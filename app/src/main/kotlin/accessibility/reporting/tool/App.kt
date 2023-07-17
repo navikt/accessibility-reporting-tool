@@ -34,14 +34,19 @@ fun FlowContent.a11yForm(status: String) {
             attributes["name"] = "status"
             +"required"
             option {
+
+                if (status == "non-compliant") {selected = true}
                 value = "compliant"
                 +"compliant"
+
             }
             option {
+                if (status == "non-compliant") {selected = true}
                 value = "non-compliant"
                 +"non compliant"
             }
             option {
+                if (status == "not-tested") {selected = true}
                 value = "not-tested"
                 +"not tested"
             }
