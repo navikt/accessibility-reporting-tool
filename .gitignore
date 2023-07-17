@@ -12,7 +12,6 @@
 
 # Package Files #
 .idea
-*.jar
 *.war
 *.nar
 *.ear
