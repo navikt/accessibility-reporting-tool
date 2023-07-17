@@ -12,6 +12,7 @@ plugins {
     id("io.ktor.plugin") version "2.3.2"
 
 
+
     // Apply the application plugin to add support for building a CLI application in Java.
     application
 }
@@ -23,9 +24,10 @@ repositories {
 }
 
 dependencies {
-
+    implementation("org.jetbrains.kotlin-wrappers:kotlin-css:1.0.0-pre.597")
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-netty")
+    implementation("io.ktor:ktor-server-html-builder")
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:junit-jupiter-api")
