@@ -62,8 +62,6 @@ suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
     this.respondText(CssBuilder().apply(builder).toString(), ContentType.Text.CSS)
 }
 
-fun runHtml(html: HTML): String = html.toString()
-
 fun Application.api() {
     routing {
         get("/isAlive") {
@@ -80,6 +78,9 @@ fun Application.api() {
                 }
                 rule("h1.page-title") {
                     color = Color.white
+                }
+                main {
+                    backgroundColor = Color.red
                 }
             }
         }
@@ -106,6 +107,12 @@ fun Application.api() {
                     }
                     title { +"Accessibility reporting" }
                     script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
+
+                    link {
+                        rel = "preload"
+                        href = "https://cdn.nav.no/aksel/@navikt/ds-css/2.9.0/index.min.css"
+                        attributes["as"] = "style"
+                    }
                 }
                 body {
                     main {
