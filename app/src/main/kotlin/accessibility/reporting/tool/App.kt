@@ -5,6 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.html.*
 import io.ktor.server.netty.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
@@ -84,9 +85,11 @@ fun Application.api() {
         }
 
         post("/submit") {
+            val formParameters = call.receiveParameters()
+            val status = formParameters["status"].toString()
 
             fun response() = createHTML().main {
-                a11yForm("very bad")
+                a11yForm(status)
 
             }
 
