@@ -1,5 +1,6 @@
 package accessibility.reporting.tool.wcag
 
+import java.lang.IllegalArgumentException
 import java.time.LocalDate
 
 
@@ -17,9 +18,21 @@ class TeamOrganization(val name: String)
 
 enum class Version() { ONE }
 
-enum class Status() {
-    COMPLIANT, NON_COMPLIANT, NOT_APPLICABLE, NOT_TESTED
+enum class Status(val display: String) {
+    COMPLIANT("compliant"), NON_COMPLIANT("non compliant"), NOT_APPLICABLE("not applicable"), NOT_TESTED("not tested");
+    companion object {
+
+        fun undisplay(s:String) =
+            when(s) {
+                COMPLIANT.display -> COMPLIANT
+                NOT_APPLICABLE.display -> NOT_APPLICABLE
+                NON_COMPLIANT.display -> NON_COMPLIANT
+                NOT_TESTED.display -> NOT_TESTED
+                else -> throw IllegalArgumentException()
+            }
+    }
 }
+
 
 class Guideline(val name: String, val section: Int, val principle: Principle)
 
