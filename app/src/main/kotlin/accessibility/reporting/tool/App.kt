@@ -11,50 +11,63 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.css.*
-import java.text.Normalizer.Form
 
 
 fun HTMLTag.hxPost(url: String) {
     attributes["hx-post"] = url
 }
 
-fun HTMLTag.hxTarget(url: String) {
-    attributes["hx-target"] = url
+fun HTMLTag.hxGet(url: String) {
+    attributes["hx-get"] = url
 }
 
-fun FlowContent.a11yForm(status: String) {
-    form {
-        id = "formsList"
-        hxPost("/submit")
-        hxTarget("#formsList")
-        span { +"ALL GOOD number" }
-        span { +"Criterion" }
-        select {
-            id = "status"
-            attributes["name"] = "status"
-            +"required"
-            option {
+fun HTMLTag.hxTarget(selector: String) {
+    attributes["hx-target"] = selector
+}
 
-                if (status == "non-compliant") {selected = true}
+
+
+fun HTMLTag.hxSwapOuter() {
+    attributes["hx-swap"] = "outerHMTL"
+}
+
+
+fun FlowContent.a11yForm(status: String, section: String) {
+    form(classes = section) {
+
+
+        span { +"number" }
+        span { +"Criterion" }
+
+        select {
+            hxPost("/submit")
+            hxTarget(".$section")
+            attributes["name"] = "status"
+
+            option {
+                if (status == "non-compliant") {
+                    selected = true
+                }
                 value = "compliant"
                 +"compliant"
 
             }
             option {
-                if (status == "non-compliant") {selected = true}
+                if (status == "non-compliant") {
+                    selected = true
+                }
                 value = "non-compliant"
                 +"non compliant"
             }
             option {
-                if (status == "not-tested") {selected = true}
+                if (status == "not-tested") {
+                    selected = true
+                }
                 value = "not-tested"
                 +"not tested"
             }
         }
-        button {
-            type = ButtonType.submit
-            +"Submit"
-        }
+
         span { +status }
     }
 }
@@ -87,7 +100,11 @@ fun Application.api() {
                 main {
                     backgroundColor = Color.red
                 }
-            }
+                form {
+                    display =Display.flex
+
+                }
+        }
         }
 
         post("/submit") {
@@ -95,7 +112,7 @@ fun Application.api() {
             val status = formParameters["status"].toString()
 
             fun response() = createHTML().main {
-                a11yForm(status)
+                a11yForm(status, "cool-section")
 
             }
 
@@ -121,7 +138,7 @@ fun Application.api() {
                 }
                 body {
                     main {
-                        a11yForm("very good")
+                        a11yForm("very good", "cool-section")
                     }
                 }
             }
