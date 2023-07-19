@@ -68,7 +68,7 @@ fun HTMLTag.hxSwapOuter() {
     attributes["data-hx-swap"] = "outerHTML"
 }
 
-fun FIELDSET.statusRadio(value_: String, status: Status, sc: SuccessCriterion) {
+fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
     label {
         input {
 
@@ -79,7 +79,7 @@ fun FIELDSET.statusRadio(value_: String, status: Status, sc: SuccessCriterion) {
             value = value_
             name = "status"
         }
-        +"${value_}"
+        +"${display}"
     }
 }
 
@@ -87,6 +87,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
     form(classes = "${sc.cssClass()}") {
         span { +"${sc.successCriterionNumber} ${sc.name}" }
         div {
+            div { +"Oppfyller alt innhold i testsettet kravet?"}
             fieldSet {
                 hxPost("/submit")
                 hxTarget(".${sc.cssClass()}")
@@ -94,10 +95,10 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
                 hxSwapOuter()
                 attributes["name"] = "status"
                 attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
-                statusRadio("compliant", Status.COMPLIANT, sc)
-                statusRadio("non compliant", Status.NON_COMPLIANT, sc)
-                statusRadio("not tested", Status.NOT_TESTED, sc)
-                statusRadio("not applicable", Status.NOT_APPLICABLE, sc)
+                statusRadio(sc,"compliant", Status.COMPLIANT, "Ja")
+                statusRadio(sc,"non compliant", Status.NON_COMPLIANT, "Nej")
+                statusRadio(sc,"not tested", Status.NOT_TESTED, "Ikke testet")
+                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen av innhola")
             }
         }
         if (sc.status == Status.NON_COMPLIANT) {
