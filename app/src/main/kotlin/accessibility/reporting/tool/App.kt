@@ -172,9 +172,69 @@ fun Application.api() {
                 body {
                     main {
                         h1 { +"A11y report" }
+                        p { +"Hvem fyller ut rapporten?"}
+                        p { +"Fyller du ut rapporten på vegne av et annet team?"}
+                        p { +"Kontaktperson fra det andre teamet"}
+                        h2 {+"Om løsningen" }
+                                p { +"Hva heter løsningen?" }
+                        p { +"Løsningens base-URL" }
+                        p { +"(For PoC'en) URLen som er testet"}
                         label {
                             +"Url:"
                             input { type = InputType.text }
+                        }
+                        label {
+                            +"Multimedia: Har sidene du skal teste multimedia eller innhold som flasher, f.eks. video, lydfiler, animasjoner?"
+                            input {
+                                type = InputType.checkBox
+                                value = """ removes
+                                1.2.1 Bare lyd og bare video
+                                1.2.2 Teksting (forhåndsinnspilt)
+                                1.2.3 Synstolking eller mediealternativ (forhåndsinnspilt)
+                                1.2.5 Synstolking (forhåndsinnspilt)
+                                1.4.2 Styring av lyd
+                                2.3.1 Terskelverdi på maksimalt tre glimt
+                                """
+                            }
+                        }
+                        label {
+                            +"Skjemaer: Har løsningen din skjemafelter (utenom i dekoratøren), eller mottar løsningen inndata fra brukeren?"
+                            input {
+                                type = InputType.checkBox
+                                value = """ removes
+
+                             1.3.5 Identifiser formål med inndata
+                             2.5.3 Ledetekst i navn
+                             3.2.2 Inndata
+                             3.3.1 Identifikasjon av feil
+                             3.3.2 Ledetekster eller instruksjoner
+                             3.3.3 Forslag ved feil
+                             3.3.4 Forhindring av feil
+                            """
+                            }
+                        }
+
+                        label {
+                            +"Interaksjonsmønstre: Har du bevegelsesaktivert innhold, hurtigtaster, eller gestures?"
+                            input {
+                                type = InputType.checkBox
+                                value = """ removes
+                        2.1.4 Hurtigtaster som består av ett tegn
+                        2.5.1 Pekerbevegelser
+                        2.5.4 Bevegelsesaktivering
+                        """
+                            }
+                        }
+                        label {
+                            +"Tidsbegrensninger og innhold som oppdaterer seg automatisk: Har du innhold med tidsbegrensning? F.eks. automatisk utlogging, begrenset tid til å ta en quiz."
+                            input {
+                                type = InputType.checkBox
+                                value = """ removes
+
+                            2.2.1 Justerbar hastighet
+                        2.2.2 Pause, stopp, skjul
+                        """
+                            }
                         }
                         ReportV1.successCriteriaV1.map { a11yForm(it) }
                     }
