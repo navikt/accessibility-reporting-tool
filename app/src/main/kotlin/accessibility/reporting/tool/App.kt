@@ -85,9 +85,9 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
 
 fun FlowContent.a11yForm(sc: SuccessCriterion) {
     form(classes = "${sc.cssClass()}") {
-        span { +"${sc.successCriterionNumber} ${sc.name}" }
+        h2 { +"${sc.successCriterionNumber} ${sc.name}" }
         div {
-            div { +"Oppfyller alt innhold i testsettet kravet?"}
+
             fieldSet {
                 hxPost("/submit")
                 hxTarget(".${sc.cssClass()}")
@@ -95,10 +95,11 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
                 hxSwapOuter()
                 attributes["name"] = "status"
                 attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
+                legend { +"Oppfyller alt innhold i testsettet kravet?"}
                 statusRadio(sc,"compliant", Status.COMPLIANT, "Ja")
                 statusRadio(sc,"non compliant", Status.NON_COMPLIANT, "Nej")
                 statusRadio(sc,"not tested", Status.NOT_TESTED, "Ikke testet")
-                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen av innhola")
+                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen av innhold")
             }
         }
         if (sc.status == Status.NON_COMPLIANT) {
