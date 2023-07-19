@@ -16,31 +16,6 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.css.*
 
-fun HTMLTag.hxPost(url: String) {
-    attributes["data-hx-post"] = url
-}
-
-fun HTMLTag.hxGet(url: String) {
-    attributes["data-hx-get"] = url
-}
-
-fun HTMLTag.hxTarget(selector: String) {
-    attributes["data-hx-target"] = selector
-}
-
-fun HTMLTag.hxTrigger(rules: String) {
-    attributes["data-hx-trigger"] = rules
-}
-
-fun HTMLTag.hxSelect(selector: String) {
-    attributes["data-hx-select"] = selector
-
-}
-
-fun HTMLTag.hxVals(json: String) {
-    attributes["data-hx-vals"] = json
-}
-
 fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, dataName: String) {
     details {
         summary {
@@ -63,10 +38,6 @@ fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, dataName: 
 
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
-
-fun HTMLTag.hxSwapOuter() {
-    attributes["data-hx-swap"] = "outerHTML"
-}
 
 fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
     label {
