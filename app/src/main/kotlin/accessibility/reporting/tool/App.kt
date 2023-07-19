@@ -34,6 +34,31 @@ fun HTMLTag.hxTrigger(rules: String) {
 
 fun HTMLTag.hxSelect(selector: String) {
     attributes["data-hx-select"] = selector
+
+}
+
+fun HTMLTag.hxVals(json: String) {
+    attributes["data-hx-vals"] = json
+}
+
+fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, dataName: String) {
+    details {
+        summary {
+            +"${summary}"
+        }
+        div {
+            textArea {
+                hxTrigger("keyup changed delay:1500ms")
+                hxPost("/submit")
+                hxVals("""{"index": "${sc.successCriterionNumber}"}""")
+                name = dataName
+                cols = "80"
+                rows = "10"
+                placeholder = "Leave blank if you're not breaking the law"
+            }
+        }
+
+    }
 }
 
 fun SuccessCriterion.cssClass() =
@@ -77,38 +102,18 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
         }
         if (sc.status == Status.NON_COMPLIANT) {
             div {
-                div {
-                    input {
-                        type = InputType.checkBox
-                    }
-                    textArea {
-                        hxTrigger("keyup changed delay:500ms")
-                        hxPost("/submit")
-                        placeholder = "oh much text"
-                    }
-                }
-
-                div {
-                    input {
-                        type = InputType.checkBox
-                    }
-                    textArea {
-                        placeholder = "oh much text"
-                    }
-                }
-                div {
-                    input {
-                        type = InputType.checkBox
-                    }
-                    textArea {
-                        placeholder = "oh much text"
-
-                    }
-                }
+                disclosureArea(sc, "Det er innhold i testsettet som bryter kravet.", "breaking-the-law")
+                disclosureArea(sc, "Det er innhold i testsettet som ikke er underlagt kravet.", "law-does-not-apply")
+                disclosureArea(
+                    sc,
+                    "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.",
+                    "too-hard-to-comply"
+                )
             }
         }
     }
 }
+
 
 fun main() {
     embeddedServer(Netty, port = 8080, module = Application::api).start(wait = true)
