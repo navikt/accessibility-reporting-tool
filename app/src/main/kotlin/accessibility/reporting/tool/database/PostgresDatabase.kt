@@ -42,7 +42,6 @@ class PostgresDatabase(environment: Environment) : Database {
 
 
 class Environment(
-
     val dbHost: String = System.getenv("DB_HOST"),
     val dbPort: String = System.getenv("DB_PORT"),
     val dbName: String = System.getenv("DB_DATABASE"),

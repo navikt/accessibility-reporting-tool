@@ -230,10 +230,9 @@ fun Application.api() {
                             input {
                                 type = InputType.checkBox
                                 value = """ removes
-
-                            2.2.1 Justerbar hastighet
-                        2.2.2 Pause, stopp, skjul
-                        """
+                                 2.2.1 Justerbar hastighet
+                                 2.2.2 Pause, stopp, skjul
+                               """
                             }
                         }
                         ReportV1.successCriteriaV1.map { a11yForm(it) }

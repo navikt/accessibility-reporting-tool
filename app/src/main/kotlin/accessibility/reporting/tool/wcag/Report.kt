@@ -14,7 +14,12 @@ abstract class Report(
     // kontaktperson/ansvarsperson
 ) {
     abstract fun toJson(): String
-}
+    companion object {
+                fun createLatest(url: String, organizationUnit: OrganizationUnit, testUrl: String?, testpersonIdent: String?) =
+            ReportV1.createEmpty(url, organizationUnit, testUrl, testpersonIdent)
+        }
+    }
+
 
 class OrganizationUnit(val id: String, val name: String, parent: OrganizationUnit? = null)
 
