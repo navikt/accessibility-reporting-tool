@@ -1,0 +1,13 @@
+label {
+    display: block;
+}
+
+body {
+ font-family: "Source Sans Pro",Arial,sans-serif;
+ line-height:1.333;
+ font-size:1.125rem
+}
+
+summary {
+    margin: 0 0 16px 0;
+}
