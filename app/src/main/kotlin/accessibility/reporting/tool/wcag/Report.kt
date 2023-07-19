@@ -1,9 +1,11 @@
 package accessibility.reporting.tool.wcag
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 
 
-abstract class BaseReport(
+abstract class Report(
+    val reportId: String,
     val url: String,
     val organizationUnit: OrganizationUnit,
     val version: Version,
@@ -11,12 +13,17 @@ abstract class BaseReport(
     val successCriteria: List<SuccessCriterion>,
     val testpersonIdent: String? = null,
     // kontaktperson/ansvarsperson
-)
+) {
+    abstract fun toJson(): String
+}
 
-class OrganizationUnit(val name: String, parent: OrganizationUnit? = null)
+class OrganizationUnit(val id: String, val name: String, parent: OrganizationUnit? = null)
 
 
-enum class Version() { ONE }
+enum class Version(val deserialize: (String) -> Report) {
+    ONE (deserialize = ReportV1::deserialize)
+
+}
 
 enum class Status() {
     COMPLIANT, NON_COMPLIANT, NOT_APPLICABLE, NOT_TESTED
@@ -43,7 +50,7 @@ class SuccessCriterion(
     val number: Int,
     var status: Status,
     val wcagUrl: String,
-    helpUrl: String,
+    helpUrl: String?=null,
     val deviations: List<Deviation>? = null
 ) {
     val successCriterionNumber = "${guideline.principle.number}.${guideline.section}.${this.number}"

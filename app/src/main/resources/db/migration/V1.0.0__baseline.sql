@@ -1,25 +1,23 @@
-CREATE TABLE IF NOT EXISTS team
+CREATE TABLE IF NOT EXISTS organization_unit
 (
-    team_id     SERIAL PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL,
-    parent_unit INT REFERENCES team (team_id)
+    organization_unit_id VARCHAR PRIMARY KEY,
+    name                 VARCHAR(100) NOT NULL,
+    parent_unit          VARCHAR REFERENCES organization_unit (organization_unit_id)
 );
 
 CREATE TABLE IF NOT EXISTS report
 (
-    report_id    SERIAL PRIMARY KEY,
-    team_id      INT REFERENCES team (team_id),
-    name         VARCHAR(100) NOT NULL,
-    parent_unit  INT REFERENCES team (team_id),
-    url          VARCHAR      NOT NULL,
-    created      TIMESTAMP,
-    last_changed TIMESTAMP,
-    reportdata   jsonb
+    report_id            VARCHAR PRIMARY KEY,
+    organization_unit_id VARCHAR REFERENCES organization_unit (organization_unit_id),
+    created              TIMESTAMP,
+    last_changed         TIMESTAMP,
+    report_data           jsonb
 );
 
 CREATE TABLE IF NOT EXISTS changelog
 (
-    report_id INT NOT NULL REFERENCES report (report_id),
+    report_id VARCHAR NOT NULL REFERENCES report (report_id),
+    time      TIMESTAMP,
     new_data  jsonb,
     old_data  jsonb
 );

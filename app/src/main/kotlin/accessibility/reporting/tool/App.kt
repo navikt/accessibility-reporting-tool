@@ -74,9 +74,7 @@ fun FlowContent.a11yForm(status: String, section: String) {
 }
 
 fun main() {
-    val dummyEnv = Environment()
-    Flyway.runFlywayMigrations(dummyEnv)
-
+    Flyway.runFlywayMigrations(Environment())
     embeddedServer(Netty, port = 8080, module = Application::api)
         .start(wait = true)
 }

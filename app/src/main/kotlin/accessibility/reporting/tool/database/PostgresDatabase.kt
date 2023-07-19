@@ -41,9 +41,18 @@ class PostgresDatabase(environment: Environment) : Database {
 }
 
 
-class Environment {
+class Environment(
 
-    val dbPassword: String = TODO()
-    val dbUser: String = TODO()
-    val dbUrl: String = TODO()
+    val dbHost: String = System.getenv("DB_HOST"),
+    val dbPort: String = System.getenv("DB_PORT"),
+    val dbName: String = System.getenv("DB_DATABASE"),
+    val dbUser: String = System.getenv("DB_USERNAME"),
+    val dbPassword: String = System.getenv("DB_PASSWORD"),
+
+    ) {
+    val dbUrl: String = if (dbHost.endsWith(":$dbPort")) {
+        "jdbc:postgresql://${dbHost}/$dbName"
+    } else {
+        "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
+    }
 }
