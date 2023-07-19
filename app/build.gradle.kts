@@ -28,10 +28,20 @@ dependencies {
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-server-html-builder")
+    implementation("org.flywaydb:flyway-core:9.20.1")
+    implementation("com.zaxxer:HikariCP:5.0.1")
+    implementation("org.postgresql:postgresql:42.6.0")
+    implementation("com.github.seratch:kotliquery:1.9.0")
+
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:junit-jupiter-api")
     testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.2")
+    testImplementation ("org.testcontainers:testcontainers:1.18.3")
+    testImplementation ("org.testcontainers:junit-jupiter:1.18.3")
+    testImplementation("org.testcontainers:postgresql:1.18.3")
+    testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
+    testImplementation("io.kotest:kotest-assertions-core:5.6.2")
 
 }
 

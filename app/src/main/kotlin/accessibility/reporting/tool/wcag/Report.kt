@@ -5,15 +5,16 @@ import java.time.LocalDate
 
 abstract class BaseReport(
     val url: String,
-    val team: Team,
+    val organizationUnit: OrganizationUnit,
     val version: Version,
     val testUrl: String? = null,
     val successCriteria: List<SuccessCriterion>,
     val testpersonIdent: String? = null,
+    // kontaktperson/ansvarsperson
 )
 
-class Team(val name: String, teamOrganization: TeamOrganization? = null)
-class TeamOrganization(val name: String)
+class OrganizationUnit(val name: String, parent: OrganizationUnit? = null)
+
 
 enum class Version() { ONE }
 
@@ -41,7 +42,7 @@ class SuccessCriterion(
     val guideline: Guideline,
     val number: Int,
     var status: Status,
-    wcagUrl: String,
+    val wcagUrl: String,
     helpUrl: String,
     val deviations: List<Deviation>? = null
 ) {

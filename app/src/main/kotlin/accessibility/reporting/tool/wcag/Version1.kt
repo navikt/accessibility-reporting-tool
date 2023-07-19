@@ -3,12 +3,12 @@ package accessibility.reporting.tool.wcag
 
 class Version1Report(
     url: String,
-    team: Team,
+    organizationUnit: OrganizationUnit,
     version: Version,
     testUrl: String? = null,
     successCriteria: List<SuccessCriterion>,
     testpersonIdent: String? = null
-) : BaseReport(url, team, version, testUrl, successCriteria, testpersonIdent) {
+) : BaseReport(url, organizationUnit, version, testUrl, successCriteria, testpersonIdent) {
 
     companion object {
         val textAlternatives = Guideline(name = "Text Alternatives", section = 1, principle = Principle.PERCEIVABLE)

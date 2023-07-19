@@ -1,5 +1,8 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.database.Environment
+import accessibility.reporting.tool.database.Flyway
+import accessibility.reporting.tool.database.PostgresDatabase
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -24,8 +27,6 @@ fun HTMLTag.hxGet(url: String) {
 fun HTMLTag.hxTarget(selector: String) {
     attributes["hx-target"] = selector
 }
-
-
 
 fun HTMLTag.hxSwapOuter() {
     attributes["hx-swap"] = "outerHMTL"
@@ -73,7 +74,11 @@ fun FlowContent.a11yForm(status: String, section: String) {
 }
 
 fun main() {
-    embeddedServer(Netty, port = 8080, module = Application::api).start(wait = true)
+    val dummyEnv = Environment()
+    Flyway.runFlywayMigrations(dummyEnv)
+
+    embeddedServer(Netty, port = 8080, module = Application::api)
+        .start(wait = true)
 }
 
 suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
@@ -81,6 +86,7 @@ suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
 }
 
 fun Application.api() {
+
     routing {
         get("/isAlive") {
             call.respond(HttpStatusCode.OK)
