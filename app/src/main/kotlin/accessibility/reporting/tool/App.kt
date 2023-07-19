@@ -17,26 +17,30 @@ import kotlinx.html.stream.createHTML
 import kotlinx.css.*
 
 fun HTMLTag.hxPost(url: String) {
-    attributes["hx-post"] = url
+    attributes["data-hx-post"] = url
 }
 
 fun HTMLTag.hxGet(url: String) {
-    attributes["hx-get"] = url
+    attributes["data-hx-get"] = url
 }
 
 fun HTMLTag.hxTarget(selector: String) {
-    attributes["hx-target"] = selector
+    attributes["data-hx-target"] = selector
+}
+
+fun HTMLTag.hxTrigger(rules: String) {
+    attributes["data-hx-trigger"] = rules
 }
 
 fun HTMLTag.hxSelect(selector: String) {
-    attributes["hx-select"] = selector
+    attributes["data-hx-select"] = selector
 }
 
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
 
 fun HTMLTag.hxSwapOuter() {
-    attributes["hx-swap"] = "outerHTML"
+    attributes["data-hx-swap"] = "outerHTML"
 }
 
 fun FIELDSET.statusRadio(value_: String, status: Status, sc: SuccessCriterion) {
@@ -72,37 +76,36 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
         }
         if (sc.status == Status.NON_COMPLIANT) {
             div {
-                input {
-                    type = InputType.checkBox
+                div {
+                    input {
+                        type = InputType.checkBox
+                    }
+                    textArea {
+                        hxTrigger("keyup changed delay:500ms")
+                        hxPost("/submit")
+                        placeholder = "oh much text"
+                    }
                 }
-                input {
-                    type = InputType.text
-                    placeholder = "oh much text"
+
+                div {
+                    input {
+                        type = InputType.checkBox
+                    }
+                    textArea {
+                        placeholder = "oh much text"
+                    }
+                }
+                div {
+                    input {
+                        type = InputType.checkBox
+                    }
+                    textArea {
+                        placeholder = "oh much text"
+
+                    }
                 }
             }
-            div {
-                input {
-                    type = InputType.checkBox
-                }
-                input {
-                    type = InputType.text
-                    placeholder = "oh much text"
-
-                }
-            }
-            div {
-                input {
-                    type = InputType.checkBox
-                }
-                input {
-                    type = InputType.text
-                    placeholder = "oh much text"
-
-                }
-            }
-
         }
-        span { +"${sc.status}" }
     }
 }
 
