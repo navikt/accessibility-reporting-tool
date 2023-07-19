@@ -7,6 +7,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.html.*
+import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -27,56 +28,80 @@ fun HTMLTag.hxTarget(selector: String) {
     attributes["hx-target"] = selector
 }
 
-fun SELECT.a11yOption(status: Status) =
-    option {
-        if (status == Status.COMPLIANT) {
-            selected = true
-        }
-        value = "compliant"
-        +"compliant"
-    }
+fun HTMLTag.hxSelect(selector: String) {
+    attributes["hx-select"] = selector
+}
+
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
+
 fun HTMLTag.hxSwapOuter() {
-    attributes["hx-swap"] = "outerHMTL"
+    attributes["hx-swap"] = "outerHTML"
+}
+
+fun FIELDSET.statusRadio(value_: String, status: Status, sc: SuccessCriterion) {
+    label {
+        input {
+
+            type = InputType.radio
+            if (sc.status == status) {
+                checked = true
+            }
+            value = value_
+        }
+        +"${value_}"
+    }
 }
 
 fun FlowContent.a11yForm(sc: SuccessCriterion) {
     form(classes = "${sc.cssClass()}") {
         span { +"${sc.successCriterionNumber} ${sc.name}" }
-        select {
-            hxPost("/submit")
-            hxTarget(".${sc.cssClass()}")
-            attributes["name"] = "status"
-            attributes["hx-vals"] = """{"id": "${sc.successCriterionNumber}"}"""
-            a11yOption(sc.status)
-
-
-            option {
-                if (sc.status == Status.NON_COMPLIANT) {
-                    selected = true
-                }
-                value = "non-compliant"
-                +"non compliant"
-            }
-
-            option {
-                if (sc.status == Status.NOT_TESTED) {
-                    selected = true
-                }
-                value = "not-tested"
-                +"not tested"
-            }
-
-            option {
-                if (sc.status == Status.NOT_APPLICABLE) {
-                    selected = true
-                }
-                value = "not-applicable"
-                +"not applicable"
+        div {
+            fieldSet {
+                hxPost("/submit")
+                hxTarget(".${sc.cssClass()}")
+                hxSelect("form")
+                hxSwapOuter()
+                attributes["name"] = "status"
+                attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
+                statusRadio("compliant", Status.COMPLIANT, sc)
+                statusRadio("non compliant", Status.NON_COMPLIANT, sc)
+                statusRadio("not tested", Status.NOT_TESTED, sc)
+                statusRadio("not applicable", Status.NOT_APPLICABLE, sc)
             }
         }
+        if (sc.status == Status.NON_COMPLIANT) {
+            div {
+                input {
+                    type = InputType.checkBox
+                }
+                input {
+                    type = InputType.text
+                    placeholder = "oh much text"
+                }
+            }
+            div {
+                input {
+                    type = InputType.checkBox
+                }
+                input {
+                    type = InputType.text
+                    placeholder = "oh much text"
 
+                }
+            }
+            div {
+                input {
+                    type = InputType.checkBox
+                }
+                input {
+                    type = InputType.text
+                    placeholder = "oh much text"
+
+                }
+            }
+
+        }
         span { +"${sc.status}" }
     }
 }
@@ -97,36 +122,28 @@ fun Application.api() {
         get("/isReady") {
             call.respond(HttpStatusCode.OK)
         }
-        get("/styles.css") {
-            call.respondCss {
-                body {
-                }
-                rule("h1.page-title") {
-
-                }
-                main {
-                    display = Display.grid
-                    gridTemplateColumns = GridTemplateColumns(1.fr)
-                    gap = 20.px
-                }
-                form {
-                    display = Display.flex
-                    flex = Flex.GROW
-
-                }
-            }
-        }
 
         post("/submit") {
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
-            val report = Version1Report.successCriteriaV1.find { it.number == 1 }
+            val index = formParameters["index"].toString()
+            val report = Version1Report.successCriteriaV1.find { it.successCriterionNumber == index }
             report?.let { foundReport ->
-                fun response() = createHTML().main {
-                    a11yForm(foundReport)
+
+                if (status == "non compliant") {
+                    fun response() = createHTML().div {
+                        a11yForm(foundReport)
+                    }
+                    call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
+                } else {
+                    fun response() = createHTML().div {
+                        a11yForm(foundReport)
+                    }
+                    call.respondText(
+                        contentType = ContentType.Text.Html,
+                        HttpStatusCode.OK, ::response
+                    )
                 }
-                call.respondText(contentType = ContentType.Text.Html,
-                    HttpStatusCode.OK, ::response)
             } ?: run {
                 call.respond(HttpStatusCode.NotFound)
             }
@@ -147,9 +164,9 @@ fun Application.api() {
                         attributes["as"] = "style"
                     }
                     link {
-                        rel = "preload"
-                        href = "/styles.css"
-                        attributes["as"] = "style"
+                        rel = "stylesheet"
+                        href = "static/style.css"
+
                     }
                 }
                 body {
@@ -158,6 +175,10 @@ fun Application.api() {
                     }
                 }
             }
+        }
+        staticResources("/static", "static") {
+            default("index.html")
+            preCompressed(CompressedFileType.GZIP)
         }
     }
 }

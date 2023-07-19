@@ -20,10 +20,11 @@ enum class Version() { ONE }
 
 enum class Status(val display: String) {
     COMPLIANT("compliant"), NON_COMPLIANT("non compliant"), NOT_APPLICABLE("not applicable"), NOT_TESTED("not tested");
+
     companion object {
 
-        fun undisplay(s:String) =
-            when(s) {
+        fun undisplay(s: String) =
+            when (s) {
                 COMPLIANT.display -> COMPLIANT
                 NOT_APPLICABLE.display -> NOT_APPLICABLE
                 NON_COMPLIANT.display -> NON_COMPLIANT
@@ -54,8 +55,8 @@ class SuccessCriterion(
     val guideline: Guideline,
     val number: Int,
     var status: Status,
-    wcagUrl: String,
-    helpUrl: String,
+    val wcagUrl: String,
+    val helpUrl: String,
     val deviations: List<Deviation>? = null
 ) {
     val successCriterionNumber = "${guideline.principle.number}.${guideline.section}.${this.number}"
@@ -68,7 +69,7 @@ class SuccessCriterion(
             wcagUrl: String,
             helpUrl: String = "https://aksel.nav.no/god-praksis/universell-utforming"
         ): SuccessCriterion =
-            SuccessCriterion(name, guideline, number, Status.NOT_TESTED, wcagUrl, helpUrl)
+            SuccessCriterion(name, guideline, number, Status.NON_COMPLIANT, wcagUrl, helpUrl)
     }
 }
 

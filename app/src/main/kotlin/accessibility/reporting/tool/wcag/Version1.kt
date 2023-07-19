@@ -17,9 +17,9 @@ class Version1Report(
         val distinguishable = Guideline(name = "Distinguishable", section = 3, principle = Principle.PERCEIVABLE)
         val successCriteriaV1 = listOf(
             SuccessCriterion.createEmpty(name = "Non-text content", guideline = textAlternatives, number = 1, "https://www.w3.org/TR/WCAG21/#non-text-content"),
-            SuccessCriterion.createEmpty(name = "Non-text content", guideline = timebasedMedia, number = 2, "https://www.w3.org/TR/WCAG21/#non-text-content"),
-            SuccessCriterion.createEmpty(name = "Non-text content", guideline = adaptable, number = 3, "https://www.w3.org/TR/WCAG21/#non-text-content"),
-           SuccessCriterion.createEmpty(name = "Non-text content", guideline = distinguishable, number = 4, "https://www.w3.org/TR/WCAG21/#non-text-content")
+            SuccessCriterion.createEmpty(name = "Very subtitle", guideline = timebasedMedia, number = 2, "https://www.w3.org/TR/WCAG21/#non-text-content"),
+            SuccessCriterion.createEmpty(name = "Much responsive", guideline = adaptable, number = 3, "https://www.w3.org/TR/WCAG21/#non-text-content"),
+           SuccessCriterion.createEmpty(name = "Very different", guideline = distinguishable, number = 4, "https://www.w3.org/TR/WCAG21/#non-text-content")
         )
     }
 }
