@@ -1,8 +1,10 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.database.Environment
+import accessibility.reporting.tool.database.Flyway
+import accessibility.reporting.tool.wcag.ReportV1
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.SuccessCriterion
-import accessibility.reporting.tool.wcag.Version1Report
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -104,6 +106,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
 
 
 fun main() {
+    Flyway.runFlywayMigrations(Environment())
     embeddedServer(Netty, port = 8080, module = Application::api).start(wait = true)
 }
 
@@ -124,7 +127,7 @@ fun Application.api() {
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
-            val report = Version1Report.successCriteriaV1.find { it.successCriterionNumber == index }
+            val report = ReportV1.successCriteriaV1.find { it.successCriterionNumber == index }
             report?.let { foundReport ->
 
                 if (status == "non compliant") {
@@ -173,7 +176,7 @@ fun Application.api() {
                             +"Url:"
                             input { type = InputType.text }
                         }
-                        Version1Report.successCriteriaV1.map { a11yForm(it) }
+                        ReportV1.successCriteriaV1.map { a11yForm(it) }
                     }
                 }
             }

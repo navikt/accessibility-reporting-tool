@@ -1,22 +1,28 @@
 package accessibility.reporting.tool.wcag
 
-import java.lang.IllegalArgumentException
 import java.time.LocalDate
 
 
-abstract class BaseReport(
+abstract class Report(
+    val reportId: String,
     val url: String,
-    val team: Team,
+    val organizationUnit: OrganizationUnit,
     val version: Version,
     val testUrl: String? = null,
     val successCriteria: List<SuccessCriterion>,
     val testpersonIdent: String? = null,
-)
+    // kontaktperson/ansvarsperson
+) {
+    abstract fun toJson(): String
+}
 
-class Team(val name: String, teamOrganization: TeamOrganization? = null)
-class TeamOrganization(val name: String)
+class OrganizationUnit(val id: String, val name: String, parent: OrganizationUnit? = null)
 
-enum class Version() { ONE }
+
+enum class Version(val deserialize: (String) -> Report) {
+    ONE(deserialize = ReportV1::deserialize)
+
+}
 
 enum class Status(val display: String) {
     COMPLIANT("compliant"), NON_COMPLIANT("non compliant"), NOT_APPLICABLE("not applicable"), NOT_TESTED("not tested");
@@ -56,7 +62,7 @@ class SuccessCriterion(
     val number: Int,
     var status: Status,
     val wcagUrl: String,
-    val helpUrl: String,
+    val helpUrl: String? = null,
     val deviations: List<Deviation>? = null
 ) {
     val successCriterionNumber = "${guideline.principle.number}.${guideline.section}.${this.number}"
