@@ -52,6 +52,7 @@ fun FIELDSET.statusRadio(value_: String, status: Status, sc: SuccessCriterion) {
                 checked = true
             }
             value = value_
+            name = "status"
         }
         +"${value_}"
     }
