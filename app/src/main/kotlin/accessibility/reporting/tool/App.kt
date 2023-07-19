@@ -1,12 +1,13 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.database.Environment
-import accessibility.reporting.tool.database.Flyway
-import accessibility.reporting.tool.database.PostgresDatabase
+import accessibility.reporting.tool.wcag.Status
+import accessibility.reporting.tool.wcag.SuccessCriterion
+import accessibility.reporting.tool.wcag.Version1Report
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.html.*
+import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -15,68 +16,95 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.css.*
 
-
-fun HTMLTag.hxPost(url: String) {
-    attributes["hx-post"] = url
-}
-
-fun HTMLTag.hxGet(url: String) {
-    attributes["hx-get"] = url
-}
-
-fun HTMLTag.hxTarget(selector: String) {
-    attributes["hx-target"] = selector
-}
-
-fun HTMLTag.hxSwapOuter() {
-    attributes["hx-swap"] = "outerHMTL"
-}
-
-
-fun FlowContent.a11yForm(status: String, section: String) {
-    form(classes = section) {
-
-
-        span { +"number" }
-        span { +"Criterion" }
-
-        select {
-            hxPost("/submit")
-            hxTarget(".$section")
-            attributes["name"] = "status"
-
-            option {
-                if (status == "non-compliant") {
-                    selected = true
-                }
-                value = "compliant"
-                +"compliant"
-
+fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, description: String, dataName: String) {
+    details {
+        summary {
+            +"${summary}"
+        }
+        div {
+            label {
+                htmlFor = "${sc.successCriterionNumber}-${dataName}"
+                +"${description}"
             }
-            option {
-                if (status == "non-compliant") {
-                    selected = true
-                }
-                value = "non-compliant"
-                +"non compliant"
+            textArea {
+                id = "${sc.successCriterionNumber}-${dataName}"
+                hxTrigger("keyup changed delay:1500ms")
+                hxPost("/submit")
+                hxVals("""{"index": "${sc.successCriterionNumber}"}""")
+                name = dataName
+                cols = "80"
+                rows = "10"
+                placeholder = "Leave blank if you're not breaking the law"
             }
-            option {
-                if (status == "not-tested") {
-                    selected = true
-                }
-                value = "not-tested"
-                +"not tested"
-            }
+
         }
 
-        span { +status }
     }
 }
 
+fun SuccessCriterion.cssClass() =
+    "f" + this.successCriterionNumber.replace(".", "-")
+
+fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
+    label {
+        input {
+
+            type = InputType.radio
+            if (sc.status == status) {
+                checked = true
+            }
+            value = value_
+            name = "status"
+        }
+        +"${display}"
+    }
+}
+
+fun FlowContent.a11yForm(sc: SuccessCriterion) {
+    form(classes = "${sc.cssClass()}") {
+        h2 { +"${sc.successCriterionNumber} ${sc.name}" }
+        div {
+
+            fieldSet {
+                hxPost("/submit")
+                hxTarget(".${sc.cssClass()}")
+                hxSelect("form")
+                hxSwapOuter()
+                attributes["name"] = "status"
+                attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
+                legend { +"Oppfyller alt innhold i testsettet kravet?" }
+                statusRadio(sc, "compliant", Status.COMPLIANT, "Ja")
+                statusRadio(sc, "non compliant", Status.NON_COMPLIANT, "Nej")
+                statusRadio(sc, "not tested", Status.NOT_TESTED, "Ikke testet")
+                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen av innhold")
+            }
+        }
+        if (sc.status == Status.NON_COMPLIANT) {
+            div {
+                disclosureArea(
+                    sc,
+                    "Det er innhold i testsettet som bryter kravet.",
+                    "Beskriv kort hvilket innhold som bryter kravet, hvorfor og konsekvensene dette får for brukeren.",
+                    "breaking-the-law"
+                )
+                disclosureArea(
+                    sc, "Det er innhold i testsettet som ikke er underlagt kravet.",
+                    "Hvilket innhold er ikke underlagt kravet?", "law-does-not-apply"
+                )
+                disclosureArea(
+                    sc,
+                    "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.",
+                    "Hvorfor mener vi at det er en uforholdsmessig stor byrde for innholdet å følge kravet?",
+                    "too-hard-to-comply"
+                )
+            }
+        }
+    }
+}
+
+
 fun main() {
-    Flyway.runFlywayMigrations(Environment())
-    embeddedServer(Netty, port = 8080, module = Application::api)
-        .start(wait = true)
+    embeddedServer(Netty, port = 8080, module = Application::api).start(wait = true)
 }
 
 suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
@@ -84,7 +112,6 @@ suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
 }
 
 fun Application.api() {
-
     routing {
         get("/isAlive") {
             call.respond(HttpStatusCode.OK)
@@ -92,36 +119,31 @@ fun Application.api() {
         get("/isReady") {
             call.respond(HttpStatusCode.OK)
         }
-        get("/styles.css") {
-            call.respondCss {
-                body {
-                    backgroundColor = Color.darkBlue
-
-                }
-                rule("h1.page-title") {
-                    color = Color.white
-                }
-                main {
-                    backgroundColor = Color.red
-                }
-                form {
-                    display =Display.flex
-
-                }
-        }
-        }
 
         post("/submit") {
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
+            val index = formParameters["index"].toString()
+            val report = Version1Report.successCriteriaV1.find { it.successCriterionNumber == index }
+            report?.let { foundReport ->
 
-            fun response() = createHTML().main {
-                a11yForm(status, "cool-section")
-
+                if (status == "non compliant") {
+                    fun response() = createHTML().div {
+                        a11yForm(foundReport)
+                    }
+                    call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
+                } else {
+                    fun response() = createHTML().div {
+                        a11yForm(foundReport)
+                    }
+                    call.respondText(
+                        contentType = ContentType.Text.Html,
+                        HttpStatusCode.OK, ::response
+                    )
+                }
+            } ?: run {
+                call.respond(HttpStatusCode.NotFound, "ENOENT")
             }
-
-            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
-
         }
         get("/index.html") {
             call.respondHtml(HttpStatusCode.OK) {
@@ -129,7 +151,6 @@ fun Application.api() {
                 head {
                     meta { charset = "UTF-8" }
                     style {
-
                     }
                     title { +"Accessibility reporting" }
                     script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
@@ -139,13 +160,27 @@ fun Application.api() {
                         href = "https://cdn.nav.no/aksel/@navikt/ds-css/2.9.0/index.min.css"
                         attributes["as"] = "style"
                     }
+                    link {
+                        rel = "stylesheet"
+                        href = "static/style.css"
+
+                    }
                 }
                 body {
                     main {
-                        a11yForm("very good", "cool-section")
+                        h1 { +"A11y report" }
+                        label {
+                            +"Url:"
+                            input { type = InputType.text }
+                        }
+                        Version1Report.successCriteriaV1.map { a11yForm(it) }
                     }
                 }
             }
+        }
+        staticResources("/static", "static") {
+            default("index.html")
+            preCompressed(CompressedFileType.GZIP)
         }
     }
 }
