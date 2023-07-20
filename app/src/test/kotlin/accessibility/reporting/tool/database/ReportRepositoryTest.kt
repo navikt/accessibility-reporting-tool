@@ -4,6 +4,7 @@ import LocalPostgresDatabase
 import accessibility.reporting.tool.wcag.Deviation
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.ReportV1
+import accessibility.reporting.tool.wcag.Version
 import assert
 import io.kotest.matchers.shouldBe
 import kotliquery.queryOf
@@ -50,6 +51,24 @@ class ReportRepositoryTest {
         repository.getReport(testReport.reportId).assert {
             require(this!=null)
             this.successCriteria.first().deviations.size shouldBe 1
+        }
+    }
+
+    @Test
+    fun `insert org units`() {
+        repository.insertOrganizationUnit(OrganizationUnit("some-id", "Some unit"))
+
+        database.query {
+            queryOf(
+                "select * from organization_unit where organization_unit_id=:id",
+                mapOf("id" to "some-id")
+            ).map { row ->
+                OrganizationUnit(id = row.string("organization_unit_id"), name = row.string("name"))
+            }.asSingle
+
+        }.assert {
+            require(this!=null)
+            name shouldBe "Some unit"
         }
     }
 

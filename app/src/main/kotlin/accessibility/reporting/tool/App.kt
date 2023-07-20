@@ -2,6 +2,9 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.database.Environment
 import accessibility.reporting.tool.database.Flyway
+import accessibility.reporting.tool.database.PostgresDatabase
+import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.ReportV1
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.SuccessCriterion
@@ -106,8 +109,16 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
 
 
 fun main() {
+    val environment = Environment()
     Flyway.runFlywayMigrations(Environment())
+    ReportRepository(PostgresDatabase(environment)).also {reportRepository ->
+        //id som kan brukes når du skal sette opp rapporter: "carls-awesome-test-unit"
+        reportRepository.insertOrganizationUnit(OrganizationUnit("carls-awesome-test-unit", "Carls awesome test unit"))
+
+    }
+
     embeddedServer(Netty, port = 8080, module = Application::api).start(wait = true)
+
 }
 
 suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {

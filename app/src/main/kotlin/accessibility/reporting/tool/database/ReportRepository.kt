@@ -1,5 +1,6 @@
 package accessibility.reporting.tool.database
 
+import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Version
 import kotliquery.queryOf
@@ -25,8 +26,19 @@ class ReportRepository(val database: Database) {
         }
     }
 
-    private fun insertOrganizationUnit(): String {
-        TODO("Not yet implemented")
+    fun insertOrganizationUnit(organizationUnit: OrganizationUnit){
+        //TODO: returning orgId
+        database.update {
+            queryOf(
+                """INSERT INTO organization_unit (organization_unit_id, name) 
+                    VALUES (:id,:name) 
+                """.trimMargin(),
+                mapOf(
+                    "id" to organizationUnit.id,
+                    "name" to organizationUnit.name,
+                )
+            )
+        }
     }
 
     fun getReport(reportId: String): Report? =
