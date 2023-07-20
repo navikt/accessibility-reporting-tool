@@ -8,6 +8,10 @@ body {
  font-size:1.125rem
 }
 
+body {
+    max-width: 50rem;
+    margin: 1rem auto;
+}
 summary {
     margin: 0 0 16px 0;
 }

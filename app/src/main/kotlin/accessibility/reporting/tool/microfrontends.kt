@@ -49,7 +49,6 @@ fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, descriptio
     }
 }
 
-
 fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
     label {
         input {

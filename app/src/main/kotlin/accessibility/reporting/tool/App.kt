@@ -61,7 +61,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             call.respond(HttpStatusCode.OK)
         }
 
-        get("/reports") {}
+
         post("/submit/{id}") {
             // 1 is a good id?
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
@@ -106,7 +106,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
                     headContent("Select reports")
                 }
                 body {
-                    h1 { +"Select a report" }
+                    h1 { +"Select a page" }
                     a {
                         href = "report/foo"
                         +"there's only this one, sir"
