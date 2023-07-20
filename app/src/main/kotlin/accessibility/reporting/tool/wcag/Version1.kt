@@ -21,10 +21,16 @@ class ReportV1(
             registerModule(JavaTimeModule())
         }
 
-        fun createEmpty(url: String, organizationUnit: OrganizationUnit, testUrl: String?, testpersonIdent: String?) =
+        fun createEmpty(
+            url: String,
+            organizationUnit: OrganizationUnit,
+            testUrl: String?,
+            testpersonIdent: String?,
+            testId: String? = null
+        ) =
             ReportV1(
                 // TODO: NO, it's not foo!
-                reportId = "foo",
+                reportId = testId ?: "foo",
                 url = url,
                 organizationUnit = organizationUnit,
                 testUrl = url,

@@ -23,7 +23,7 @@ abstract class Report(
     }
 
 
-class OrganizationUnit(val id: String, val name: String, parent: OrganizationUnit? = null)
+class OrganizationUnit(val id: String, val name: String, parent: OrganizationUnit? = null, val email:String)
 
 
 enum class Version(val deserialize: (String) -> Report) {
