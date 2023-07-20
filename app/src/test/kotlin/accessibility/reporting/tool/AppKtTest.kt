@@ -3,6 +3,7 @@ package accessibility.reporting.tool
 import LocalPostgresDatabase
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
+import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
@@ -20,6 +21,7 @@ class AppKtTest {
         application {
             api(repository = ReportRepository(db), authInstaller = {})
         }
-        assertEquals(HttpStatusCode.OK, client.get("/isAlive").status)
+        client.get("/isAlive").status shouldBe HttpStatusCode.OK
+        client.get("/orgunit").status shouldBe HttpStatusCode.OK
     }
 }

@@ -19,25 +19,25 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.css.*
-import kotliquery.param
 import java.lang.IllegalArgumentException
 
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
 
-val testOrg = OrganizationUnit("carls-awesome-test-unit", "Carls awesome test unit")
+val testOrg =
+    OrganizationUnit(id = "carls-awesome-test-unit", name = "Carls awesome test unit", email = "awesome@nav.no")
 
 fun main() {
     val environment = Environment()
     Flyway.runFlywayMigrations(Environment())
-    val repository = ReportRepository(PostgresDatabase(environment)).also {reportRepository ->
+    val repository = ReportRepository(PostgresDatabase(environment)).also { reportRepository ->
         //id som kan brukes når du skal sette opp rapporter: "carls-awesome-test-unit"
 
-        reportRepository.insertOrganizationUnit(OrganizationUnit("carls-awesome-test-unit", "Carls awesome test unit"))
+        reportRepository.insertOrganizationUnit(testOrg)
 
     }
 
-    embeddedServer(Netty, port = 8080, module = {this.api(repository) { installAzure() } }).start(wait = true)
+    embeddedServer(Netty, port = 8080, module = { this.api(repository) { } }).start(wait = true)
 }
 
 fun Application.installAzure() {
@@ -45,13 +45,15 @@ fun Application.installAzure() {
         jwt {}
     }
 }
+
 suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
     this.respondText(CssBuilder().apply(builder).toString(), ContentType.Text.CSS)
 }
 
-fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit )  {
+fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
     authInstaller()
     routing {
+        organizationUnits(repository)
         get("/isAlive") {
             call.respond(HttpStatusCode.OK)
         }
@@ -62,14 +64,16 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
         get("/reports") {}
         post("/submit/{id}") {
             // 1 is a good id?
-            val id = call.parameters["id"]?: throw IllegalArgumentException()
+            val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
-            val filters = listOf(formParameters["multimedia-filter"],
+            val filters = listOf(
+                formParameters["multimedia-filter"],
                 formParameters["form-filter"],
                 formParameters["timelimit-filter"],
-                formParameters["interaction-filter"]).map { it.toString() }
+                formParameters["interaction-filter"]
+            ).map { it.toString() }
 
             val report = ReportV1.successCriteriaV1.find { it.successCriterionNumber == index }
             report?.let { foundReport ->
@@ -102,16 +106,17 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
                     headContent("Select reports")
                 }
                 body {
-                    h1 { +"Select a report"}
-                    a { href="report/foo"
+                    h1 { +"Select a report" }
+                    a {
+                        href = "report/foo"
                         +"there's only this one, sir"
                     }
                 }
             }
         }
         get("/report/{id}") {
-            val id = call.parameters["id"]?: throw IllegalArgumentException()
-            val report = repository.getReport(id)?: Report.createLatest("url", testOrg, "foo", null  )
+            val id = call.parameters["id"] ?: throw IllegalArgumentException()
+            val report = repository.getReport(id) ?: Report.createLatest("url", testOrg, "foo", null)
 
             call.respondHtml(HttpStatusCode.OK) {
                 lang = "no"
@@ -119,16 +124,16 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
                     headContent("A11y report")
                 }
                 body {
-                    p {+"${report.organizationUnit.name}"}
+                    p { +report.organizationUnit.name }
                     main {
                         h1 { +"A11y report" }
-                        p { +"Hvem fyller ut rapporten?"}
-                        p { +"Fyller du ut rapporten på vegne av et annet team?"}
-                        p { +"Kontaktperson fra det andre teamet"}
-                        h2 {+"Om løsningen" }
+                        p { +"Hvem fyller ut rapporten?" }
+                        p { +"Fyller du ut rapporten på vegne av et annet team?" }
+                        p { +"Kontaktperson fra det andre teamet" }
+                        h2 { +"Om løsningen" }
                         p { +"Hva heter løsningen?" }
                         p { +"Løsningens base-URL" }
-                        p { +"(For PoC'en) URLen som er testet"}
+                        p { +"(For PoC'en) URLen som er testet" }
                         div {
                             label {
                                 +"Url:"

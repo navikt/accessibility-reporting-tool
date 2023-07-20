@@ -12,7 +12,7 @@ import java.lang.IllegalArgumentException
 
 fun Routing.organizationUnits(repository: ReportRepository) {
 
-    get("orgunit/{id}") {
+    get("orgunit/{id?}") {
 
         call.parameters["id"]?.let { unitId ->
             val (org, reports) = repository.getReportForOrganizationUnit(unitId)
