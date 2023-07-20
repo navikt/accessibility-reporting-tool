@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS organization_unit
 (
     organization_unit_id VARCHAR PRIMARY KEY,
     name                 VARCHAR(100) NOT NULL,
-    parent_unit          VARCHAR REFERENCES organization_unit (organization_unit_id)
+    parent_unit          VARCHAR REFERENCES organization_unit (organization_unit_id),
+    email                VARCHAR      NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS report
@@ -11,7 +12,7 @@ CREATE TABLE IF NOT EXISTS report
     organization_unit_id VARCHAR REFERENCES organization_unit (organization_unit_id),
     created              TIMESTAMP,
     last_changed         TIMESTAMP,
-    report_data           jsonb
+    report_data          jsonb
 );
 
 CREATE TABLE IF NOT EXISTS changelog

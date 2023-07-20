@@ -111,9 +111,15 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
 fun main() {
     val environment = Environment()
     Flyway.runFlywayMigrations(Environment())
-    ReportRepository(PostgresDatabase(environment)).also {reportRepository ->
+    ReportRepository(PostgresDatabase(environment)).also { reportRepository ->
         //id som kan brukes når du skal sette opp rapporter: "carls-awesome-test-unit"
-        reportRepository.insertOrganizationUnit(OrganizationUnit("carls-awesome-test-unit", "Carls awesome test unit"))
+        reportRepository.insertOrganizationUnit(
+            OrganizationUnit(
+                id = "carls-awesome-test-unit",
+                name = "Carls awesome test unit",
+                email = "awesome@nav.no"
+            )
+        )
 
     }
 
@@ -183,13 +189,13 @@ fun Application.api() {
                 body {
                     main {
                         h1 { +"A11y report" }
-                        p { +"Hvem fyller ut rapporten?"}
-                        p { +"Fyller du ut rapporten på vegne av et annet team?"}
-                        p { +"Kontaktperson fra det andre teamet"}
-                        h2 {+"Om løsningen" }
-                                p { +"Hva heter løsningen?" }
+                        p { +"Hvem fyller ut rapporten?" }
+                        p { +"Fyller du ut rapporten på vegne av et annet team?" }
+                        p { +"Kontaktperson fra det andre teamet" }
+                        h2 { +"Om løsningen" }
+                        p { +"Hva heter løsningen?" }
                         p { +"Løsningens base-URL" }
-                        p { +"(For PoC'en) URLen som er testet"}
+                        p { +"(For PoC'en) URLen som er testet" }
                         label {
                             +"Url:"
                             input { type = InputType.text }
