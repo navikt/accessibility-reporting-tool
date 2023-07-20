@@ -68,7 +68,7 @@ class SuccessCriterion(
     var status: Status,
     val wcagUrl: String,
     val helpUrl: String? = null,
-    val deviations: List<Deviation>? = null
+    val deviations: MutableList<Deviation>? = null
 ) {
     val successCriterionNumber = "${guideline.principle.number}.${guideline.section}.${this.number}"
 
