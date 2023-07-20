@@ -11,3 +11,8 @@ body {
 summary {
     margin: 0 0 16px 0;
 }
+
+
+* {
+    color: #333;
+}

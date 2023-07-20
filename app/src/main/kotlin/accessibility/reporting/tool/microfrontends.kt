@@ -5,6 +5,24 @@ import accessibility.reporting.tool.wcag.SuccessCriterion
 import kotlinx.html.*
 
 
+fun HEAD.headContent(title: String) {
+    meta { charset = "UTF-8" }
+    style {
+    }
+    title { +"${title}" }
+    script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
+
+    link {
+        rel = "preload"
+        href = "https://cdn.nav.no/aksel/@navikt/ds-css/2.9.0/index.min.css"
+        attributes["as"] = "style"
+    }
+    link {
+        rel = "stylesheet"
+        href = "/static/style.css"
+
+    }
+}
 fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, description: String, dataName: String) {
     details {
         summary {
