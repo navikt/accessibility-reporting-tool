@@ -1,6 +1,7 @@
 package accessibility.reporting.tool.wcag
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 abstract class Report(
@@ -68,9 +69,10 @@ class SuccessCriterion(
     var status: Status,
     val wcagUrl: String,
     val helpUrl: String? = null,
-    val deviations: MutableList<Deviation>? = null
+    val deviations: MutableList<Deviation> = mutableListOf()
 ) {
     val successCriterionNumber = "${guideline.principle.number}.${guideline.section}.${this.number}"
+
 
     companion object {
         fun createEmpty(
@@ -85,7 +87,7 @@ class SuccessCriterion(
 }
 
 class Deviation(
-    val dateIndentified: LocalDate,
+    val dateIndentified: LocalDateTime,
     val description: String,
     val correctedDate: LocalDate? = null,
 )

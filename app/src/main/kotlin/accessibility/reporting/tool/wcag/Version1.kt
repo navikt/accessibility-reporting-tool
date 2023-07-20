@@ -1,5 +1,6 @@
 package accessibility.reporting.tool.wcag
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.*
 
@@ -14,10 +15,10 @@ class ReportV1(
 ) : Report(reportId = reportId, url, organizationUnit, Version.ONE, testUrl, successCriteria, testpersonIdent) {
 
     companion object {
-        fun deserialize(s: String): Report = jacksonObjectMapper().readValue(s, ReportV1::class.java)
+        fun deserialize(s: String): Report = objectMapper.readValue(s, ReportV1::class.java)
 
         private val objectMapper = jacksonObjectMapper().apply {
-
+            registerModule(JavaTimeModule())
         }
 
         fun createEmpty(url: String, organizationUnit: OrganizationUnit, testUrl: String?, testpersonIdent: String?) =

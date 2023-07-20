@@ -14,7 +14,7 @@ class ReportRepository(val database: Database) {
         database.update {
             queryOf(
                 """INSERT INTO report (report_id,organization_unit_id,report_data) 
-                    VALUES (:id,:org, :data) 
+                    VALUES (:id,:org, :data) ON CONFLICT (report_id) DO UPDATE SET organization_unit_id=:org, report_data=:data
                 """.trimMargin(),
                 mapOf(
                     "id" to report.reportId,

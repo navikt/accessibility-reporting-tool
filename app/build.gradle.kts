@@ -34,6 +34,7 @@ dependencies {
     implementation("com.github.seratch:kotliquery:1.9.0")
     implementation("com.fasterxml.jackson.core:jackson-core:2.15.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
 
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")

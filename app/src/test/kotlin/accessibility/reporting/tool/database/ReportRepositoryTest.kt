@@ -1,6 +1,7 @@
 package accessibility.reporting.tool.database
 
 import LocalPostgresDatabase
+import accessibility.reporting.tool.wcag.Deviation
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.ReportV1
 import assert
@@ -18,7 +19,7 @@ class ReportRepositoryTest {
 
     private val testOrg = OrganizationUnit(id = UUID.randomUUID().toString(), name = "DummyOrg", parent = null)
     private val database = LocalPostgresDatabase.cleanDb()
-    val repository = ReportRepository(database)
+    private val repository = ReportRepository(database)
 
     @BeforeAll
     fun setup() {
@@ -42,6 +43,13 @@ class ReportRepositoryTest {
         repository.getReport(testReport.reportId).assert {
             require(this != null)
             this.successCriteria.size shouldBe 4
+            this.successCriteria.first().deviations.size shouldBe 0
+        }
+        testReport.successCriteria.first().deviations.add(Deviation(LocalDateTimeHelper.nowAtUtc(),"some error"))
+        repository.upsertReport(testReport)
+        repository.getReport(testReport.reportId).assert {
+            require(this!=null)
+            this.successCriteria.first().deviations.size shouldBe 1
         }
     }
 
