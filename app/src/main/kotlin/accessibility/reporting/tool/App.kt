@@ -7,6 +7,8 @@ import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.html.*
 import io.ktor.server.http.content.*
@@ -118,14 +120,21 @@ fun main() {
 
     }
 
-    embeddedServer(Netty, port = 8080, module = {this.api(repository)}).start(wait = true)
+    embeddedServer(Netty, port = 8080, module = {this.api(repository) { installAzure() } }).start(wait = true)
 }
 
+fun Application.installAzure() {
+    install(Authentication) {
+        jwt {}
+        verifier()
+    }
+}
 suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
     this.respondText(CssBuilder().apply(builder).toString(), ContentType.Text.CSS)
 }
 
-fun Application.api(repository: ReportRepository)  {
+fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit )  {
+    authInstaller()
     routing {
         get("/isAlive") {
             call.respond(HttpStatusCode.OK)

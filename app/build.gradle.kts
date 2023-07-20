@@ -21,9 +21,17 @@ repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
     mavenLocal()
+    maven("jitpack.io")
+
+
 }
 
+
 dependencies {
+    implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-client-content-negotiation")
+    implementation("io.ktor:ktor-server-auth")
+    implementation("io.ktor:ktor-server-auth-jwt")
     implementation("org.jetbrains.kotlin-wrappers:kotlin-css:1.0.0-pre.597")
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-netty")
