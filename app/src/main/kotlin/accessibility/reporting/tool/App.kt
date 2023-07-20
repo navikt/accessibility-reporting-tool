@@ -120,7 +120,11 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
                 }
                 body {
                     p {+"${report.organizationUnit.name}"}
+                    a { href="/index.html"
+                        +"back to top"
+                    }
                     main {
+
                         h1 { +"A11y report" }
                         p { +"Hvem fyller ut rapporten?"}
                         p { +"Fyller du ut rapporten på vegne av et annet team?"}
