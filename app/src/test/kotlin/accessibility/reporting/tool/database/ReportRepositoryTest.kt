@@ -114,6 +114,7 @@ class ReportRepositoryTest {
     }
 
     private fun dummyReportV1(url: String = "http://dummyurl.test") = ReportV1.createEmpty(
+        testId = UUID.randomUUID().toString(),
         url = url,
         organizationUnit = testOrg,
         testUrl = null,

@@ -4,12 +4,11 @@ import accessibility.reporting.tool.database.Environment
 import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.ReportV1
-import accessibility.reporting.tool.wcag.Status
-import accessibility.reporting.tool.wcag.SuccessCriterion
+import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.html.*
 import io.ktor.server.http.content.*
@@ -20,98 +19,17 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.css.*
-
-fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, description: String, dataName: String) {
-    details {
-        summary {
-            +"${summary}"
-        }
-        div {
-            label {
-                htmlFor = "${sc.successCriterionNumber}-${dataName}"
-                +"${description}"
-            }
-            textArea {
-                id = "${sc.successCriterionNumber}-${dataName}"
-                hxTrigger("keyup changed delay:1500ms")
-                hxPost("/submit")
-                hxVals("""{"index": "${sc.successCriterionNumber}"}""")
-                name = dataName
-                cols = "80"
-                rows = "10"
-                placeholder = "Leave blank if you're not breaking the law"
-            }
-
-        }
-
-    }
-}
+import java.lang.IllegalArgumentException
 
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
 
-fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
-    label {
-        input {
-
-            type = InputType.radio
-            if (sc.status == status) {
-                checked = true
-            }
-            value = value_
-            name = "status"
-        }
-        +"${display}"
-    }
-}
-
-fun FlowContent.a11yForm(sc: SuccessCriterion) {
-    form(classes = "${sc.cssClass()}") {
-        h2 { +"${sc.successCriterionNumber} ${sc.name}" }
-        div {
-
-            fieldSet {
-                hxPost("/submit")
-                hxTarget(".${sc.cssClass()}")
-                hxSelect("form")
-                hxSwapOuter()
-                attributes["name"] = "status"
-                attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
-                legend { +"Oppfyller alt innhold i testsettet kravet?" }
-                statusRadio(sc, "compliant", Status.COMPLIANT, "Ja")
-                statusRadio(sc, "non compliant", Status.NON_COMPLIANT, "Nej")
-                statusRadio(sc, "not tested", Status.NOT_TESTED, "Ikke testet")
-                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen av innhold")
-            }
-        }
-        if (sc.status == Status.NON_COMPLIANT) {
-            div {
-                disclosureArea(
-                    sc,
-                    "Det er innhold i testsettet som bryter kravet.",
-                    "Beskriv kort hvilket innhold som bryter kravet, hvorfor og konsekvensene dette får for brukeren.",
-                    "breaking-the-law"
-                )
-                disclosureArea(
-                    sc, "Det er innhold i testsettet som ikke er underlagt kravet.",
-                    "Hvilket innhold er ikke underlagt kravet?", "law-does-not-apply"
-                )
-                disclosureArea(
-                    sc,
-                    "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.",
-                    "Hvorfor mener vi at det er en uforholdsmessig stor byrde for innholdet å følge kravet?",
-                    "too-hard-to-comply"
-                )
-            }
-        }
-    }
-}
-
+val testOrg = OrganizationUnit("carls-awesome-test-unit", "Carls awesome test unit", email = "awesom@nav.no")
 
 fun main() {
     val environment = Environment()
     Flyway.runFlywayMigrations(Environment())
-    ReportRepository(PostgresDatabase(environment)).also { reportRepository ->
+    val repository = ReportRepository(PostgresDatabase(environment)).also { reportRepository ->
         //id som kan brukes når du skal sette opp rapporter: "carls-awesome-test-unit"
         reportRepository.insertOrganizationUnit(
             OrganizationUnit(
@@ -123,15 +41,20 @@ fun main() {
 
     }
 
-    embeddedServer(Netty, port = 8080, module = Application::api).start(wait = true)
-
+    embeddedServer(Netty, port = 8080, module = {this.api(repository) { installAzure() } }).start(wait = true)
 }
 
+fun Application.installAzure() {
+    install(Authentication) {
+        jwt {}
+    }
+}
 suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
     this.respondText(CssBuilder().apply(builder).toString(), ContentType.Text.CSS)
 }
 
-fun Application.api() {
+fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit )  {
+    authInstaller()
     routing {
         get("/isAlive") {
             call.respond(HttpStatusCode.OK)
@@ -140,14 +63,24 @@ fun Application.api() {
             call.respond(HttpStatusCode.OK)
         }
 
-        post("/submit") {
+        get("/reports") {}
+        post("/submit/{id}") {
+            // 1 is a good id?
+            val id = call.parameters["id"]?: throw IllegalArgumentException()
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
+            val filters = listOf(formParameters["multimedia-filter"],
+                            formParameters["form-filter"],
+                            formParameters["timelimit-filter"],
+                            formParameters["interaction-filter"]).map { it.toString() }
+
             val report = ReportV1.successCriteriaV1.find { it.successCriterionNumber == index }
             report?.let { foundReport ->
 
                 if (status == "non compliant") {
+                    // .div because I cannot find a .fragment or similar.
+                    // This means that you have to hx-select on the other end
                     fun response() = createHTML().div {
                         a11yForm(foundReport)
                     }
@@ -165,14 +98,17 @@ fun Application.api() {
                 call.respond(HttpStatusCode.NotFound, "ENOENT")
             }
         }
-        get("/index.html") {
+        get("/{id}") {
+            val id = call.parameters["id"]?: throw IllegalArgumentException()
+            val report = repository.getReport(id)?: Report.createLatest("url", testOrg, "foo", null  )
+
             call.respondHtml(HttpStatusCode.OK) {
                 lang = "no"
                 head {
                     meta { charset = "UTF-8" }
                     style {
                     }
-                    title { +"Accessibility reporting" }
+                    title { +"Accessibility reporting ${report.organizationUnit.name} " }
                     script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
 
                     link {
@@ -187,6 +123,7 @@ fun Application.api() {
                     }
                 }
                 body {
+                    p {+"${report.organizationUnit.name}"}
                     main {
                         h1 { +"A11y report" }
                         p { +"Hvem fyller ut rapporten?" }
@@ -204,7 +141,9 @@ fun Application.api() {
                             +"Multimedia: Har sidene du skal teste multimedia eller innhold som flasher, f.eks. video, lydfiler, animasjoner?"
                             input {
                                 type = InputType.checkBox
-                                value = """ removes
+                                value = "multimedia-filter"
+                                name = "multimedia-filter"
+                                attributes["data-removes"] = """ removes
                                 1.2.1 Bare lyd og bare video
                                 1.2.2 Teksting (forhåndsinnspilt)
                                 1.2.3 Synstolking eller mediealternativ (forhåndsinnspilt)
@@ -218,7 +157,9 @@ fun Application.api() {
                             +"Skjemaer: Har løsningen din skjemafelter (utenom i dekoratøren), eller mottar løsningen inndata fra brukeren?"
                             input {
                                 type = InputType.checkBox
-                                value = """ removes
+                                name = "form-filter"
+                                value = "form-filter"
+                                attributes["data-removes"] = """ removes
 
                              1.3.5 Identifiser formål med inndata
                              2.5.3 Ledetekst i navn
@@ -235,7 +176,9 @@ fun Application.api() {
                             +"Interaksjonsmønstre: Har du bevegelsesaktivert innhold, hurtigtaster, eller gestures?"
                             input {
                                 type = InputType.checkBox
-                                value = """ removes
+                                name = "interaction-filter"
+                                value = "interaction-filter"
+                                attributes["data-removes"] = """ removes
                         2.1.4 Hurtigtaster som består av ett tegn
                         2.5.1 Pekerbevegelser
                         2.5.4 Bevegelsesaktivering
@@ -246,7 +189,9 @@ fun Application.api() {
                             +"Tidsbegrensninger og innhold som oppdaterer seg automatisk: Har du innhold med tidsbegrensning? F.eks. automatisk utlogging, begrenset tid til å ta en quiz."
                             input {
                                 type = InputType.checkBox
-                                value = """ removes
+                                value = "timelimit-filter"
+                                name = "timelimit-filter"
+                                attributes["data-removes"] = """ removes
                                  2.2.1 Justerbar hastighet
                                  2.2.2 Pause, stopp, skjul
                                """
