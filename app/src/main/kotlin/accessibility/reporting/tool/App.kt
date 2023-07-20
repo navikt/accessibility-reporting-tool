@@ -138,10 +138,14 @@ fun Application.api() {
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
+            val filters = formParameters["filters"].toString()
+
             val report = ReportV1.successCriteriaV1.find { it.successCriterionNumber == index }
             report?.let { foundReport ->
 
                 if (status == "non compliant") {
+                    // .div because I cannot find a .fragment or similar.
+                    // This means that you have to hx-select on the other end
                     fun response() = createHTML().div {
                         a11yForm(foundReport)
                     }
