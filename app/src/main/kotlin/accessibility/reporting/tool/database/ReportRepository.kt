@@ -31,7 +31,7 @@ class ReportRepository(val database: Database) {
         database.update {
             queryOf(
                 """INSERT INTO organization_unit (organization_unit_id, name) 
-                    VALUES (:id,:name) 
+                    VALUES (:id,:name) on conflict do nothing 
                 """.trimMargin(),
                 mapOf(
                     "id" to organizationUnit.id,

@@ -5,13 +5,14 @@ import java.time.LocalDateTime
 
 
 abstract class Report(
-    val reportId: String,
+    val reportId: String = "foo",
     val url: String,
     val organizationUnit: OrganizationUnit,
     val version: Version,
     val testUrl: String? = null,
     val successCriteria: List<SuccessCriterion>,
     val testpersonIdent: String? = null,
+    val filters: MutableList<String> = mutableListOf()
     // kontaktperson/ansvarsperson
 ) {
     abstract fun toJson(): String

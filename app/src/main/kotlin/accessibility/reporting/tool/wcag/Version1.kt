@@ -23,7 +23,8 @@ class ReportV1(
 
         fun createEmpty(url: String, organizationUnit: OrganizationUnit, testUrl: String?, testpersonIdent: String?) =
             ReportV1(
-                reportId = UUID.randomUUID().toString(),
+                // TODO: NO, it's not foo!
+                reportId = "foo",
                 url = url,
                 organizationUnit = organizationUnit,
                 testUrl = url,

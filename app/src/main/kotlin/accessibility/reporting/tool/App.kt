@@ -4,10 +4,7 @@ import accessibility.reporting.tool.database.Environment
 import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.ReportV1
-import accessibility.reporting.tool.wcag.Status
-import accessibility.reporting.tool.wcag.SuccessCriterion
+import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -20,6 +17,8 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.css.*
+import kotliquery.param
+import java.lang.IllegalArgumentException
 
 fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, description: String, dataName: String) {
     details {
@@ -107,25 +106,26 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
     }
 }
 
+val testOrg = OrganizationUnit("carls-awesome-test-unit", "Carls awesome test unit")
 
 fun main() {
     val environment = Environment()
     Flyway.runFlywayMigrations(Environment())
-    ReportRepository(PostgresDatabase(environment)).also {reportRepository ->
+    val repository = ReportRepository(PostgresDatabase(environment)).also {reportRepository ->
         //id som kan brukes når du skal sette opp rapporter: "carls-awesome-test-unit"
+
         reportRepository.insertOrganizationUnit(OrganizationUnit("carls-awesome-test-unit", "Carls awesome test unit"))
 
     }
 
-    embeddedServer(Netty, port = 8080, module = Application::api).start(wait = true)
-
+    embeddedServer(Netty, port = 8080, module = {this.api(repository)}).start(wait = true)
 }
 
 suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
     this.respondText(CssBuilder().apply(builder).toString(), ContentType.Text.CSS)
 }
 
-fun Application.api() {
+fun Application.api(repository: ReportRepository)  {
     routing {
         get("/isAlive") {
             call.respond(HttpStatusCode.OK)
@@ -134,11 +134,17 @@ fun Application.api() {
             call.respond(HttpStatusCode.OK)
         }
 
-        post("/submit") {
+        get("/reports") {}
+        post("/submit/{id}") {
+            // 1 is a good id?
+            val id = call.parameters["id"]?: throw IllegalArgumentException()
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
-            val filters = formParameters["filters"].toString()
+            val filters = listOf(formParameters["multimedia-filter"],
+                            formParameters["form-filter"],
+                            formParameters["timelimit-filter"],
+                            formParameters["interaction-filter"]).map { it.toString() }
 
             val report = ReportV1.successCriteriaV1.find { it.successCriterionNumber == index }
             report?.let { foundReport ->
@@ -163,14 +169,17 @@ fun Application.api() {
                 call.respond(HttpStatusCode.NotFound, "ENOENT")
             }
         }
-        get("/index.html") {
+        get("/{id}") {
+            val id = call.parameters["id"]?: throw IllegalArgumentException()
+            val report = repository.getReport(id)?: Report.createLatest("url", testOrg, "foo", null  )
+
             call.respondHtml(HttpStatusCode.OK) {
                 lang = "no"
                 head {
                     meta { charset = "UTF-8" }
                     style {
                     }
-                    title { +"Accessibility reporting" }
+                    title { +"Accessibility reporting ${report.organizationUnit.name} " }
                     script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
 
                     link {
@@ -202,7 +211,9 @@ fun Application.api() {
                             +"Multimedia: Har sidene du skal teste multimedia eller innhold som flasher, f.eks. video, lydfiler, animasjoner?"
                             input {
                                 type = InputType.checkBox
-                                value = """ removes
+                                value = "multimedia-filter"
+                                name = "multimedia-filter"
+                                attributes["data-removes"] = """ removes
                                 1.2.1 Bare lyd og bare video
                                 1.2.2 Teksting (forhåndsinnspilt)
                                 1.2.3 Synstolking eller mediealternativ (forhåndsinnspilt)
@@ -216,7 +227,9 @@ fun Application.api() {
                             +"Skjemaer: Har løsningen din skjemafelter (utenom i dekoratøren), eller mottar løsningen inndata fra brukeren?"
                             input {
                                 type = InputType.checkBox
-                                value = """ removes
+                                name = "form-filter"
+                                value = "form-filter"
+                                attributes["data-removes"] = """ removes
 
                              1.3.5 Identifiser formål med inndata
                              2.5.3 Ledetekst i navn
@@ -233,7 +246,9 @@ fun Application.api() {
                             +"Interaksjonsmønstre: Har du bevegelsesaktivert innhold, hurtigtaster, eller gestures?"
                             input {
                                 type = InputType.checkBox
-                                value = """ removes
+                                name = "interaction-filter"
+                                value = "interaction-filter"
+                                attributes["data-removes"] = """ removes
                         2.1.4 Hurtigtaster som består av ett tegn
                         2.5.1 Pekerbevegelser
                         2.5.4 Bevegelsesaktivering
@@ -244,7 +259,9 @@ fun Application.api() {
                             +"Tidsbegrensninger og innhold som oppdaterer seg automatisk: Har du innhold med tidsbegrensning? F.eks. automatisk utlogging, begrenset tid til å ta en quiz."
                             input {
                                 type = InputType.checkBox
-                                value = """ removes
+                                value = "timelimit-filter"
+                                name = "timelimit-filter"
+                                attributes["data-removes"] = """ removes
                                  2.2.1 Justerbar hastighet
                                  2.2.2 Pause, stopp, skjul
                                """
