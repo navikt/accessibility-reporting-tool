@@ -92,6 +92,16 @@ class ReportRepository(val database: Database) {
             }
             .asList
     }
+
+    fun getReports(): List<Report> =
+        database.list {
+            queryOf(
+                "select report_data ->> 'version' as version, report_data from report"
+            ).map { row ->
+                Version.valueOf(row.string("version")).deserialize(row.string("report_data"))
+            }.asList
+        }
+
 }
 
 object LocalDateTimeHelper {
