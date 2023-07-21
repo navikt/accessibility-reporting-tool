@@ -20,7 +20,7 @@ fun Routing.organizationUnits(repository: ReportRepository) {
             org?.let { orgUnit ->
                 call.respondHtml {
                     body {
-                        h1 { +"$orgUnit accessibility reports" }
+                        h1 { +"${orgUnit.name} accessibility reports" }
                         ul {
                             reports.forEach { report ->
                                 li {
