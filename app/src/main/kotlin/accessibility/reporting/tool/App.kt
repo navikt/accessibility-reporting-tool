@@ -108,46 +108,88 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
                 }
                 body {
                     h1 { +"Select a page" }
-                    a {
-                        href = "report/foo"
-                        +"there's only this one, sir"
+                    div {
+                        a {
+                            href = "report/foo"
+                            +"there's only this one, sir"
+                        }
                     }
-                    a {
-                        href = "/reports/new"
-                        +"Lag ny rapport"
+                    div {
+                        a {
+                            href = "/reports/new"
+                            +"Lag ny rapport"
+                        }
                     }
-                    reports.map {it.url}
+                    reports.map { it.url }
                 }
             }
+        }
+        delete("/reports/{id}") {}
+        post("/reports/new") {
+            fun response() = createHTML().div(classes = "create-form") {
+                h2 {
+                    +"ny rapport"
+                }
+                p {
+                    a {
+                        href = "/reports/foo"
+                        +"Rediger rapport"
+                    }
+                }
+                p {
+                    +"slett rapport"
+                }
+            }
+            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
         get("/reports/new") {
-            call.respondHtml ( HttpStatusCode.OK) {
-              lang = "no"
-              head {
-                  headContent("Lag ny rapport")
-              }
+            call.respondHtml(HttpStatusCode.OK) {
+                lang = "no"
+                head {
+                    headContent("Lag ny rapport")
+                }
                 body {
-                    p {
-                        +"Ny rapport"
+                    h1 {
+                        +"Lag ny rapport"
+                    }
+                    div(classes = "create-form") {
+                        form {
+                            label {
+                                +"Url"
+                                input {
+                                    type = InputType.text
+                                    placeholder = "url"
+
+                                }
+                                button {
+                                    hxSwapOuter()
+                                    hxTarget(".create-form")
+                                    hxPost("/reports/new")
+                                    +"Lag ny rapport"
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+
         get("/reports/{id}") {
 
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val report = repository.getReport(id) ?: Report.createLatest("url", testOrg, "foo", null)
 
-             call.respondHtml(HttpStatusCode.OK) {
+            call.respondHtml(HttpStatusCode.OK) {
                 lang = "no"
                 head {
                     headContent("A11y report")
                 }
                 body {
                     p {
-                        +"${report.organizationUnit.name}" }
+                        +"${report.organizationUnit.name}"
+                    }
                     a {
-                        href = "/index.html"
+                        href = "/"
                         +"back to top"
                     }
                     main {
