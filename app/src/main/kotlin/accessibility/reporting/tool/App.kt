@@ -99,7 +99,8 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             }
         }
 
-        get("/index.html") {
+        get("/") {
+            val reports = repository.getReports()
             call.respondHtml(HttpStatusCode.OK) {
                 lang = "no"
                 head {
@@ -111,20 +112,40 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
                         href = "report/foo"
                         +"there's only this one, sir"
                     }
+                    a {
+                        href = "/reports/new"
+                        +"Lag ny rapport"
+                    }
+                    reports.map {it.url}
                 }
             }
         }
-        get("/report/{id}") {
+        get("/reports/new") {
+            call.respondHtml ( HttpStatusCode.OK) {
+              lang = "no"
+              head {
+                  headContent("Lag ny rapport")
+              }
+                body {
+                    p {
+                        +"Ny rapport"
+                    }
+                }
+            }
+        }
+        get("/reports/{id}") {
+
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val report = repository.getReport(id) ?: Report.createLatest("url", testOrg, "foo", null)
 
-            call.respondHtml(HttpStatusCode.OK) {
+             call.respondHtml(HttpStatusCode.OK) {
                 lang = "no"
                 head {
                     headContent("A11y report")
                 }
                 body {
-                    p { +"${report.organizationUnit.name}" }
+                    p {
+                        +"${report.organizationUnit.name}" }
                     a {
                         href = "/index.html"
                         +"back to top"
