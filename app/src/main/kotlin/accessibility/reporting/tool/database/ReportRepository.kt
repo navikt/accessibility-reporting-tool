@@ -92,6 +92,10 @@ class ReportRepository(val database: Database) {
             }
             .asList
     }
+
+    fun getReportForUser(user: String): List<Report> {
+        TODO("Not yet implemented")
+    }
 }
 
 object LocalDateTimeHelper {

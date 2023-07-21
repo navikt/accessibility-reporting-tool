@@ -10,7 +10,6 @@ import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.html.*
 import io.ktor.server.http.content.*
@@ -50,7 +49,10 @@ suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
 fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
     authInstaller()
     routing {
-        organizationUnits(repository)
+        authenticate {
+            organizationUnits(repository)
+        }
+
         get("/isAlive") {
             call.respond(HttpStatusCode.OK)
         }
