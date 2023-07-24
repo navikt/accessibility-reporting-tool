@@ -61,29 +61,38 @@ enum class Principle(val number: Int, description: String) {
         4,
         "Content must be robust enough that it can be interpreted by by a wide variety of user agents, including assistive technologies"
     )
+
 }
 
 class SuccessCriterion(
     val name: String,
-    val guideline: Guideline,
-    val number: Int,
+    val description: String,
+    val principle: String,
+    val guildeline_: String,
+    val tools: String,
+    val number: String,
+    val contentGroup: String,
     var status: Status,
-    val wcagUrl: String,
+    val wcagUrl: String? = null,
     val helpUrl: String? = null,
     val deviations: MutableList<Deviation> = mutableListOf()
 ) {
-    val successCriterionNumber = "${guideline.principle.number}.${guideline.section}.${this.number}"
+    val successCriterionNumber = "${number}}"
 
 
     companion object {
         fun createEmpty(
+            contentGroup: String,
+            description: String,
+            guildeline_: String,
+            helpUrl: String = "https://aksel.nav.no/god-praksis/universell-utforming",
             name: String,
-            guideline: Guideline,
-            number: Int,
-            wcagUrl: String,
-            helpUrl: String = "https://aksel.nav.no/god-praksis/universell-utforming"
+            number: String,
+            principle: String,
+            tools: String,
+            wcagUrl: String? = null
         ): SuccessCriterion =
-            SuccessCriterion(name, guideline, number, Status.NON_COMPLIANT, wcagUrl, helpUrl)
+            SuccessCriterion(name, description, principle, guildeline_,tools, number, contentGroup, Status.NON_COMPLIANT, wcagUrl, helpUrl)
     }
 }
 
