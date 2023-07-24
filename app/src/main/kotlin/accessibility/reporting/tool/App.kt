@@ -1,5 +1,7 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.AzureAuthContext
+import accessibility.reporting.tool.authenitcation.installAuthentication
 import accessibility.reporting.tool.database.Environment
 import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
@@ -8,7 +10,6 @@ import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.html.*
 import io.ktor.server.http.content.*
@@ -29,21 +30,16 @@ val testOrg =
 
 fun main() {
     val environment = Environment()
+    val authContext = AzureAuthContext()
     Flyway.runFlywayMigrations(Environment())
     val repository = ReportRepository(PostgresDatabase(environment)).also { reportRepository ->
         //id som kan brukes når du skal sette opp rapporter: "carls-awesome-test-unit"
-
         reportRepository.insertOrganizationUnit(testOrg)
-
     }
 
-    embeddedServer(Netty, port = 8080, module = { this.api(repository) { } }).start(wait = true)
-}
-
-fun Application.installAzure() {
-    install(Authentication) {
-        jwt {}
-    }
+    embeddedServer(Netty, port = 8081, module = { this.api(repository) { installAuthentication(authContext) } }).start(
+        wait = true
+    )
 }
 
 suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
@@ -53,7 +49,10 @@ suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
 fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
     authInstaller()
     routing {
-        organizationUnits(repository)
+        authenticate {
+            organizationUnits(repository)
+        }
+
         get("/isAlive") {
             call.respond(HttpStatusCode.OK)
         }

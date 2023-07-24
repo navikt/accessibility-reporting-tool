@@ -92,7 +92,9 @@ class ReportRepository(val database: Database) {
             }
             .asList
     }
-
+    fun getReportForUser(user: String): List<Report> {
+        TODO("Not yet implemented")
+    }
     fun getReports(): List<Report> =
         database.list {
             queryOf(
@@ -101,6 +103,7 @@ class ReportRepository(val database: Database) {
                 Version.valueOf(row.string("version")).deserialize(row.string("report_data"))
             }.asList
         }
+
 
 }
 
