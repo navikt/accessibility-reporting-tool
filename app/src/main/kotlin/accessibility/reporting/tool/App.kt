@@ -51,6 +51,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
     routing {
         authenticate {
             organizationUnits(repository)
+            userRoute(repository)
         }
 
         get("/isAlive") {

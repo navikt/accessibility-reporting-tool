@@ -64,7 +64,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
 }
 
 fun Route.userRoute(repository: ReportRepository) {
-    get("orgunit/{id?}") {
+    get("user") {
 
         val reports = repository.getReportForUser(call.user)
 
@@ -81,6 +81,8 @@ fun Route.userRoute(repository: ReportRepository) {
                             }
                         }
                     }
+
+                    a("")
                 }
             }
         }

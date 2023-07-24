@@ -24,39 +24,25 @@ import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.css.body
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
 
 fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
-    /*
-    TODO
-    * https://doc.nais.io/security/auth/azure-ad/access-policy/#users
-    *sidecar:
-      enabled: true
-      autoLogin: true
-
-    sjekke om profile er en del av default scope
-    * */
 
     authentication {
-        //TODO: fix this!
         jwt {
-
-            skipWhen { call ->
-                call.request.uri.endsWith("testuser")
-            }
             verifier(jwkProvider = azureAuthContext.jwkProvider) {
                 withIssuer(azureAuthContext.issuer)
                 withAudience(azureAuthContext.azureClientId)
             }
-
-            validate { jwtCredential -> User(jwtCredential.payload.getClaim("oid").asString()) }
+            validate {
+                jwtCredential -> User(jwtCredential.payload.getClaim("oid").asString())
+            }
 
             challenge { defaultScheme, realm ->
-
-                call.respond(HttpStatusCode.Unauthorized, "Auth funker ikke bruk defaultuser testuser")
-
+                call.respond(HttpStatusCode.Unauthorized)
             }
         }
     }

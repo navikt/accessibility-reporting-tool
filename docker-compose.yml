@@ -13,12 +13,30 @@ services:
       - "5432:5432"
 
   mock-oauth2-server:
-    image: ghcr.io/navikt/mock-oauth2-server:0.5.7
+    image: ghcr.io/navikt/mock-oauth2-server:1.0.0
     ports:
       - "8080:8080"
     environment:
-      JSON_CONFIG: "{\"interactiveLogin\":false}"
-    hostname: host.docker.internal
+      JSON_CONFIG: |
+        {
+          "interactiveLogin": false,
+          "tokenCallbacks": [
+            {
+              "issuerId": "issueissue",
+              "requestMappings": [
+                {
+                  "requestParam": "grant_type",
+                  "claims": {
+                    "aud": ["a11y"],
+                    "email" : "carl@good.morning",
+                    "name": "Carl Good Morning",
+                    "oid": "tadda-i-fixed-it"
+                  }
+                }
+              ]
+            }
+          ]
+        }
 
   redis:
     image: redis:7
@@ -32,15 +50,16 @@ services:
     ports:
       - "3000:3000"
     command: >
-      --openid.client-id=bogus
-      --openid.well-known-url=http://host.docker.internal:8080/default/.well-known/openid-configuration
+      --openid.client-id=a11y
+      --openid.well-known-url=http://host.docker.internal:8080/issueissue/.well-known/openid-configuration
       --ingress=http://localhost:3000
       --bind-address=0.0.0.0:3000
-      --upstream-host=upstream:4000
+      --upstream-host=host.docker.internal:8081
       --redis.address=redis:6379
       --redis.tls=false
       --log-level=debug
       --log-format=text
+      --auto-login=true
     restart: on-failure
     environment:
       WONDERWALL_OPENID_CLIENT_JWK: >
