@@ -12,11 +12,14 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
+import io.ktor.server.html.*
 import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.html.*
+import kotliquery.queryOf
 import java.lang.IllegalArgumentException
 
 fun SuccessCriterion.cssClass() =
@@ -31,7 +34,7 @@ fun main() {
     Flyway.runFlywayMigrations(Environment())
     val repository = ReportRepository(PostgresDatabase(environment)).also { reportRepository ->
         //id som kan brukes når du skal sette opp rapporter: "carls-awesome-test-unit"
-        reportRepository.insertOrganizationUnit(testOrg)
+        reportRepository.database.update { queryOf("delete from report") }
     }
 
     embeddedServer(Netty, port = 8081, module = { this.api(repository) { installAuthentication(authContext) } }).start(
@@ -46,8 +49,9 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
         exception<Throwable> { call, cause ->
             when (cause) {
                 is IllegalArgumentException -> {
-                    call.respondText(status=HttpStatusCode.BadRequest, text = cause.message?:"Bad request")
+                    call.respondText(status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad request")
                 }
+
                 else -> call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
             }
         }
@@ -58,12 +62,41 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             organizationUnits(repository)
             userRoute(repository)
             reports(repository)
+            landingPage(repository)
         }
         meta()
 
         staticResources("/static", "static") {
-            default("index.html")
             preCompressed(CompressedFileType.GZIP)
+        }
+    }
+}
+
+fun Route.landingPage(repository: ReportRepository) {
+    get {
+        val reports = repository.getReports()
+        call.respondHtml {
+            head {
+                headContent("a11y reporting tool")
+            }
+
+            body {
+                h1 { +"a11y reporting tool for NAV" }
+                a {
+                    href="user"
+                    +"See your reports"
+                }
+                ul {
+                    reports.forEach { report ->
+                        li {
+                            a {
+                                href = "reports/${report.reportId}"
+                                +"Report for ${report.url}"
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

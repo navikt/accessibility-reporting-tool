@@ -66,7 +66,7 @@ fun Route.userRoute(repository: ReportRepository) {
                 headContent(call.user.email)
             }
             body {
-                h1 { +"${call.user} accessibility reports" }
+                h1 { +"${call.user.email} accessibility reports" }
                 ul {
                     reports.forEach { report ->
                         li {
