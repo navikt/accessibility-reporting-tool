@@ -14,7 +14,9 @@ fun HTMLTag.hxGet(url: String) {
 fun HTMLTag.hxTarget(selector: String) {
     attributes["data-hx-target"] = selector
 }
-
+fun HTMLTag.hxDelete(url: String) {
+    attributes["data-hx-delete"] = url
+}
 fun HTMLTag.hxTrigger(rules: String) {
     attributes["data-hx-trigger"] = rules
 }
