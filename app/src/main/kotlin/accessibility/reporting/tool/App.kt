@@ -37,10 +37,6 @@ fun main() {
     )
 }
 
-suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
-    this.respondText(CssBuilder().apply(builder).toString(), ContentType.Text.CSS)
-}
-
 fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
     authInstaller()
     routing {

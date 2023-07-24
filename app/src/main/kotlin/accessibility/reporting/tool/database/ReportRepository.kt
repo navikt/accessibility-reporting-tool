@@ -10,12 +10,13 @@ import java.time.ZoneId
 
 class ReportRepository(val database: Database) {
 
-    fun upsertReport(report: Report) {
+    fun upsertReport(report: Report) =
         //TODO: changelog
         database.update {
             queryOf(
-                """INSERT INTO report (report_id,report_data) 
-                    VALUES (:id, :data) ON CONFLICT (report_id) DO UPDATE SET report_data=:data
+                """insert into report (report_id,report_data) 
+                    values (:id, :data) on conflict (report_id) do update set report_data=:data
+
                 """.trimMargin(),
                 mapOf(
                     "id" to report.reportId,
@@ -23,7 +24,7 @@ class ReportRepository(val database: Database) {
                 )
             )
         }
-    }
+
 
     fun insertOrganizationUnit(organizationUnit: OrganizationUnit) {
         database.update {

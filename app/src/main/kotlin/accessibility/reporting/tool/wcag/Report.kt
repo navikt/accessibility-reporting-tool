@@ -80,7 +80,6 @@ enum class Status(val display: String) {
     }
 }
 
-
 class SuccessCriterion(
     val name: String,
     val description: String,

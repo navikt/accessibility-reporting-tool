@@ -1,7 +1,10 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.Version
+import accessibility.reporting.tool.wcag.Version1
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
@@ -30,6 +33,9 @@ fun Route.reports(repository: ReportRepository) {
                             href = "reports/foo"
                             +"there's only this one, sir"
                         }
+                        reports.map{ p {
+                            +"${it.reportId}"
+                        }}
                     }
                     div {
                         a {
@@ -43,18 +49,10 @@ fun Route.reports(repository: ReportRepository) {
         }
 
         post("/submit/{id}") {
-            // 1 is a good id?
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
-            val filters = listOf(
-                formParameters["multimedia-filter"],
-                formParameters["form-filter"],
-                formParameters["timelimit-filter"],
-                formParameters["interaction-filter"]
-            ).map { it.toString() }
-
             val report = repository.getReport(id)?.successCriteria?.find { it.successCriterionNumber == index }
             report?.let { foundReport ->
 
@@ -118,18 +116,26 @@ fun Route.reports(repository: ReportRepository) {
         delete("{id}") {}
 
         post("new") {
+
+            val formParameters = call.receiveParameters()
+            val url = formParameters["page-url"].toString()
+
+            val email = call.user.email
+
+            repository.upsertReport(Report(organizationUnit = null, reportId = url, successCriteria = Version1.criteria, testData = null,
+                url = url, user= call.user, version = Version.V1 ))
             fun response() = createHTML().div(classes = "create-form") {
                 h2 {
                     +"ny rapport"
                 }
                 p {
                     a {
-                        href = "/reports/foo"
+                        href = "/reports/${url}"
                         +"Rediger rapport"
                     }
                 }
                 button {
-                    hxDelete("/reports/foo")
+                    hxDelete("/reports/${url}")
                     +"slett rapport"
                 }
             }
@@ -149,10 +155,11 @@ fun Route.reports(repository: ReportRepository) {
                     div(classes = "create-form") {
                         form {
                             label {
-                                +"Url"
+                                +"Url til siden "
                                 input {
                                     type = InputType.text
-                                    placeholder = "url"
+                                    placeholder = "Url"
+                                    name = "page-url"
 
                                 }
                                 button {
@@ -167,7 +174,5 @@ fun Route.reports(repository: ReportRepository) {
                 }
             }
         }
-
-
     }
 }
