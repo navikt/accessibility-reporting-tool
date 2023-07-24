@@ -14,12 +14,11 @@ class ReportRepository(val database: Database) {
         //TODO: changelog
         database.update {
             queryOf(
-                """INSERT INTO report (report_id,organization_unit_id,report_data) 
-                    VALUES (:id,:org, :data) ON CONFLICT (report_id) DO UPDATE SET organization_unit_id=:org, report_data=:data
+                """INSERT INTO report (report_id,report_data) 
+                    VALUES (:id, :data) ON CONFLICT (report_id) DO UPDATE SET report_data=:data
                 """.trimMargin(),
                 mapOf(
                     "id" to report.reportId,
-                    "org" to report.organizationUnit.id,
                     "data" to report.toJson().jsonB()
                 )
             )
@@ -60,7 +59,6 @@ class ReportRepository(val database: Database) {
                 OrganizationUnit(
                     id = row.string("organization_unit_id"),
                     name = row.string("name"),
-                    parent = null,
                     email = row.string("email")
                 )
 
@@ -86,15 +84,21 @@ class ReportRepository(val database: Database) {
                 OrganizationUnit(
                     id = row.string("organization_unit_id"),
                     name = row.string("name"),
-                    parent = null,
                     email = row.string("email")
                 )
             }
             .asList
     }
-    fun getReportForUser(user: String): List<Report> {
-        TODO("Not yet implemented")
+
+    fun getReportsForUser(userEmail: String): List<Report> = database.list {
+        queryOf(
+            "select report_data ->> 'version' as version, report_data from report where report_data -> 'user'->>'email'=:email ",
+            mapOf("email" to userEmail)
+        ).map { row ->
+            Version.valueOf(row.string("version")).deserialize(row.string("report_data"))
+        }.asList
     }
+
     fun getReports(): List<Report> =
         database.list {
             queryOf(

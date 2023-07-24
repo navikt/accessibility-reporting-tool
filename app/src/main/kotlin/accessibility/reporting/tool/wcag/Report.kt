@@ -1,34 +1,67 @@
 package accessibility.reporting.tool.wcag
 
-import java.time.LocalDate
+import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.database.LocalDateTimeHelper
+import accessibility.reporting.tool.wcag.Version.V1
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 
 
-abstract class Report(
-    val reportId: String = "foo",
+class Report(
+    val reportId: String,
     val url: String,
-    val organizationUnit: OrganizationUnit,
+    val organizationUnit: OrganizationUnit?,
     val version: Version,
-    val testUrl: String? = null,
+    val testData: TestData?,
+    val user: User,
     val successCriteria: List<SuccessCriterion>,
-    val testpersonIdent: String? = null,
     val filters: MutableList<String> = mutableListOf()
-    // kontaktperson/ansvarsperson
 ) {
-    abstract fun toJson(): String
+
     companion object {
-                fun createLatest(url: String, organizationUnit: OrganizationUnit, testUrl: String?, testpersonIdent: String?) =
-            ReportV1.createEmpty(url, organizationUnit, testUrl, testpersonIdent)
+        private val objectMapper = jacksonObjectMapper().apply {
+            registerModule(JavaTimeModule())
+        }
+
+        fun fromJsonVersion1(rawJson: String): Report = jacksonObjectMapper().readTree(rawJson).let { jsonNode ->
+            Report(
+                reportId = jsonNode["reportId"].asText(),
+                url = jsonNode["url"].asText(),
+                organizationUnit = jsonNode["organizationUnit"]
+                    .takeIf { !it.isEmpty }
+                    ?.let { organizationJson ->
+                        OrganizationUnit(
+                            id = organizationJson["id"].asText(),
+                            name = organizationJson["name"].asText(),
+                            parentId = organizationJson["parentId"]?.asText(),
+                            email = organizationJson["email"].asText()
+                        )
+                    },
+                version = V1,
+                testData = jsonNode["testData"]
+                    .takeIf { !it.isEmpty }
+                    ?.let { testDataJson ->
+                        TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
+                    },
+                user = User(email = jsonNode["user"]["email"].asText(), jsonNode["user"]["name"].asText()),
+                successCriteria = jsonNode["successCriteria"].map { SuccessCriterion.fromJson(it) },
+                filters = jsonNode["filters"].map { it.asText() }.toMutableList()
+            )
+
         }
     }
 
+    fun toJson(): String = objectMapper.writeValueAsString(this)
+}
 
-class OrganizationUnit(val id: String, val name: String, parent: OrganizationUnit? = null, val email:String)
 
+class TestData(val ident: String, val url: String)
+class OrganizationUnit(val id: String, val name: String, parentId: String? = null, val email: String)
 
-enum class Version(val deserialize: (String) -> Report) {
-    ONE(deserialize = ReportV1::deserialize)
-
+enum class Version(val deserialize: (String) -> Report, val criteria: List<SuccessCriterion>) {
+    V1(Report::fromJsonVersion1, Version1.criteria)
 }
 
 enum class Status(val display: String) {
@@ -48,27 +81,11 @@ enum class Status(val display: String) {
 }
 
 
-class Guideline(val name: String, val section: Int, val principle: Principle)
-
-enum class Principle(val number: Int, description: String) {
-    PERCEIVABLE(
-        1,
-        "Information and user interface components must be presentable to users in ways they can perceive."
-    ),
-    OPERABLE(2, "User interface components and navigation must be operable"),
-    UNDERSTANDABLE(3, "Information and the operation of user interface must be understandable"),
-    ROBUST(
-        4,
-        "Content must be robust enough that it can be interpreted by by a wide variety of user agents, including assistive technologies"
-    )
-
-}
-
 class SuccessCriterion(
     val name: String,
     val description: String,
     val principle: String,
-    val guildeline_: String,
+    val guideline: String,
     val tools: String,
     val number: String,
     val contentGroup: String,
@@ -92,12 +109,47 @@ class SuccessCriterion(
             tools: String,
             wcagUrl: String? = null
         ): SuccessCriterion =
-            SuccessCriterion(name, description, principle, guildeline_,tools, number, contentGroup, Status.NON_COMPLIANT, wcagUrl, helpUrl)
+            SuccessCriterion(
+                name,
+                description,
+                principle,
+                guildeline_,
+                tools,
+                number,
+                contentGroup,
+                Status.NON_COMPLIANT,
+                wcagUrl,
+                helpUrl
+            )
+
+        private val objectMapper = jacksonObjectMapper().apply {
+            registerModule(JavaTimeModule())
+        }
+
+        fun fromJson(rawJson: JsonNode): SuccessCriterion = SuccessCriterion(
+            name = rawJson["name"].asText(),
+            description = rawJson["description"].asText(),
+            principle = rawJson["principle"].asText(),
+            guideline = rawJson["guideline"].asText(),
+            tools = rawJson["tools"].asText(),
+            number = rawJson["number"].asText(),
+            contentGroup = rawJson["contentGroup"].asText(),
+            status = Status.valueOf(rawJson["status"].asText()),
+            wcagUrl = rawJson["wcagUrl"].asText(),
+            helpUrl = rawJson["helpUrl"].asText(),
+            deviations = Deviation.fromJson(rawJson["deviations"])
+        )
     }
 }
 
 class Deviation(
     val dateIndentified: LocalDateTime,
     val description: String,
-    val correctedDate: LocalDate? = null,
-)
+    val correctedDate: LocalDateTime? = null,
+) {
+    companion object {
+        fun fromJson(jsonNode: JsonNode?): MutableList<Deviation> = jsonNode?.toList()?.map {
+            Deviation(dateIndentified = LocalDateTimeHelper.nowAtUtc(), description = "", correctedDate = null)
+        }?.toMutableList() ?: mutableListOf()
+    }
+}

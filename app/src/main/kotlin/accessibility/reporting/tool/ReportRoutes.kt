@@ -1,9 +1,7 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.ReportV1
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
@@ -57,7 +55,7 @@ fun Route.reports(repository: ReportRepository) {
                 formParameters["interaction-filter"]
             ).map { it.toString() }
 
-            val report = ReportV1.successCriteriaV1.find { it.successCriterionNumber == index }
+            val report = repository.getReport(id)?.successCriteria?.find { it.successCriterionNumber == index }
             report?.let { foundReport ->
 
                 if (status == "non compliant") {
@@ -84,7 +82,7 @@ fun Route.reports(repository: ReportRepository) {
         get("{id}") {
 
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
-            val report = repository.getReport(id) ?: Report.createLatest("url", testOrg, "foo", null)
+            val report = repository.getReport(id)?:throw IllegalArgumentException()
 
             call.respondHtml(HttpStatusCode.OK) {
                 lang = "no"
@@ -93,7 +91,7 @@ fun Route.reports(repository: ReportRepository) {
                 }
                 body {
                     p {
-                        +"${report.organizationUnit.name}"
+                        +"${report.user.email}"
                     }
                     a {
                         href = "/"
@@ -110,76 +108,8 @@ fun Route.reports(repository: ReportRepository) {
                         p { +"Løsningens base-URL" }
                         p { +"(For PoC'en) URLen som er testet" }
                         div {
-                            label {
-                                +"Url:"
-                                input { type = InputType.text }
-                            }
-                            label {
-
-                                input {
-                                    type = InputType.checkBox
-                                    value = "multimedia-filter"
-                                    name = "multimedia-filter"
-                                    attributes["data-removes"] = """ removes
-                                1.2.1 Bare lyd og bare video
-                                1.2.2 Teksting (forhåndsinnspilt)
-                                1.2.3 Synstolking eller mediealternativ (forhåndsinnspilt)
-                                1.2.5 Synstolking (forhåndsinnspilt)
-                                1.4.2 Styring av lyd
-                                2.3.1 Terskelverdi på maksimalt tre glimt
-                                """
-                                }
-                                +"Multimedia: Har sidene du skal teste multimedia eller innhold som flasher, f.eks. video, lydfiler, animasjoner?"
-                            }
-                            label {
-
-                                input {
-                                    type = InputType.checkBox
-                                    name = "form-filter"
-                                    value = "form-filter"
-                                    attributes["data-removes"] = """ removes
-
-                             1.3.5 Identifiser formål med inndata
-                             2.5.3 Ledetekst i navn
-                             3.2.2 Inndata
-                             3.3.1 Identifikasjon av feil
-                             3.3.2 Ledetekster eller instruksjoner
-                             3.3.3 Forslag ved feil
-                             3.3.4 Forhindring av feil
-                            """
-                                }
-                                +"Skjemaer: Har løsningen din skjemafelter (utenom i dekoratøren), eller mottar løsningen inndata fra brukeren?"
-                            }
-
-                            label {
-
-                                input {
-                                    type = InputType.checkBox
-                                    name = "interaction-filter"
-                                    value = "interaction-filter"
-                                    attributes["data-removes"] = """ removes
-                        2.1.4 Hurtigtaster som består av ett tegn
-                        2.5.1 Pekerbevegelser
-                        2.5.4 Bevegelsesaktivering
-                        """
-                                }
-                                +"Interaksjonsmønstre: Har du bevegelsesaktivert innhold, hurtigtaster, eller gestures?"
-                            }
-                            label {
-
-                                input {
-                                    type = InputType.checkBox
-                                    value = "timelimit-filter"
-                                    name = "timelimit-filter"
-                                    attributes["data-removes"] = """ removes
-                                 2.2.1 Justerbar hastighet
-                                 2.2.2 Pause, stopp, skjul
-                               """
-                                }
-                                +"Tidsbegrensninger og innhold som oppdaterer seg automatisk: Har du innhold med tidsbegrensning? F.eks. automatisk utlogging, begrenset tid til å ta en quiz."
-                            }
+                            report.successCriteria.map { a11yForm(it) }
                         }
-                        ReportV1.successCriteriaV1.map { a11yForm(it) }
                     }
                 }
             }

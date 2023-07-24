@@ -28,6 +28,8 @@ import kotlinx.css.body
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
+val ApplicationCall.user: User
+    get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Azuread sucks")
 
 fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
 
@@ -37,8 +39,11 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
                 withIssuer(azureAuthContext.issuer)
                 withAudience(azureAuthContext.azureClientId)
             }
-            validate {
-                jwtCredential -> User(jwtCredential.payload.getClaim("oid").asString())
+            validate { jwtCredential ->
+                User(
+                    name = jwtCredential.payload.getClaim("name").asString(),
+                    email = jwtCredential.payload.getClaim("email").asString()
+                )
             }
 
             challenge { defaultScheme, realm ->
@@ -48,7 +53,9 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
     }
 }
 
-data class User(val username: String) : Principal
+data class User(val email: String, val name: String) : Principal
+
+
 
 class AzureAuthContext() {
     var issuer: String = ""
