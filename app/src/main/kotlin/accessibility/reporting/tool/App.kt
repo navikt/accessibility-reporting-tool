@@ -110,7 +110,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
                     h1 { +"Select a page" }
                     div {
                         a {
-                            href = "report/foo"
+                            href = "reports/foo"
                             +"there's only this one, sir"
                         }
                     }
@@ -136,7 +136,8 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
                         +"Rediger rapport"
                     }
                 }
-                p {
+                button {
+                    hxDelete("/reports/foo")
                     +"slett rapport"
                 }
             }
