@@ -34,4 +34,3 @@ fun HTMLTag.hxVals(json: String) {
     attributes["data-hx-vals"] = json
 }
 
-fun HTMLTag.hxDelete(json: String) {}

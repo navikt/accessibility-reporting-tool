@@ -36,7 +36,7 @@ fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, descriptio
             textArea {
                 id = "${sc.successCriterionNumber}-${dataName}"
                 hxTrigger("keyup changed delay:1500ms")
-                hxPost("/submit")
+                hxPost("/reports/submit")
                 hxVals("""{"index": "${sc.successCriterionNumber}"}""")
                 name = dataName
                 cols = "80"
