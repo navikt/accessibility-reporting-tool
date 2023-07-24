@@ -10,7 +10,6 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 
 
-
 fun Route.organizationUnits(repository: ReportRepository) {
 
     get("orgunit/{id?}") {
@@ -62,8 +61,10 @@ fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
         val reports = repository.getReportsForUser(call.user.email)
-
         call.respondHtml {
+            head {
+                headContent(call.user.email)
+            }
             body {
                 h1 { +"${call.user} accessibility reports" }
                 ul {
@@ -77,7 +78,10 @@ fun Route.userRoute(repository: ReportRepository) {
                     }
                 }
 
-                a("")
+                a {
+                    href = "/reports/new"
+                    +"Start a new report"
+                }
             }
         }
     }

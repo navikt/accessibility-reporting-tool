@@ -120,8 +120,6 @@ fun Route.reports(repository: ReportRepository) {
             val formParameters = call.receiveParameters()
             val url = formParameters["page-url"].toString()
 
-            val email = call.user.email
-
             repository.upsertReport(Report(organizationUnit = null, reportId = url, successCriteria = Version1.criteria, testData = null,
                 url = url, user= call.user, version = Version.V1 ))
             fun response() = createHTML().div(classes = "create-form") {

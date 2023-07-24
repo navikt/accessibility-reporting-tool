@@ -26,6 +26,7 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder")
     implementation("io.ktor:ktor-server-auth")
     implementation("io.ktor:ktor-server-auth-jwt")
+    implementation("io.ktor:ktor-server-status-pages")
     implementation("org.jetbrains.kotlin-wrappers:kotlin-css:1.0.0-pre.597")
     implementation("org.flywaydb:flyway-core:9.20.1")
     implementation("com.zaxxer:HikariCP:5.0.1")
@@ -34,14 +35,17 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.15.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+    implementation("io.ktor:ktor-server-core-jvm:2.3.2")
+    implementation("io.ktor:ktor-server-host-common-jvm:2.3.2")
+    implementation("io.ktor:ktor-server-status-pages-jvm:2.3.2")
 
 
 
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:junit-jupiter-api")
     testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.2")
-    testImplementation ("org.testcontainers:testcontainers:1.18.3")
-    testImplementation ("org.testcontainers:junit-jupiter:1.18.3")
+    testImplementation("org.testcontainers:testcontainers:1.18.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.18.3")
     testImplementation("org.testcontainers:postgresql:1.18.3")
     testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
     testImplementation("io.kotest:kotest-assertions-core:5.6.2")

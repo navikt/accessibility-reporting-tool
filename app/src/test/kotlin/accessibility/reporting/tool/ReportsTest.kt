@@ -23,9 +23,9 @@ class ReportsTest {
             } }
             api(repository = ReportRepository(db), authInstaller = {})
         }
-       // client.get("/reports").status shouldBe HttpStatusCode.OK
-       // client.get("/reports/someid").status shouldBe HttpStatusCode.OK
-       // client.get("/reports/new").status shouldBe HttpStatusCode.OK
+        client.get("/reports").status shouldBe HttpStatusCode.OK
+        client.get("/reports/someid").status shouldBe HttpStatusCode.OK
+        client.get("/reports/new").status shouldBe HttpStatusCode.OK
 
     }
 }

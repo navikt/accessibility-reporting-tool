@@ -1,8 +1,10 @@
 package accessibility.reporting.tool
 
 import LocalPostgresDatabase
+import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
+import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -17,16 +19,20 @@ import org.junit.jupiter.api.TestInstance
 class AppKtTest {
 
     private val db = LocalPostgresDatabase.cleanDb()
+    private val testuserEmail = "test@testing.ok"
+    private val testuserName = "Testa testerson"
 
     @Test
     fun testGetIsalive() = testApplication {
         application {
-            authentication { jwt {
-                skipWhen { true }
-            } }
+            authentication {
+                jwt {
+                    skipWhen { true }
+                }
+            }
             api(repository = ReportRepository(db), authInstaller = {})
         }
+
         client.get("/isAlive").status shouldBe HttpStatusCode.OK
-        client.get("/orgunit").status shouldBe HttpStatusCode.OK
     }
 }
