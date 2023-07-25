@@ -20,7 +20,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotliquery.queryOf
+import mu.KotlinLogging
 import java.lang.IllegalArgumentException
+
+private val log = KotlinLogging.logger {  }
 
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
@@ -33,7 +36,7 @@ fun main() {
     val authContext = AzureAuthContext()
     Flyway.runFlywayMigrations(Environment())
     val repository = ReportRepository(PostgresDatabase(environment))
-
+    log.info { "Sånn her kan du logge" }
     embeddedServer(Netty, port = 8081, module = { this.api(repository) { installAuthentication(authContext) } }).start(
         wait = true
     )
