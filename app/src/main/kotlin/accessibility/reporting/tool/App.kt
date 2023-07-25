@@ -32,10 +32,7 @@ fun main() {
     val environment = Environment()
     val authContext = AzureAuthContext()
     Flyway.runFlywayMigrations(Environment())
-    val repository = ReportRepository(PostgresDatabase(environment)).also { reportRepository ->
-        //id som kan brukes når du skal sette opp rapporter: "carls-awesome-test-unit"
-        reportRepository.database.update { queryOf("delete from report") }
-    }
+    val repository = ReportRepository(PostgresDatabase(environment))
 
     embeddedServer(Netty, port = 8081, module = { this.api(repository) { installAuthentication(authContext) } }).start(
         wait = true

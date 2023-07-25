@@ -26,12 +26,9 @@ class Report(
         }
 
         fun fromJsonVersion1(rawJson: String): Report = jacksonObjectMapper().readTree(rawJson).let { jsonNode ->
-            Report(
-                reportId = jsonNode["reportId"].asText(),
+            Report(reportId = jsonNode["reportId"].asText(),
                 url = jsonNode["url"].asText(),
-                organizationUnit = jsonNode["organizationUnit"]
-                    .takeIf { !it.isEmpty }
-                    ?.let { organizationJson ->
+                organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }?.let { organizationJson ->
                         OrganizationUnit(
                             id = organizationJson["id"].asText(),
                             name = organizationJson["name"].asText(),
@@ -40,9 +37,7 @@ class Report(
                         )
                     },
                 version = V1,
-                testData = jsonNode["testData"]
-                    .takeIf { !it.isEmpty }
-                    ?.let { testDataJson ->
+                testData = jsonNode["testData"].takeIf { !it.isEmpty }?.let { testDataJson ->
                         TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
                     },
                 user = User(email = jsonNode["user"]["email"].asText(), jsonNode["user"]["name"].asText()),
@@ -56,14 +51,9 @@ class Report(
     fun toJson(): String = objectMapper.writeValueAsString(this)
 }
 
-
 class TestData(val ident: String, val url: String)
 class OrganizationUnit(
-    val id: String,
-    val name: String,
-    parentId: String? = null,
-    val email: String,
-    val shortName: String? = null
+    val id: String, val name: String, parentId: String? = null, val email: String, val shortName: String? = null
 )
 
 enum class Version(val deserialize: (String) -> Report, val criteria: List<SuccessCriterion>) {
@@ -75,24 +65,24 @@ enum class Status(val display: String) {
 
     companion object {
 
-        fun undisplay(s: String) =
-            when (s) {
-                COMPLIANT.display -> COMPLIANT
-                NOT_APPLICABLE.display -> NOT_APPLICABLE
-                NON_COMPLIANT.display -> NON_COMPLIANT
-                NOT_TESTED.display -> NOT_TESTED
-                else -> throw IllegalArgumentException()
-            }
+        fun undisplay(s: String) = when (s) {
+            COMPLIANT.display -> COMPLIANT
+            NOT_APPLICABLE.display -> NOT_APPLICABLE
+            NON_COMPLIANT.display -> NON_COMPLIANT
+            NOT_TESTED.display -> NOT_TESTED
+            else -> throw IllegalArgumentException()
+        }
     }
 }
 
-class SuccessCriterion(
+data class SuccessCriterion(
     val name: String,
     val description: String,
     val principle: String,
     val guideline: String,
     val tools: String,
     val number: String,
+    val textboxes: Triple<String, String, String>,
     val contentGroup: String,
     var status: Status,
     val wcagUrl: String? = null,
@@ -106,26 +96,27 @@ class SuccessCriterion(
         fun createEmpty(
             contentGroup: String,
             description: String,
-            guildeline_: String,
+            guideline: String,
             helpUrl: String = "https://aksel.nav.no/god-praksis/universell-utforming",
             name: String,
             number: String,
             principle: String,
+            textboxes: Triple<String, String, String> = Triple("","",""),
             tools: String,
             wcagUrl: String? = null
-        ): SuccessCriterion =
-            SuccessCriterion(
-                name,
-                description,
-                principle,
-                guildeline_,
-                tools,
-                number,
-                contentGroup,
-                Status.NON_COMPLIANT,
-                wcagUrl,
-                helpUrl
-            )
+        ): SuccessCriterion = SuccessCriterion(
+            name,
+            description,
+            principle,
+            guideline,
+            tools,
+            number,
+            textboxes,
+            contentGroup,
+            Status.NON_COMPLIANT,
+            wcagUrl,
+            helpUrl
+        )
 
         private val objectMapper = jacksonObjectMapper().apply {
             registerModule(JavaTimeModule())
@@ -138,6 +129,9 @@ class SuccessCriterion(
             guideline = rawJson["guideline"].asText(),
             tools = rawJson["tools"].asText(),
             number = rawJson["number"].asText(),
+            textboxes = rawJson["textboxes"].toList().let {
+                Triple(it.first().asText(), it[1].asText(), it[2].asText())
+            },
             contentGroup = rawJson["contentGroup"].asText(),
             status = Status.valueOf(rawJson["status"].asText()),
             wcagUrl = rawJson["wcagUrl"].asText(),

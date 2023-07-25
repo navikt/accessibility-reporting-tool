@@ -2,9 +2,7 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.Version
-import accessibility.reporting.tool.wcag.Version1
+import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
@@ -53,8 +51,15 @@ fun Route.reports(repository: ReportRepository) {
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
-            val criterion = repository.getReport(id)?.successCriteria?.find { it.successCriterionNumber == index }
-            criterion?.let { successCriterion ->
+            val oldReport = repository.getReport(id) ?: throw IllegalArgumentException()
+            val criteria = oldReport?.successCriteria?.find { it.successCriterionNumber == index }?.let { criteria ->
+                criteria.copy(status = Status.valueOf(status), )
+            }
+
+            val report = oldReport?.apply {
+
+            }
+            criteria?.let { successCriterion ->
 
                 if (status == "non compliant") {
                     // .div because I cannot find a .fragment or similar.
@@ -65,7 +70,7 @@ fun Route.reports(repository: ReportRepository) {
                     call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
                 } else {
                     fun response() = createHTML().div {
-                        a11yForm(successCriterion, id )
+                        a11yForm(successCriterion, id)
                     }
                     call.respondText(
                         contentType = ContentType.Text.Html,
@@ -106,7 +111,7 @@ fun Route.reports(repository: ReportRepository) {
                         p { +"Løsningens base-URL" }
                         p { +"(For PoC'en) URLen som er testet" }
                         div {
-                            report.successCriteria.map { a11yForm(it, id ) }
+                            report.successCriteria.map { a11yForm(it, id) }
                         }
                     }
                 }
