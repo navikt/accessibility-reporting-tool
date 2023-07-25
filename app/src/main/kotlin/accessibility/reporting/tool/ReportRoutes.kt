@@ -130,7 +130,10 @@ fun Route.reports(repository: ReportRepository) {
             }
         }
 
-        delete("{id}") {}
+        delete("{id}") {
+            val id = call.parameters["id"] ?: throw IllegalArgumentException()
+            repository.deleteReport(id)
+        }
 
         post("new") {
 

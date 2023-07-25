@@ -29,14 +29,14 @@ class ReportRepository(val database: Database) {
         return getReport(reportId = report.reportId)!!
     }
 
-    fun deleteReport(report: Report) =
+    fun deleteReport(reportId: String) =
         database.update {
             queryOf(
                 """
                      delete from report where report_id =:id 
                     """.trimMargin(),
                 mapOf(
-                    "id" to report.reportId
+                    "id" to reportId
                 ))
         }
 
