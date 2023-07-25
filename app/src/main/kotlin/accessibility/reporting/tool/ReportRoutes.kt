@@ -17,7 +17,6 @@ import java.util.UUID
 fun Route.reports(repository: ReportRepository) {
 
     route("/reports") {
-
         get {
             val reports = repository.getReports()
             call.respondHtml(HttpStatusCode.OK) {
@@ -28,10 +27,20 @@ fun Route.reports(repository: ReportRepository) {
                 body {
                     h1 { +"Select a page" }
                     div {
-                        reports.map { report ->
-                            a {
-                                href = "reports/${report.reportId}"
-                                +report.url
+                        ul {
+                            reports.map { report ->
+                                li {
+                                    a {
+                                        href = "reports/${report.reportId}"
+                                        +report.url
+                                    }
+                                    button {
+                                        hxDelete("/reports/${report.reportId}")
+                                        hxSwapInner()
+                                        hxTarget("body div ul")
+                                        +"slett rapport"
+                                    }
+                                }
                             }
                         }
                     }
@@ -57,10 +66,12 @@ fun Route.reports(repository: ReportRepository) {
             val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
             val criterion: SuccessCriterion =
                 oldReport.successCriteria.find { it.successCriterionNumber == index }.let { criteria ->
-                    criteria?.copy(status = Status.undisplay(status),
+                    criteria?.copy(
+                        status = Status.undisplay(status),
                         breakingTheLaw = breakingTheLaw ?: criteria.breakingTheLaw,
                         lawDoesNotApply = lawDoesNotApply ?: criteria.lawDoesNotApply,
-                        tooHardToComply = tooHardToComply ?: criteria.tooHardToComply)
+                        tooHardToComply = tooHardToComply ?: criteria.tooHardToComply
+                    )
                         ?: throw IllegalArgumentException("ukjent successkriterie")
                 }
 
@@ -130,10 +141,13 @@ fun Route.reports(repository: ReportRepository) {
             }
         }
 
-        delete("{id}") {
+        delete("/{id}") {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             repository.deleteReport(id)
+            call.response.headers.append("HX-Redirect", "/")
+            call.respond(HttpStatusCode.NoContent)
         }
+
 
         post("new") {
 

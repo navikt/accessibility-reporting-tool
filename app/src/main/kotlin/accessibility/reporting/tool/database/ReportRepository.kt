@@ -33,7 +33,7 @@ class ReportRepository(val database: Database) {
         database.update {
             queryOf(
                 """
-                     delete from report where report_id =:id 
+                     delete from report where report_id=:id 
                     """.trimMargin(),
                 mapOf(
                     "id" to reportId

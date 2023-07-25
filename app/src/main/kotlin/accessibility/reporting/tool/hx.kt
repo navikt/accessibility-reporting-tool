@@ -30,6 +30,10 @@ fun HTMLTag.hxSwapOuter() {
     attributes["data-hx-swap"] = "outerHTML"
 }
 
+fun HTMLTag.hxSwapInner() {
+    attributes["data-hx-swap"] = "innerHTML"
+}
+
 fun HTMLTag.hxVals(json: String) {
     attributes["data-hx-vals"] = json
 }
