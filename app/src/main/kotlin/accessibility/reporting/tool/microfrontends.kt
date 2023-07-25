@@ -50,14 +50,9 @@ fun FlowContent.disclosureArea(
                 name = dataName
                 cols = "80"
                 rows = "10"
-
-                placeholder = "Leave blank if you're not breaking the law"
                 +"${text}"
             }
-
-
         }
-
     }
 }
 
@@ -74,16 +69,17 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
         }
         label {
             htmlFor = "${sc.number}-${value_}"
-            +"${display}"
+            +display
         }
     }
 }
 
 fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
-    form(classes = "${sc.cssClass()}") {
-        h2 { +"${sc.name}" }
+    form(classes = sc.cssClass()) {
+        h2 { +sc.name }
         p {
-            +sc.description}
+            +sc.description
+        }
         div {
             fieldSet {
                 hxPost("/reports/submit/${reportId}")
@@ -92,11 +88,11 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                 hxSwapOuter()
                 attributes["name"] = "status"
                 attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
-                legend { +"Oppfyller alt innhold i testsettet kravet?" }
+                legend { +"Oppfyller alt innhold på siden kravet?" }
                 statusRadio(sc, "compliant", Status.COMPLIANT, "Ja")
-                statusRadio(sc, "non compliant", Status.NON_COMPLIANT, "Nej")
+                statusRadio(sc, "non compliant", Status.NON_COMPLIANT, "Nei")
                 statusRadio(sc, "not tested", Status.NOT_TESTED, "Ikke testet")
-                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen av innhold")
+                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen innhold")
             }
         }
         if (sc.status == Status.NON_COMPLIANT) {
@@ -105,7 +101,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                     sc,
                     reportId,
                     sc.breakingTheLaw,
-                    "Det er innhold i testsettet som bryter kravet.",
+                    "Det er innhold på siden som bryter kravet.",
                     "Beskriv kort hvilket innhold som bryter kravet, hvorfor og konsekvensene dette får for brukeren.",
                     "breaking-the-law"
                 )
@@ -113,7 +109,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                     sc,
                     reportId,
                     sc.lawDoesNotApply,
-                    "Det er innhold i testsettet som ikke er underlagt kravet.",
+                    "Det er innhold i på siden som ikke er underlagt kravet.",
 
                     "Hvilket innhold er ikke underlagt kravet?",
                     "law-does-not-apply"

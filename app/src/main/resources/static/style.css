@@ -33,3 +33,8 @@ nav ul li {
     display: inline-block;
     margin-left: 32px;
 }
+
+li button {
+    margin-left: 24px;
+
+}

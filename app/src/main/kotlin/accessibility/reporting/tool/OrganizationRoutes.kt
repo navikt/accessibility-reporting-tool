@@ -3,6 +3,7 @@ package accessibility.reporting.tool
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
+import accessibility.reporting.tool.wcag.Report
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
@@ -124,24 +125,30 @@ fun Route.userRoute(repository: ReportRepository) {
 
         val reports = repository.getReportsForUser(call.user.email)
         call.respondHtmlContent(call.user.email) {
-            h1 { +"${call.user.email} accessibility reports" }
-            ul {
-                reports.forEach { report ->
-                    li {
-                        a {
-                            href = "reports/${report.reportId}"
-                            +"Rapport for ${report.url}"
-                        }
-                    }
-                }
+            h1 { +"Dine rapporter" }
+            ul(classes = "report-list") {
+                reports.map { report -> reportListItem(report) }
             }
-
             a {
                 href = "/reports/new"
-                +"Start a new report"
+                +"Lag ny rapport"
             }
         }
 
     }
+}
 
+fun UL.reportListItem(report: Report) {
+    li {
+        a {
+            href = "reports/${report.reportId}"
+            +"Rapport for ${report.url}"
+        }
+        button {
+            hxDelete("/reports/${report.reportId}")
+            hxSwapOuter()
+            hxTarget(".report-list")
+            +"Slett"
+        }
+    }
 }

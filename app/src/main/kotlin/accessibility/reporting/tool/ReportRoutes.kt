@@ -18,26 +18,30 @@ fun Route.reports(repository: ReportRepository) {
 
     route("/reports") {
 
-        get {
-            val reports = repository.getReports()
-            call.respondHtmlContent("A11y rapporter") {
-                h1 { +"Velg rapport" }
-                div {
-                    reports.map { report ->
-                        a {
-                            href = "reports/${report.reportId}"
-                            +report.url
-                        }
+        get("{id}") {
+
+            val id = call.parameters["id"] ?: throw IllegalArgumentException()
+            val report = repository.getReport(id) ?: throw IllegalArgumentException()
+
+            call.respondHtmlContent("A11y rapport") {
+                p {
+                    +"Ansvarlig: ${report.user.email}"
+                }
+                main {
+                    h1 { +"A11y report" }
+                    div {
+                        report.successCriteria.map { a11yForm(it, id) }
                     }
                 }
-                div {
-                    a {
-                        href = "/reports/new"
-                        +"Lag ny rapport"
-                    }
-                }
-                reports.map { it.url }
             }
+        }
+
+        delete("/{id}") {
+            val id = call.parameters["id"] ?: throw IllegalArgumentException()
+            repository.deleteReport(id)
+            val reports = repository.getReportsForUser(call.user.email)
+            fun response() = createHTML().ul(classes = "report-list") { reports.map { reportListItem(it) } }
+            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 
         post("/submit/{id}") {
@@ -89,93 +93,55 @@ fun Route.reports(repository: ReportRepository) {
             }
         }
 
+        route("new") {
 
-        get("{id}") {
+            post {
 
-            val id = call.parameters["id"] ?: throw IllegalArgumentException()
-            val report = repository.getReport(id) ?: throw IllegalArgumentException()
+                val formParameters = call.receiveParameters()
+                val url = formParameters["page-url"].toString()
 
-            call.respondHtmlContent("A11y rapport") {
-                p {
-                    +"Ansvarlig: ${report.user.email}"
-                }
-                main {
-                    h1 { +"A11y report" }
-                    div {
-                        report.successCriteria.map { a11yForm(it, id) }
-                    }
-                }
-            }
-        }
-
-        delete("/{id}") {
-            val id = call.parameters["id"] ?: throw IllegalArgumentException()
-            repository.deleteReport(id)
-            call.response.headers.append("HX-Redirect", "/")
-            call.respond(HttpStatusCode.NoContent)
-        }
-
-
-        post("new") {
-
-            val formParameters = call.receiveParameters()
-            val url = formParameters["page-url"].toString()
-
-            val newReportId = UUID.randomUUID().toString()
-            repository.upsertReport(
-                Report(
-                    organizationUnit = null,
-                    reportId = newReportId,
-                    successCriteria = Version1.criteria,
-                    testData = null,
-                    url = url,
-                    user = call.user,
-                    version = Version.V1
+                val newReportId = UUID.randomUUID().toString()
+                repository.upsertReport(
+                    Report(
+                        organizationUnit = null,
+                        reportId = newReportId,
+                        successCriteria = Version1.criteria,
+                        testData = null,
+                        url = url,
+                        user = call.user,
+                        version = Version.V1
+                    )
                 )
-            )
-            fun response() = createHTML().div(classes = "create-form") {
-                h2 {
-                    +"ny rapport"
-                }
-                p {
-                    a {
-                        href = "/reports/${newReportId}"
-                        +"Rediger rapport"
-                    }
-                }
-                button {
-                    hxDelete("/reports/${newReportId}")
-                    +"slett rapport"
-                }
+                call.response.header("HX-Redirect", "/reports/$newReportId")
+                call.respond(HttpStatusCode.Created)
             }
-            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
-        }
 
-        get("new") {
-            call.respondHtml(HttpStatusCode.OK) {
-                lang = "no"
-                head {
-                    headContent("Lag ny rapport")
-                }
-                body {
-                    h1 {
-                        +"Lag ny rapport"
+            get {
+                call.respondHtml(HttpStatusCode.OK) {
+                    lang = "no"
+                    head {
+                        headContent("Lag ny rapport")
                     }
-                    div(classes = "create-form") {
-                        form {
-                            label {
-                                +"Url til siden "
-                                input {
-                                    type = InputType.text
-                                    placeholder = "Url"
-                                    name = "page-url"
+                    body {
+                        h1 {
+                            +"Lag ny rapport"
+                        }
+                        div(classes = "create-form") {
+                            form {
+                                label {
+                                    +"Url til siden "
+                                    input {
+                                        type = InputType.text
+                                        placeholder = "Url"
+                                        name = "page-url"
 
-                                }
-                                button {
-                                    hxSwapOuter()
-                                    hxTarget(".create-form")
-                                    hxPost("/reports/new")
-                                    +"Lag ny rapport"
+                                    }
+                                    button {
+                                        hxSwapOuter()
+                                        hxTarget(".create-form")
+                                        hxPost("/reports/new")
+                                        +"Lag ny rapport"
+                                    }
                                 }
                             }
                         }
