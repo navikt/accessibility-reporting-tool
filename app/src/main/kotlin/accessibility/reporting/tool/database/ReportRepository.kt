@@ -10,7 +10,7 @@ import java.time.ZoneId
 
 class ReportRepository(val database: Database) {
 
-    fun upsertReport(report: Report) =
+    fun upsertReport(report: Report): Report {
         //TODO: changelog
         database.update {
             queryOf(
