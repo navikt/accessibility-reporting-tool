@@ -48,7 +48,7 @@ fun Route.reports(repository: ReportRepository) {
             }
         }
 
-        post("/reports/submit/{id}") {
+        post("/submit/{id}") {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()

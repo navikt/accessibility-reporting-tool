@@ -23,7 +23,7 @@ fun HEAD.headContent(title: String) {
 
     }
 }
-fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, description: String, dataName: String) {
+fun FlowContent.disclosureArea(sc: SuccessCriterion, reportId: String, summary: String, description: String, dataName: String) {
     details {
         summary {
             +"${summary}"
@@ -36,7 +36,7 @@ fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, descriptio
             textArea {
                 id = "${sc.successCriterionNumber}-${dataName}"
                 hxTrigger("keyup changed delay:1500ms")
-                hxPost("/reports/submit")
+                hxPost("/reports/submit/${reportId}")
                 hxVals("""{"index": "${sc.successCriterionNumber}"}""")
                 name = dataName
                 cols = "80"
@@ -85,17 +85,20 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
             div {
                 disclosureArea(
                     sc,
+                    reportId,
                     "Det er innhold i testsettet som bryter kravet.",
                     "Beskriv kort hvilket innhold som bryter kravet, hvorfor og konsekvensene dette får for brukeren.",
                     "breaking-the-law"
                 )
                 disclosureArea(
                     sc, "Det er innhold i testsettet som ikke er underlagt kravet.",
+                    reportId,
                     "Hvilket innhold er ikke underlagt kravet?",
                     "law-does-not-apply"
                 )
                 disclosureArea(
                     sc,
+                    reportId,
                     "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.",
                     "Hvorfor mener vi at det er en uforholdsmessig stor byrde for innholdet å følge kravet?",
                     "too-hard-to-comply"
