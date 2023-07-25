@@ -58,7 +58,13 @@ class Report(
 
 
 class TestData(val ident: String, val url: String)
-class OrganizationUnit(val id: String, val name: String, parentId: String? = null, val email: String)
+class OrganizationUnit(
+    val id: String,
+    val name: String,
+    parentId: String? = null,
+    val email: String,
+    val shortName: String? = null
+)
 
 enum class Version(val deserialize: (String) -> Report, val criteria: List<SuccessCriterion>) {
     V1(Report::fromJsonVersion1, Version1.criteria)

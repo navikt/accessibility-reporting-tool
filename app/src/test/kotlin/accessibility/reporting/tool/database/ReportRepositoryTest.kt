@@ -8,6 +8,7 @@ import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Version
 import assert
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import kotliquery.queryOf
 import org.junit.jupiter.api.Test
@@ -45,7 +46,7 @@ class ReportRepositoryTest {
     }
 
     @BeforeEach
-    fun `cleanDb`() {
+    fun cleanDb() {
         database.update { queryOf("delete from changelog") }
         database.update { queryOf("delete from report") }
 
@@ -70,38 +71,60 @@ class ReportRepositoryTest {
 
     @Test
     fun `insert org units`() {
-        repository.insertOrganizationUnit(OrganizationUnit("some-id", "Some unit", null, "tadda@nav.no"))
+        val testOrg1 = OrganizationUnit("some-id", "Some unit", null, "tadda@nav.no")
+        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", testOrg.id, "jaha@nav.no", "shorty")
+        val testOrg2 = OrganizationUnit(
+            "some-other-two",
+            "Child unit",
+            testOrg.id,
+            "jaha@nav.no",
+            "shorty short"
+        )
+        val grandchildTestOrg =
+            OrganizationUnit("some-id-thats-this", "Grandchild unit", childTestOrg.id, "something@nav.no")
 
-        database.query {
+        repository.insertOrganizationUnit(testOrg1)
+        repository.insertOrganizationUnit(testOrg1)
+
+        repository.insertOrganizationUnit(childTestOrg)
+        //Ønsket oppførsel om navn ikke er unikt, kaste expception?
+
+        repository.insertOrganizationUnit(testOrg2)
+        repository.insertOrganizationUnit(grandchildTestOrg)
+
+        database.list {
             queryOf(
-                "select * from organization_unit where organization_unit_id=:id",
-                mapOf("id" to "some-id")
+                "select * from organization_unit"
             ).map { row ->
                 OrganizationUnit(
                     id = row.string("organization_unit_id"),
                     name = row.string("name"),
                     email = row.string("email")
                 )
-            }.asSingle
-
+            }.asList
         }.assert {
-            require(this != null)
-            name shouldBe "Some unit"
+            map { it.name } shouldContainExactlyInAnyOrder listOf(
+                testOrg1.name,
+                testOrg2.name,
+                childTestOrg.name,
+                grandchildTestOrg.name,
+                testOrg.name
+            )
         }
     }
 
-    @Disabled
+
     @Test
     fun `get projects for unit`() {
-        repository.upsertReport(dummyReportV1())
-        repository.upsertReport(dummyReportV1("http://dummyurl2.test"))
-        repository.upsertReport(dummyReportV1("http://dummyurl3.test"))
-        repository.upsertReport(dummyReportV1("http://dummyurl4.test"))
+        repository.upsertReport(dummyReportV1(orgUnit = testOrg))
+        repository.upsertReport(dummyReportV1("http://dummyurl2.test", testOrg))
+        repository.upsertReport(dummyReportV1("http://dummyurl3.test", testOrg))
+        repository.upsertReport(dummyReportV1("http://dummyurl4.test", testOrg))
 
         repository.getReportForOrganizationUnit(testOrg.id).assert {
             require(first != null)
             second.assert {
-                size shouldBe 0 //TODO
+                size shouldBe 4
                 withClue("Report with url dummyUrl.test is missing") {
                     any { it.url == "http://dummyurl.test" } shouldBe true
                 }
@@ -144,10 +167,10 @@ class ReportRepositoryTest {
 
     }
 
-    private fun dummyReportV1(url: String = "http://dummyurl.test") = Report(
+    private fun dummyReportV1(url: String = "http://dummyurl.test", orgUnit: OrganizationUnit? = null) = Report(
         reportId = UUID.randomUUID().toString(),
         url = url,
-        organizationUnit = null,
+        organizationUnit = orgUnit,
         version = Version.V1,
         testData = null,
         user = User(email = testUserEmail, name = testUserName),
