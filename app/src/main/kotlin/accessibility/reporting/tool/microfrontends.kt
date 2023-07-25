@@ -23,8 +23,17 @@ fun HEAD.headContent(title: String) {
 
     }
 }
-fun FlowContent.disclosureArea(sc: SuccessCriterion, reportId: String, text: String, summary: String, description: String, dataName: String) {
+
+fun FlowContent.disclosureArea(
+    sc: SuccessCriterion,
+    reportId: String,
+    text: String,
+    summary: String,
+    description: String,
+    dataName: String
+) {
     details {
+        open = text.isNotEmpty()
         summary {
             +"${summary}"
         }
@@ -53,8 +62,9 @@ fun FlowContent.disclosureArea(sc: SuccessCriterion, reportId: String, text: Str
 }
 
 fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
-    label {
+    div(classes = "radiogroup") {
         input {
+            id = "${sc.number}-${value_}"
             type = InputType.radio
             if (sc.status == status) {
                 checked = true
@@ -62,7 +72,10 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
             value = value_
             name = "status"
         }
-        +"${display}"
+        label {
+            htmlFor = "${sc.number}-${value_}"
+            +"${display}"
+        }
     }
 }
 

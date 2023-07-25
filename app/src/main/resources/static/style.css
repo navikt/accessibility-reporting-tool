@@ -16,6 +16,9 @@ summary {
     margin: 0 0 16px 0;
 }
 
+.radiogroup label {
+    display: inline;
+}
 
 * {
     color: #333;
