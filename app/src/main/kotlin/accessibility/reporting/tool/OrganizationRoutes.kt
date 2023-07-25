@@ -25,7 +25,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                             reports.forEach { report ->
                                 li {
                                     a {
-                                        href = "report/${report.reportId}"
+                                        href = "reports/${report.reportId}"
                                         +"Rapport for ${report.url}"
                                     }
                                 }
