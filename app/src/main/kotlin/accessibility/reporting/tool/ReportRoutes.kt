@@ -53,7 +53,7 @@ fun Route.reports(repository: ReportRepository) {
             val index = formParameters["index"].toString()
             val oldReport = repository.getReport(id) ?: throw IllegalArgumentException()
             val criteria = oldReport?.successCriteria?.find { it.successCriterionNumber == index }?.let { criteria ->
-                criteria.copy(status = Status.valueOf(status), )
+                criteria.copy(status = Status.undisplay(status), )
             }
 
             val report = oldReport?.apply {

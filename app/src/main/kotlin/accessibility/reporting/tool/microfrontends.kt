@@ -91,8 +91,10 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                     "breaking-the-law"
                 )
                 disclosureArea(
-                    sc, "Det er innhold i testsettet som ikke er underlagt kravet.",
+                    sc,
                     reportId,
+                    "Det er innhold i testsettet som ikke er underlagt kravet.",
+
                     "Hvilket innhold er ikke underlagt kravet?",
                     "law-does-not-apply"
                 )
