@@ -57,7 +57,10 @@ fun Route.reports(repository: ReportRepository) {
             val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
             val criterion: SuccessCriterion =
                 oldReport.successCriteria.find { it.successCriterionNumber == index }.let { criteria ->
-                    criteria?.copy(status = Status.undisplay(status), textboxes = Triple(breakingTheLaw, lawDoesNotApply, tooHardToComply) )
+                    criteria?.copy(status = Status.undisplay(status)
+                        , breakingTheLaw = breakingTheLaw,
+                        lawDoesNotApply = lawDoesNotApply,
+                        tooHardToComply = tooHardToComply)
                         ?: throw IllegalArgumentException("ukjent successkriterie")
                 }
 

@@ -82,6 +82,8 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
 fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     form(classes = "${sc.cssClass()}") {
         h2 { +"${sc.name}" }
+        p {
+            +sc.description}
         div {
             fieldSet {
                 hxPost("/reports/submit/${reportId}")
@@ -102,7 +104,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                 disclosureArea(
                     sc,
                     reportId,
-                    sc.textboxes.first,
+                    sc.breakingTheLaw,
                     "Det er innhold i testsettet som bryter kravet.",
                     "Beskriv kort hvilket innhold som bryter kravet, hvorfor og konsekvensene dette får for brukeren.",
                     "breaking-the-law"
@@ -110,7 +112,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                 disclosureArea(
                     sc,
                     reportId,
-                    sc.textboxes.second,
+                    sc.lawDoesNotApply,
                     "Det er innhold i testsettet som ikke er underlagt kravet.",
 
                     "Hvilket innhold er ikke underlagt kravet?",
@@ -119,7 +121,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                 disclosureArea(
                     sc,
                     reportId,
-                    sc.textboxes.third,
+                    sc.tooHardToComply,
                     "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.",
                     "Hvorfor mener vi at det er en uforholdsmessig stor byrde for innholdet å følge kravet?",
                     "too-hard-to-comply"
