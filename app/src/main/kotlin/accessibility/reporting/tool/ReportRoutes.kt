@@ -17,41 +17,26 @@ import java.util.UUID
 fun Route.reports(repository: ReportRepository) {
 
     route("/reports") {
+
         get {
             val reports = repository.getReports()
-            call.respondHtml(HttpStatusCode.OK) {
-                lang = "no"
-                head {
-                    headContent("Select reports")
-                }
-                body {
-                    h1 { +"Select a page" }
-                    div {
-                        ul {
-                            reports.map { report ->
-                                li {
-                                    a {
-                                        href = "reports/${report.reportId}"
-                                        +report.url
-                                    }
-                                    button {
-                                        hxDelete("/reports/${report.reportId}")
-                                        hxSwapInner()
-                                        hxTarget("body div ul")
-                                        +"slett rapport"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    div {
+            call.respondHtmlContent("A11y rapporter") {
+                h1 { +"Velg rapport" }
+                div {
+                    reports.map { report ->
                         a {
-                            href = "/reports/new"
-                            +"Lag ny rapport"
+                            href = "reports/${report.reportId}"
+                            +report.url
                         }
                     }
-                    reports.map { it.url }
                 }
+                div {
+                    a {
+                        href = "/reports/new"
+                        +"Lag ny rapport"
+                    }
+                }
+                reports.map { it.url }
             }
         }
 
@@ -110,32 +95,14 @@ fun Route.reports(repository: ReportRepository) {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val report = repository.getReport(id) ?: throw IllegalArgumentException()
 
-            call.respondHtml(HttpStatusCode.OK) {
-                lang = "no"
-                head {
-                    headContent("A11y report")
+            call.respondHtmlContent("A11y rapport") {
+                p {
+                    +"Ansvarlig: ${report.user.email}"
                 }
-                body {
-                    p {
-                        +"${report.user.email}"
-                    }
-                    a {
-                        href = "/"
-                        +"back to top"
-                    }
-                    main {
-
-                        h1 { +"A11y report" }
-                        p { +"Hvem fyller ut rapporten?" }
-                        p { +"Fyller du ut rapporten på vegne av et annet team?" }
-                        p { +"Kontaktperson fra det andre teamet" }
-                        h2 { +"Om løsningen" }
-                        p { +"Hva heter løsningen?" }
-                        p { +"Løsningens base-URL" }
-                        p { +"(For PoC'en) URLen som er testet" }
-                        div {
-                            report.successCriteria.map { a11yForm(it, id) }
-                        }
+                main {
+                    h1 { +"A11y report" }
+                    div {
+                        report.successCriteria.map { a11yForm(it, id) }
                     }
                 }
             }

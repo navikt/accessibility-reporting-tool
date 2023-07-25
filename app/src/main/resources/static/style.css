@@ -3,15 +3,16 @@ label {
 }
 
 body {
- font-family: "Source Sans Pro",Arial,sans-serif;
- line-height:1.333;
- font-size:1.125rem
+    font-family: "Source Sans Pro", Arial, sans-serif;
+    line-height: 1.333;
+    font-size: 1.125rem
 }
 
 body {
     max-width: 50rem;
     margin: 1rem auto;
 }
+
 summary {
     margin: 0 0 16px 0;
 }
@@ -22,4 +23,13 @@ summary {
 
 * {
     color: #333;
+}
+
+nav {
+    border-bottom: #335ea8 solid 3px;
+}
+
+nav ul li {
+    display: inline-block;
+    margin-left: 32px;
 }

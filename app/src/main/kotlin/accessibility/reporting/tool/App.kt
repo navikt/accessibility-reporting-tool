@@ -71,32 +71,3 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
         }
     }
 }
-
-fun Route.landingPage(repository: ReportRepository) {
-    get {
-        val reports = repository.getReports()
-        call.respondHtml {
-            head {
-                headContent("a11y reporting tool")
-            }
-
-            body {
-                h1 { +"a11y reporting tool for NAV" }
-                a {
-                    href="user"
-                    +"See your reports"
-                }
-                ul {
-                    reports.forEach { report ->
-                        li {
-                            a {
-                                href = "reports/${report.reportId}"
-                                +"Report for ${report.url}"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
