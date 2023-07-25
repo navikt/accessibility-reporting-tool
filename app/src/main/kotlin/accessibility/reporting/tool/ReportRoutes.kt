@@ -51,16 +51,16 @@ fun Route.reports(repository: ReportRepository) {
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
-            val breakingTheLaw = formParameters["breaking-the-law"].toString()
-            val lawDoesNotApply = formParameters["law-does-not-apply"].toString()
-            val tooHardToComply = formParameters["too-hard-to-comply"].toString()
+            val breakingTheLaw = formParameters["breaking-the-law"]
+            val lawDoesNotApply = formParameters["law-does-not-apply"]
+            val tooHardToComply = formParameters["too-hard-to-comply"]
             val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
             val criterion: SuccessCriterion =
                 oldReport.successCriteria.find { it.successCriterionNumber == index }.let { criteria ->
-                    criteria?.copy(status = Status.undisplay(status)
-                        , breakingTheLaw = breakingTheLaw,
-                        lawDoesNotApply = lawDoesNotApply,
-                        tooHardToComply = tooHardToComply)
+                    criteria?.copy(status = Status.undisplay(status),
+                        breakingTheLaw = breakingTheLaw ?: criteria.breakingTheLaw,
+                        lawDoesNotApply = lawDoesNotApply ?: criteria.lawDoesNotApply,
+                        tooHardToComply = tooHardToComply ?: criteria.tooHardToComply)
                         ?: throw IllegalArgumentException("ukjent successkriterie")
                 }
 
