@@ -20,7 +20,7 @@ class Report(
     val filters: MutableList<String> = mutableListOf()
 ) {
     fun findCriterion(index: String) =
-        successCriteria.find{ it.number == index } ?: throw java.lang.IllegalArgumentException("no such criteria")
+        successCriteria.find { it.number == index } ?: throw java.lang.IllegalArgumentException("no such criteria")
 
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
@@ -31,17 +31,16 @@ class Report(
             Report(reportId = jsonNode["reportId"].asText(),
                 url = jsonNode["url"].asText(),
                 organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }?.let { organizationJson ->
-                        OrganizationUnit(
-                            id = organizationJson["id"].asText(),
-                            name = organizationJson["name"].asText(),
-                            parentId = organizationJson["parentId"]?.asText(),
-                            email = organizationJson["email"].asText()
-                        )
-                    },
+                    OrganizationUnit(
+                        id = organizationJson["id"].asText(),
+                        name = organizationJson["name"].asText(),
+                        email = organizationJson["email"].asText()
+                    )
+                },
                 version = V1,
                 testData = jsonNode["testData"].takeIf { !it.isEmpty }?.let { testDataJson ->
-                        TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
-                    },
+                    TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
+                },
                 user = User(email = jsonNode["user"]["email"].asText(), jsonNode["user"]["name"].asText()),
                 successCriteria = jsonNode["successCriteria"].map { SuccessCriterion.fromJson(it) },
                 filters = jsonNode["filters"].map { it.asText() }.toMutableList()
@@ -55,8 +54,23 @@ class Report(
 
 class TestData(val ident: String, val url: String)
 class OrganizationUnit(
-    val id: String, val name: String, parentId: String? = null, val email: String, val shortName: String? = null
-)
+    val id: String, val name: String, val email: String, val shortName: String? = null
+) {
+
+    companion object {
+        fun createNew(name: String, email: String, shortName: String?=null) = OrganizationUnit(
+            id = shortName?.toOrgUnitId() ?: name.toOrgUnitId(),
+            name = name,
+            email = email,
+            shortName = shortName
+        )
+
+        private fun String.toOrgUnitId() = trimMargin()
+                .lowercase()
+                .replace(" ", "-")
+    }
+}
+
 
 enum class Version(val deserialize: (String) -> Report, val criteria: List<SuccessCriterion>) {
     V1(Report::fromJsonVersion1, Version1.criteria)
@@ -94,7 +108,6 @@ data class SuccessCriterion(
     val deviations: MutableList<Deviation> = mutableListOf()
 ) {
     val successCriterionNumber = "${number}"
-
 
     companion object {
         fun createEmpty(

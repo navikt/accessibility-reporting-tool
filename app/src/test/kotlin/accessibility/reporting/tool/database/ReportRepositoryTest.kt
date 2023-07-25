@@ -71,21 +71,19 @@ class ReportRepositoryTest {
 
     @Test
     fun `insert org units`() {
-        val testOrg1 = OrganizationUnit("some-id", "Some unit", null, "tadda@nav.no")
-        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", testOrg.id, "jaha@nav.no", "shorty")
+        val testOrg1 = OrganizationUnit("some-id", "Some unit", "tadda@nav.no")
+        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no", "shorty")
         val testOrg2 = OrganizationUnit(
             "some-other-two",
             "Child unit",
-            testOrg.id,
             "jaha@nav.no",
             "shorty short"
         )
         val grandchildTestOrg =
-            OrganizationUnit("some-id-thats-this", "Grandchild unit", childTestOrg.id, "something@nav.no")
+            OrganizationUnit("some-id-thats-this", "Grandchild unit", "something@nav.no")
 
         repository.insertOrganizationUnit(testOrg1)
         repository.insertOrganizationUnit(testOrg1)
-
         repository.insertOrganizationUnit(childTestOrg)
         //Ønsket oppførsel om navn ikke er unikt, kaste expception?
 

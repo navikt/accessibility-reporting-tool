@@ -123,7 +123,6 @@ class ReportRepository(val database: Database) {
             }.asList
         }
 
-
 }
 
 object LocalDateTimeHelper {
