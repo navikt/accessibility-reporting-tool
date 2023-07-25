@@ -24,13 +24,13 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
             org?.let { orgUnit ->
                 call.respondHtmlContent("Organisasjonsenhter") {
-                    h1 { +"${orgUnit.name} accessibility reports" }
+                    h1 { +"Rapporter for ${orgUnit.name}" }
                     ul {
                         reports.forEach { report ->
                             li {
                                 a {
                                     href = "reports/${report.reportId}"
-                                    +"Rapport for ${report.url}"
+                                    +"${report.url}"
                                 }
                             }
                         }
@@ -117,7 +117,6 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
         }
     }
-
 }
 
 fun Route.userRoute(repository: ReportRepository) {

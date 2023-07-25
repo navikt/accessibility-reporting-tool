@@ -28,15 +28,11 @@ private val log = KotlinLogging.logger {  }
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
 
-val testOrg =
-    OrganizationUnit(id = "carls-awesome-test-unit", name = "Carls awesome test unit", email = "awesome@nav.no")
-
 fun main() {
     val environment = Environment()
     val authContext = AzureAuthContext()
     Flyway.runFlywayMigrations(Environment())
     val repository = ReportRepository(PostgresDatabase(environment))
-    log.info { "Sånn her kan du logge" }
     embeddedServer(Netty, port = 8081, module = { this.api(repository) { installAuthentication(authContext) } }).start(
         wait = true
     )
