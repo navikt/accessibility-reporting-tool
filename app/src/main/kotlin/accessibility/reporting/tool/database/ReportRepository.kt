@@ -23,8 +23,22 @@ class ReportRepository(val database: Database) {
                     "data" to report.toJson().jsonB()
                 )
             )
-        }
 
+        }
+        // if we cant put-get we're screwed anyway
+        return getReport(reportId = report.reportId)!!
+    }
+
+    fun deleteReport(report: Report) =
+        database.update {
+            queryOf(
+                """
+                     delete from report where report_id =:id 
+                    """.trimMargin(),
+                mapOf(
+                    "id" to report.reportId
+                ))
+        }
 
     fun insertOrganizationUnit(organizationUnit: OrganizationUnit) {
         database.update {

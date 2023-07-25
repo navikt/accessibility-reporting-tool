@@ -51,36 +51,42 @@ fun Route.reports(repository: ReportRepository) {
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
-            val oldReport = repository.getReport(id) ?: throw IllegalArgumentException()
-            val criteria = oldReport?.successCriteria?.find { it.successCriterionNumber == index }?.let { criteria ->
-                criteria.copy(status = Status.undisplay(status), )
-            }
-
-            val report = oldReport?.apply {
-
-            }
-            criteria?.let { successCriterion ->
-
-                if (status == "non compliant") {
-                    // .div because I cannot find a .fragment or similar.
-                    // This means that you have to hx-select on the other end
-                    fun response() = createHTML().div {
-                        a11yForm(successCriterion, id)
-                    }
-                    call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
-                } else {
-                    fun response() = createHTML().div {
-                        a11yForm(successCriterion, id)
-                    }
-                    call.respondText(
-                        contentType = ContentType.Text.Html,
-                        HttpStatusCode.OK, ::response
-                    )
+            val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
+            val criterion: SuccessCriterion =
+                oldReport.successCriteria.find { it.successCriterionNumber == index }.let { criteria ->
+                    criteria?.copy(status = Status.undisplay(status))
+                        ?: throw IllegalArgumentException("ukjent successkriterie")
                 }
-            } ?: run {
-                call.respond(HttpStatusCode.NotFound, "ENOENT")
+
+            val report = repository.upsertReport(
+                Report(
+                    organizationUnit = oldReport.organizationUnit,
+                    reportId = id,
+                    successCriteria = oldReport.successCriteria.map { if (it.number == criterion.number) criterion else it },
+                    testData = oldReport.testData,
+                    url = oldReport.url,
+                    user = call.user,
+                    version = Version.V1
+                )
+            )
+            if (status == "non compliant") {
+                // .div because I cannot find a .fragment or similar.
+                // This means that you have to hx-select on the other end
+                fun response() = createHTML().div {
+                    a11yForm(report.findCriterion(index), id)
+                }
+                call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
+            } else {
+                fun response() = createHTML().div {
+                    a11yForm(report.findCriterion(index), id)
+                }
+                call.respondText(
+                    contentType = ContentType.Text.Html,
+                    HttpStatusCode.OK, ::response
+                )
             }
         }
+
 
         get("{id}") {
 

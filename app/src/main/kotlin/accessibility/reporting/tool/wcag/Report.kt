@@ -19,6 +19,8 @@ class Report(
     val successCriteria: List<SuccessCriterion>,
     val filters: MutableList<String> = mutableListOf()
 ) {
+    fun findCriterion(index: String) =
+        successCriteria.find{ it.number == index } ?: throw java.lang.IllegalArgumentException("no such criteria")
 
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
