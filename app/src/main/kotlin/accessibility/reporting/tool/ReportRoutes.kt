@@ -48,24 +48,24 @@ fun Route.reports(repository: ReportRepository) {
             }
         }
 
-        post("/submit/{id}") {
+        post("/reports/submit/{id}") {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
             val index = formParameters["index"].toString()
-            val report = repository.getReport(id)?.successCriteria?.find { it.successCriterionNumber == index }
-            report?.let { foundReport ->
+            val criterion = repository.getReport(id)?.successCriteria?.find { it.successCriterionNumber == index }
+            criterion?.let { successCriterion ->
 
                 if (status == "non compliant") {
                     // .div because I cannot find a .fragment or similar.
                     // This means that you have to hx-select on the other end
                     fun response() = createHTML().div {
-                        a11yForm(foundReport)
+                        a11yForm(successCriterion, id)
                     }
                     call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
                 } else {
                     fun response() = createHTML().div {
-                        a11yForm(foundReport)
+                        a11yForm(successCriterion, id )
                     }
                     call.respondText(
                         contentType = ContentType.Text.Html,
@@ -106,7 +106,7 @@ fun Route.reports(repository: ReportRepository) {
                         p { +"Løsningens base-URL" }
                         p { +"(For PoC'en) URLen som er testet" }
                         div {
-                            report.successCriteria.map { a11yForm(it) }
+                            report.successCriteria.map { a11yForm(it, id ) }
                         }
                     }
                 }

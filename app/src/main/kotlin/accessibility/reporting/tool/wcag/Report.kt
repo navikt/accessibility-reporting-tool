@@ -99,7 +99,7 @@ class SuccessCriterion(
     val helpUrl: String? = null,
     val deviations: MutableList<Deviation> = mutableListOf()
 ) {
-    val successCriterionNumber = "${number}}"
+    val successCriterionNumber = "${number}"
 
 
     companion object {

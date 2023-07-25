@@ -52,7 +52,6 @@ fun FlowContent.disclosureArea(sc: SuccessCriterion, summary: String, descriptio
 fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
     label {
         input {
-
             type = InputType.radio
             if (sc.status == status) {
                 checked = true
@@ -64,13 +63,12 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
     }
 }
 
-fun FlowContent.a11yForm(sc: SuccessCriterion) {
+fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     form(classes = "${sc.cssClass()}") {
-        h2 { +"${sc.successCriterionNumber} ${sc.name}" }
+        h2 { +"${sc.name}" }
         div {
-
             fieldSet {
-                hxPost("/submit")
+                hxPost("/reports/submit/${reportId}")
                 hxTarget(".${sc.cssClass()}")
                 hxSelect("form")
                 hxSwapOuter()
@@ -93,7 +91,8 @@ fun FlowContent.a11yForm(sc: SuccessCriterion) {
                 )
                 disclosureArea(
                     sc, "Det er innhold i testsettet som ikke er underlagt kravet.",
-                    "Hvilket innhold er ikke underlagt kravet?", "law-does-not-apply"
+                    "Hvilket innhold er ikke underlagt kravet?",
+                    "law-does-not-apply"
                 )
                 disclosureArea(
                     sc,
