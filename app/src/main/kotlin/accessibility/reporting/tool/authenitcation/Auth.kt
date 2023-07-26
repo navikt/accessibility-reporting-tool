@@ -39,6 +39,7 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
                 withIssuer(azureAuthContext.issuer)
                 withAudience(azureAuthContext.azureClientId)
             }
+
             validate { jwtCredential ->
                 User(
                     name = jwtCredential.payload.getClaim("name").asString(),
