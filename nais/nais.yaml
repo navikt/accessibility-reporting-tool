@@ -6,7 +6,7 @@ metadata:
   labels:
     team: a11y-statement
 spec:
-  image: {{image}}
+  image: "{{ image }}"
   port: 8080
   liveness:
     path: /isalive
@@ -21,7 +21,8 @@ spec:
   ingresses:
     - "https://a11y-statement.intern.nav.no"
   azure:
-    enabled: true
+    application:
+      enabled: true
   gcp:
     sqlInstances:
       - name: a11y-statement
@@ -30,11 +31,11 @@ spec:
         diskType: SSD
         diskSize: 10
         diskAutoresize: true
-        autoBackupTime: "03:00"
+        autoBackupHour: 3
         databases:
           - name: a11y-statement
             envVarPrefix: DB
-        maintenanceWindow:
+        maintenance:
           day: 1
           hour: 4
         cascadingDelete: false
