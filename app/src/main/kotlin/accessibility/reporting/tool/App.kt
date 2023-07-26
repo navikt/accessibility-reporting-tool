@@ -33,10 +33,11 @@ fun main() {
     val authContext = AzureAuthContext()
     Flyway.runFlywayMigrations(Environment())
     val repository = ReportRepository(PostgresDatabase(environment))
-    embeddedServer(Netty, port = 8081, module = { this.api(repository) { installAuthentication(authContext) } }).start(
+    embeddedServer(Netty, port = System.getenv("PORT")?.toInt()?:8081, module = { this.api(repository) { installAuthentication(authContext) } }).start(
         wait = true
     )
 }
+
 
 fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
     authInstaller()

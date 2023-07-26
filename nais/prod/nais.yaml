@@ -1,0 +1,51 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: accessibility-statement-tool
+  namespace: a11y-statement
+  labels:
+    team: a11y-statement
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    path: /isalive
+    initialDelay: 30
+  readiness:
+    path: /isready
+    initialDelay: 5
+  replicas:
+    min: 1
+    max: 2
+    cpuThresholdPercentage: 100
+  ingresses:
+    - "https://a11y-statement.intern.nav.no"
+  azure:
+    enabled: true
+    sidecar:
+  gcp:
+    sqlInstances:
+      - name: a11y-statement
+        type: POSTGRES_14
+        tier: db-custom-1-4096
+        diskType: SSD
+        diskSize: 10
+        diskAutoresize: true
+        autoBackupTime: "03:00"
+        databases:
+          - name: a11y-statement
+            envVarPrefix: DB
+        maintenanceWindow:
+          day: 1
+          hour: 4
+        cascadingDelete: false
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1024Mi
+    requests:
+      cpu: "50m"
+      memory: 256Mi
+  env:
+    - name: PORT
+      value: 8080

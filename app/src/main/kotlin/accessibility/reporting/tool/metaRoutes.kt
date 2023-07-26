@@ -11,10 +11,10 @@ import kotlinx.html.*
 
 fun Routing.meta() {
 
-    get("/isAlive") {
+    get("/isalive") {
         call.respond(HttpStatusCode.OK)
     }
-    get("/isReady") {
+    get("/isready") {
         call.respond(HttpStatusCode.OK)
     }
 }
