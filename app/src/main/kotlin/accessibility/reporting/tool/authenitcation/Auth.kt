@@ -24,7 +24,6 @@ import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.css.body
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
@@ -42,8 +41,9 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
 
             validate { jwtCredential ->
                 User(
-                    name = jwtCredential.payload.getClaim("name").asString(),
-                    email = jwtCredential.payload.getClaim("email").asString()
+                    name = jwtCredential.payload.getClaim("name")?.asString(),
+                    email = jwtCredential.payload.getClaim("email")?.asString()
+                        ?: jwtCredential.payload.getClaim("oid").asString()
                 )
             }
 
@@ -54,12 +54,11 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
     }
 }
 
-data class User(val email: String, val name: String) : Principal
-
+data class User(val email: String, val name: String?) : Principal
 
 
 class AzureAuthContext() {
-    var issuer: String = System.getenv("AZURE_OPENID_CONFIG_ISSUER")?:""
+    var issuer: String = System.getenv("AZURE_OPENID_CONFIG_ISSUER") ?: ""
     val azureClientId: String = getAzureEnvVar("AZURE_APP_CLIENT_ID")
     val azureWellKnownUrl: String = getAzureEnvVar("AZURE_APP_WELL_KNOWN_URL")
 
