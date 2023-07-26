@@ -29,7 +29,7 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 
 val ApplicationCall.user: User
-    get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Azuread sucks")
+    get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Princial ikke satt")
 
 fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
 
@@ -58,7 +58,7 @@ data class User(val email: String, val name: String) : Principal
 
 
 class AzureAuthContext() {
-    var issuer: String = ""
+    var issuer: String = System.getenv("AZURE_OPENID_CONFIG_ISSUER")?:""
     val azureClientId: String = getAzureEnvVar("AZURE_APP_CLIENT_ID")
     val azureWellKnownUrl: String = getAzureEnvVar("AZURE_APP_WELL_KNOWN_URL")
 
