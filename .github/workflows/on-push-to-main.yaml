@@ -21,7 +21,6 @@ jobs:
           ./gradlew test
   build:
     name: Build and push Docker container
-    needs: run-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,7 +38,9 @@ jobs:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }} # Provided as Organization Variable
   deploy:
     name: Deploy to NAIS
-    needs: build
+    needs:
+      - build
+      - run-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
