@@ -19,10 +19,9 @@ spec:
     max: 2
     cpuThresholdPercentage: 100
   ingresses:
-    - "https://a11y-statement.intern.dev.nav.no"
+    - "https://a11y-statement.intern.nav.no"
   azure:
     enabled: true
-    sidecar:
   gcp:
     sqlInstances:
       - name: a11y-statement
@@ -48,4 +47,4 @@ spec:
       memory: 256Mi
   env:
     - name: PORT
-      value: 8080
+      value: "8080"
