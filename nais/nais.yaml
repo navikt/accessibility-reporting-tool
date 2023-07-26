@@ -1,7 +1,7 @@
-apiVersion: "nais.io/v1alpha1"
-kind: "Application"
+apiVersion: nais.io/v1alpha1
+kind: Application
 metadata:
-  name: accessibility-statement-tool
+  name: a11y-statement
   namespace: a11y-statement
   labels:
     team: a11y-statement
@@ -19,14 +19,14 @@ spec:
     max: 2
     cpuThresholdPercentage: 100
   ingresses:
-    - "https://a11y-statement.intern.nav.no"
+    - "https://a11y-statement.intern.dev.nav.no"
   azure:
     enabled: true
     sidecar:
   gcp:
     sqlInstances:
       - name: a11y-statement
-        type: POSTGRES_14
+        type: POSTGRES_15
         tier: db-custom-1-4096
         diskType: SSD
         diskSize: 10
