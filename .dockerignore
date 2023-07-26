@@ -1,0 +1,7 @@
+.envrc
+.gitattributes
+.gitignore
+build
+.gradle
+.idea
+app/build

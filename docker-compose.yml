@@ -76,3 +76,18 @@ services:
           "dq":"7EUfw92T8EhEjUrRKkQQYEK0iGnGdBxePLiOshEUky3PLT8kcBHbr17cUJgjHBiKqofOVNnE3i9nkOMCWcAyfUtY7KmGndL-WIP-FYplpnrjQzgEnuENgEhRlQOCXZWjNcnPKdKJDqF4WAtAgSIznz6SbSQMUoDD8IoyraPFCck",
           "n":"7CU8tTANiN6W_fD9SP1dK2vQvCkf7-nwvBYe5CfANV0_Bb0ZmQb77FVVsl1beJ7EYLz3cJmL8Is1RCHKUK_4ydqihNjEWTyZiQoj1i67pkqk_zRvfQa9raZR4uZbuBxx7dWUoPC6fFH2F_psAlHW0zf90fsLvhB6Aqq3uvO7XXqo8qNl9d_JSG0Rg_2QUYVb0WKmPVbbhgwtkFu0Tyuev-VZ9IzTbbr5wmZwEUVY7YAi73pDJkcZt5r2WjOF_cuIXe-O2vwbOrRgmJfHO9--mVLdATnEyrb6q2oy_75h6JjP-R4-TD1hyoFFoE2gmj-kSS6Z_Gggljs3Aw7--Nh10Q"
         }
+  #statements:
+  #  image: awesomepossum:latest
+  #  ports:
+  #    - "8081:8081"
+  #  depends_on:
+  #    - mock-oauth2-server
+  #  restart: on-failure
+  #  environment:
+  #    AZURE_APP_CLIENT_ID: "a11y"
+  #    AZURE_APP_WELL_KNOWN_URL: "http://host.docker.internal:8080/issueissue/.well-known/openid-configuration"
+  #    DB_DATABASE: "a11y"
+  #    DB_HOST: "host.docker.internal"
+  #    DB_PASSWORD: "a11y"
+  #    DB_PORT: "5432"
+  #    DB_USERNAME: "postgres"
