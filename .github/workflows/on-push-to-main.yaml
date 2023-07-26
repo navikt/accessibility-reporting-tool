@@ -35,8 +35,7 @@ jobs:
           team: a11y-statement
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} # Provided as Organization Secret
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }} # Provided as Organization Variable
-
-  deploy-to-dev:
+  deploy:
     name: Deploy to NAIS
     needs: build
     runs-on: ubuntu-latest
@@ -45,19 +44,6 @@ jobs:
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: ./nais/dev/nais.yaml
+          CLUSTER: prod-gcp
+          RESOURCE: ./nais/nais.yaml
           VAR: image=${{ env.docker_image }}
-
-#  deploy to prod:
-#    name: Deploy to NAIS
-#    needs: build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: nais/deploy/actions/deploy@v1
-#        env:
-#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#          CLUSTER: dev-gcp
-#          RESOURCE: ../../nais/dev-gcp/nais.yaml
-#          VAR: image=${{ env.docker_image }}
