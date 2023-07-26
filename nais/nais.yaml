@@ -23,6 +23,9 @@ spec:
   azure:
     application:
       enabled: true
+    sidecar:
+      enabled: true
+      autoLogin: true
   gcp:
     sqlInstances:
       - name: a11y-statement
