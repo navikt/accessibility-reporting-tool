@@ -26,6 +26,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - uses: actions/checkout@v3
       - name: Push docker image to GAR
@@ -46,4 +48,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: ./nais/nais.yaml
-          VAR: image=${{ env.docker_image }}
+          VAR: image=${{ needs.build.outputs.image }}
