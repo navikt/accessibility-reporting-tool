@@ -40,38 +40,6 @@ fun Route.landingPage(repository: ReportRepository) {
 
     }
 }
-
-fun BODY.navbar(email:String) {
-    nav {
-        ul {
-            li {
-                a {
-                    href = "/"
-                    +"Forside"
-                }
-            }
-            li {
-                a {
-                    href = "/orgunit"
-                    +"Organisasjonsenheter"
-                }
-            }
-            li {
-                a {
-                    href = "/user"
-                    +"Dine rapporter"
-                }
-            }
-            li {
-                a {
-                    href = "/oauth2/logout"
-                    +"Logg ut ($email)"
-                }
-            }
-        }
-    }
-}
-
 suspend fun ApplicationCall.respondHtmlContent(title: String, contenbuilder: BODY.() -> Unit) {
     respondHtml {
         lang = "no"

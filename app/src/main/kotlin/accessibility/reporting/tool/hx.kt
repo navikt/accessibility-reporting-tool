@@ -6,11 +6,6 @@ import kotlinx.html.HTMLTag
 fun HTMLTag.hxPost(url: String) {
     attributes["data-hx-post"] = url
 }
-
-fun HTMLTag.hxGet(url: String) {
-    attributes["data-hx-get"] = url
-}
-
 fun HTMLTag.hxTarget(selector: String) {
     attributes["data-hx-target"] = selector
 }

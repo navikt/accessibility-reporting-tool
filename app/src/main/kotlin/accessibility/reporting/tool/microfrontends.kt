@@ -126,3 +126,38 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
         }
     }
 }
+
+
+fun SuccessCriterion.cssClass() =
+    "f" + this.successCriterionNumber.replace(".", "-")
+
+fun BODY.navbar(email:String) {
+    nav {
+        ul {
+            li {
+                a {
+                    href = "/"
+                    +"Forside"
+                }
+            }
+            li {
+                a {
+                    href = "/orgunit"
+                    +"Organisasjonsenheter"
+                }
+            }
+            li {
+                a {
+                    href = "/user"
+                    +"Dine rapporter"
+                }
+            }
+            li {
+                a {
+                    href = "/oauth2/logout"
+                    +"Logg ut ($email)"
+                }
+            }
+        }
+    }
+}

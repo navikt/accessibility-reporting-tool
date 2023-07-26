@@ -23,11 +23,6 @@ import kotliquery.queryOf
 import mu.KotlinLogging
 import java.lang.IllegalArgumentException
 
-private val log = KotlinLogging.logger {  }
-
-fun SuccessCriterion.cssClass() =
-    "f" + this.successCriterionNumber.replace(".", "-")
-
 fun main() {
     val environment = Environment()
     val authContext = AzureAuthContext()

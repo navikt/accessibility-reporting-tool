@@ -4,6 +4,7 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Version
+import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -46,9 +47,13 @@ class ReportRoutesTest {
             )
         )
 
-        client.get("/reports").status shouldBe HttpStatusCode.OK
+        client.get("/").assert {
+            this.status shouldBe HttpStatusCode.OK
+            this.headers["Content-Type"] shouldBe "text/html"
+        }
         client.get("/reports/knownid").status shouldBe HttpStatusCode.OK
         client.get("/reports/notknownid").status shouldBe HttpStatusCode.BadRequest
         client.get("/reports/new").status shouldBe HttpStatusCode.OK
+
     }
 }
