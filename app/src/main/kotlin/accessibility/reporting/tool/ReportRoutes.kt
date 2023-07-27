@@ -143,10 +143,14 @@ fun Route.reports(repository: ReportRepository) {
                     }
                     div(classes = "create-form") {
                         form {
+                            hxPost("/reports/new")
+                            hxSwapOuter()
+                            hxTarget(".create-form")
                             label {
                                 +"Url til siden "
                                 input {
                                     type = InputType.text
+                                    required = true
                                     placeholder = "Url"
                                     name = "page-url"
 
@@ -169,11 +173,7 @@ fun Route.reports(repository: ReportRepository) {
                                     }
                                 }
                             }
-
                             button {
-                                hxSwapOuter()
-                                hxTarget(".create-form")
-                                hxPost("/reports/new")
                                 +"Lag ny erklæring"
                             }
                         }

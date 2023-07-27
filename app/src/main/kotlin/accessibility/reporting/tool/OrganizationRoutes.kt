@@ -71,6 +71,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
         get {
             call.respondHtmlContent("Legg til organisasjonsenhet") {
                 form {
+                    hxPost("/orgunit/new")
                     label {
                         htmlFor = "text-input-name"
                         +"Navn"
@@ -93,7 +94,6 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     }
 
                     button {
-                        hxPost("/orgunit/new")
                         +"opprett enhet"
                     }
                 }
