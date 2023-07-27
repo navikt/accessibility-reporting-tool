@@ -469,11 +469,13 @@ object Version1 {
             number = "4.1.3",
             name = "4.1.3 Statusbeskjeder",
             description =
-            "Tilby synstolking til alle videoer som ikke er direktesendinger.",
+            "Gjør brukeren oppmerksom på statusendringer.",
             principle = "4. Robust",
             guideline = "4.1 Kompatibel",
             contentGroup = "",
             tools = "Skjermleser/DevTools",
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/413-statusbeskjeder#hcdb4fcfaf29c",
+            wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/status-messages.html"
         ),
     )
 }

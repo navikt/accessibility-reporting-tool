@@ -36,5 +36,16 @@ nav ul li {
 
 button {
     margin-left: 24px;
+}
 
+.report-info {
+    margin-bottom: 16px;
+}
+
+.report-info a{
+    display: block;
+}
+
+.report-info p{
+    margin-bottom: 8px;
 }

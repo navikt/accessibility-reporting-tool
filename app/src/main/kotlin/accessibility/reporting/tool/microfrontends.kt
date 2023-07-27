@@ -75,11 +75,8 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
 }
 
 fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
+    successCriterionInformation(sc)
     form(classes = sc.cssClass()) {
-        h2 { +sc.name }
-        p {
-            +sc.description
-        }
         div {
             fieldSet {
                 hxPost("/reports/submit/${reportId}")
@@ -127,11 +124,35 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     }
 }
 
+private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
+    div(classes = "report-info") {
+        h2 { +sc.name }
+        p { +sc.description }
+        sc.helpUrl?.let {
+            a {
+                href = it
+                target = "_blank"
+                rel = "noopener noreferrer"
+                +"Hvordan teste (åpner i ny fane)"
+            }
+        }
+        sc.wcagUrl?.let {
+            a {
+                href = it
+                target = "_blank"
+                rel = "noopener noreferrer"
+                +"WCAG definisjon (åpner i ny fane)"
+
+            }
+        }
+    }
+}
+
 
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
 
-fun BODY.navbar(email:String) {
+fun BODY.navbar(email: String) {
     nav {
         ul {
             li {

@@ -69,7 +69,9 @@ private fun List<SuccessCriterion>.disputedDeviationCount() =
 private fun List<SuccessCriterion>.deviationCount() = count { it.status == NON_COMPLIANT && !it.devationIsDesputed() }
 
 private val Int.punkter: String
-    get() = if(this==1){"1 punkt"} else "$this punkter"
+    get() = if (this == 1) {
+        "1 punkt"
+    } else "$this punkter"
 
 class TestData(val ident: String, val url: String)
 class OrganizationUnit(
@@ -136,7 +138,7 @@ data class SuccessCriterion(
             contentGroup: String,
             description: String,
             guideline: String,
-            helpUrl: String = "https://aksel.nav.no/god-praksis/universell-utforming",
+            helpUrl: String? = null,
             name: String,
             number: String,
             breakingTheLaw: String = "",
@@ -161,9 +163,6 @@ data class SuccessCriterion(
             helpUrl
         )
 
-        private val objectMapper = jacksonObjectMapper().apply {
-            registerModule(JavaTimeModule())
-        }
 
         fun fromJson(rawJson: JsonNode): SuccessCriterion = SuccessCriterion(
             name = rawJson["name"].asText(),
@@ -177,8 +176,8 @@ data class SuccessCriterion(
             tooHardToComply = rawJson["tooHardToComply"].asText(),
             contentGroup = rawJson["contentGroup"].asText(),
             status = Status.valueOf(rawJson["status"].asText()),
-            wcagUrl = rawJson["wcagUrl"].asText(),
-            helpUrl = rawJson["helpUrl"].asText(),
+            wcagUrl = rawJson["wcagUrl"].takeIf { !it.isNull }?.asText(),
+            helpUrl = rawJson["helpUrl"].takeIf { !it.isNull }?.asText(),
             deviations = Deviation.fromJson(rawJson["deviations"])
         )
     }

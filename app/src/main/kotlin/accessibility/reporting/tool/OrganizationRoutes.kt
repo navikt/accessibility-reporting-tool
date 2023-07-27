@@ -70,6 +70,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
     route("orgunit/new") {
         get {
             call.respondHtmlContent("Legg til organisasjonsenhet") {
+                h1 { +"Legg til organisasjonsenhet" }
                 form {
                     hxPost("/orgunit/new")
                     label {
