@@ -2,6 +2,7 @@ package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
+import accessibility.reporting.tool.wcag.Status.*
 import accessibility.reporting.tool.wcag.Version.V1
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -51,12 +52,24 @@ class Report(
 
     fun toJson(): String = objectMapper.writeValueAsString(this)
     fun status(): String = when {
-        successCriteria.any { it.status == Status.NOT_TESTED } -> "Ikke ferdig"
-        successCriteria.any { it.status == Status.NON_COMPLIANT } -> "${successCriteria.count { it.status == Status.NON_COMPLIANT }} avvik"
-        successCriteria.all { it.status == Status.NOT_APPLICABLE || it.status == Status.COMPLIANT } -> "Ingen avvik"
+        successCriteria.any { it.status == NOT_TESTED } -> "Ikke ferdig"
+        successCriteria.deviationCount() != 0 ->
+            "${successCriteria.deviationCount()} avvik, ${successCriteria.disputedDeviationCount().punkter} med merknad"
+
+        successCriteria.deviationCount() == 0 ->
+            "Ingen avvik, ${successCriteria.disputedDeviationCount().punkter} med merknad"
+
         else -> "Ukjent"
     }
 }
+
+private fun List<SuccessCriterion>.disputedDeviationCount() =
+    count { it.status == NON_COMPLIANT && it.devationIsDesputed() }
+
+private fun List<SuccessCriterion>.deviationCount() = count { it.status == NON_COMPLIANT && !it.devationIsDesputed() }
+
+private val Int.punkter: String
+    get() = if(this==1){"1 punkt"} else "$this punkter"
 
 class TestData(val ident: String, val url: String)
 class OrganizationUnit(
@@ -113,6 +126,9 @@ data class SuccessCriterion(
     val helpUrl: String? = null,
     val deviations: MutableList<Deviation> = mutableListOf()
 ) {
+    fun devationIsDesputed() =
+        breakingTheLaw.isEmpty() && (lawDoesNotApply.isNotEmpty() || tooHardToComply.isNotEmpty())
+
     val successCriterionNumber = number
 
     companion object {
@@ -140,7 +156,7 @@ data class SuccessCriterion(
             lawDoesNotApply,
             tooHardToComply,
             contentGroup,
-            Status.NOT_TESTED,
+            NOT_TESTED,
             wcagUrl,
             helpUrl
         )
