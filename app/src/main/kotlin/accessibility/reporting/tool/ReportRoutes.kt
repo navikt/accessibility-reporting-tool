@@ -24,10 +24,24 @@ fun Route.reports(repository: ReportRepository) {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val report = repository.getReport(id) ?: throw IllegalArgumentException()
 
-            call.respondHtmlContent("A11y rapport") {
+            call.respondHtmlContent("Tilgjengelighetsærklæring") {
+                p {
+                    +"Løsning: ${report.url}"
+                }
                 p {
                     +"Ansvarlig: ${report.user.email}"
                 }
+
+                p{
+                    +"Organisasjonsenhet/team: "
+                     report.organizationUnit?.let {org ->
+                         a {
+                             href="/orgunit/${org.id}"
+                             + org.name
+                         }
+                     }
+                }
+
                 main {
                     h1 { +"A11y report" }
                     div {
@@ -158,7 +172,7 @@ fun Route.reports(repository: ReportRepository) {
                                 hxSwapOuter()
                                 hxTarget(".create-form")
                                 hxPost("/reports/new")
-                                +"Lag ny rapport"
+                                +"Lag ny erklæring"
                             }
                         }
                     }

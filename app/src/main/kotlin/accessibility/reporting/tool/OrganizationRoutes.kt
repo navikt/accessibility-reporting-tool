@@ -23,45 +23,48 @@ fun Route.organizationUnits(repository: ReportRepository) {
             val (org, reports) = repository.getReportForOrganizationUnit(unitId)
 
             org?.let { orgUnit ->
-                call.respondHtmlContent("Organisasjonsenhter") {
-                    h1 { +"Rapporter for ${orgUnit.name}" }
+                call.respondHtmlContent(orgUnit.name) {
+                    h1 { +orgUnit.name }
+                    p {
+                        +"epost: ${orgUnit.email}"
+                    }
+                    h2 { +"Tilgjengelighetserklæringer" }
                     ul {
                         reports.forEach { report ->
                             li {
                                 a {
                                     href = "/reports/${report.reportId}"
-                                    +"${report.url}"
+                                    +report.url
                                 }
                             }
                         }
                     }
                 }
-            } ?: run {
-                call.respond(HttpStatusCode.NotFound)
-            }
-        } ?: run {
-            call.respondHtmlContent("Organisasjonsenheter") {
-                h1 { +"Organisasjonsenheter" }
-                ul {
-                    repository.getAllOrganizationUnits().forEach { orgUnit ->
-                        li {
-                            a {
-                                href = "orgunit/${orgUnit.id}"
-                                +"Rapporter for ${orgUnit.name}"
+            } ?: run { call.respond(HttpStatusCode.NotFound) }
+        }
+            ?: run {
+                call.respondHtmlContent("Organisasjonsenheter") {
+                    h1 { +"Organisasjonsenheter" }
+                    ul {
+                        repository.getAllOrganizationUnits().forEach { orgUnit ->
+                            li {
+                                a {
+                                    href = "orgunit/${orgUnit.id}"
+                                    +orgUnit.name
+                                }
                             }
                         }
                     }
-                }
 
-                a {
-                    href = "orgunit/new"
-                    +"Legg til organisajonsenhet"
-                }
+                    a {
+                        href = "orgunit/new"
+                        +"Legg til organisajonsenhet"
+                    }
 
+
+                }
 
             }
-
-        }
     }
 
     route("orgunit/new") {
@@ -124,13 +127,13 @@ fun Route.userRoute(repository: ReportRepository) {
 
         val reports = repository.getReportsForUser(call.user.email)
         call.respondHtmlContent(call.user.email) {
-            h1 { +"Dine rapporter" }
+            h1 { +"Dine tilgjengelighetserklæringer" }
             ul(classes = "report-list") {
                 reports.map { report -> reportListItem(report) }
             }
             a {
                 href = "/reports/new"
-                +"Lag ny rapport"
+                +"Lag ny erklæring"
             }
         }
 
@@ -141,7 +144,7 @@ fun UL.reportListItem(report: Report) {
     li {
         a {
             href = "reports/${report.reportId}"
-            +"Rapport for ${report.url}"
+            +"${report.url}"
         }
         button {
             hxDelete("/reports/${report.reportId}")

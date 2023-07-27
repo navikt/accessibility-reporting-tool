@@ -149,7 +149,7 @@ fun BODY.navbar(email:String) {
             li {
                 a {
                     href = "/user"
-                    +"Dine rapporter"
+                    +"Dine erklæringer"
                 }
             }
             li {
