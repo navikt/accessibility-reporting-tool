@@ -28,6 +28,10 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     p {
                         +"epost: ${orgUnit.email}"
                     }
+                    a {
+                        href ="/reports/orgunit/${orgUnit.id}/all"
+                        +"status for alle sider"
+                    }
                     h2 { +"Tilgjengelighetserklæringer" }
                     ul {
                         reports.forEach { report ->
@@ -99,7 +103,6 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     }
                 }
             }
-
         }
 
         post {

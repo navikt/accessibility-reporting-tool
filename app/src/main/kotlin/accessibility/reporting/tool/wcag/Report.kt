@@ -3,6 +3,8 @@ package accessibility.reporting.tool.wcag
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.wcag.Status.*
+import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
+import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
 import accessibility.reporting.tool.wcag.Version.V1
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -62,11 +64,6 @@ class Report(
         else -> "Ukjent"
     }
 }
-
-private fun List<SuccessCriterion>.disputedDeviationCount() =
-    count { it.status == NON_COMPLIANT && it.devationIsDesputed() }
-
-private fun List<SuccessCriterion>.deviationCount() = count { it.status == NON_COMPLIANT && !it.devationIsDesputed() }
 
 private val Int.punkter: String
     get() = if (this == 1) {
@@ -134,6 +131,9 @@ data class SuccessCriterion(
     val successCriterionNumber = number
 
     companion object {
+        fun List<SuccessCriterion>.disputedDeviationCount() =
+            count { it.status == NON_COMPLIANT && it.devationIsDesputed() }
+        fun List<SuccessCriterion>.deviationCount() = count { it.status == NON_COMPLIANT && !it.devationIsDesputed() }
         fun createEmpty(
             contentGroup: String,
             description: String,
