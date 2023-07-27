@@ -35,16 +35,22 @@ fun main() {
 
 
 fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
+    val log = KotlinLogging.logger {  }
     authInstaller()
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             when (cause) {
                 is IllegalArgumentException -> {
+                    log.debug { "Feil i request fra bruker: ${cause.message}" }
                     call.respondText(status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad request")
                 }
 
-                else -> call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+                else -> {
+                    log.error { "Ukjent feil: ${cause.message}" }
+                    call.respondText(text = "500: ${cause.message}", status = HttpStatusCode.InternalServerError)
+
+                }
             }
         }
     }

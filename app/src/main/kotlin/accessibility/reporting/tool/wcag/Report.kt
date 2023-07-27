@@ -58,7 +58,7 @@ class OrganizationUnit(
 ) {
 
     companion object {
-        fun createNew(name: String, email: String, shortName: String?=null) = OrganizationUnit(
+        fun createNew(name: String, email: String, shortName: String? = null) = OrganizationUnit(
             id = shortName?.toOrgUnitId() ?: name.toOrgUnitId(),
             name = name,
             email = email,
@@ -66,8 +66,8 @@ class OrganizationUnit(
         )
 
         private fun String.toOrgUnitId() = trimMargin()
-                .lowercase()
-                .replace(" ", "-")
+            .lowercase()
+            .replace(" ", "-")
     }
 }
 
@@ -107,7 +107,7 @@ data class SuccessCriterion(
     val helpUrl: String? = null,
     val deviations: MutableList<Deviation> = mutableListOf()
 ) {
-    val successCriterionNumber = "${number}"
+    val successCriterionNumber = number
 
     companion object {
         fun createEmpty(

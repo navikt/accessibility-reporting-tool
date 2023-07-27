@@ -9,6 +9,7 @@ import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.css.body
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import java.lang.IllegalArgumentException
@@ -96,14 +97,16 @@ fun Route.reports(repository: ReportRepository) {
         route("new") {
 
             post {
-
                 val formParameters = call.receiveParameters()
                 val url = formParameters["page-url"].toString()
+                val organizationUnit = formParameters["orgunit"].toString().let { id ->
+                    repository.getOrganizationUnit(id)
+                }
 
                 val newReportId = UUID.randomUUID().toString()
                 repository.upsertReport(
                     Report(
-                        organizationUnit = null,
+                        organizationUnit = organizationUnit,
                         reportId = newReportId,
                         successCriteria = Version1.criteria,
                         testData = null,
@@ -117,32 +120,45 @@ fun Route.reports(repository: ReportRepository) {
             }
 
             get {
-                call.respondHtml(HttpStatusCode.OK) {
-                    lang = "no"
-                    head {
-                        headContent("Lag ny rapport")
+                val orgUnits = repository.getAllOrganizationUnits()
+                call.respondHtmlContent("Ny tilgjengelighetserklæring") {
+                    h1 {
+                        +"Lag ny tilgjengelighetserklæring"
                     }
-                    body {
-                        h1 {
-                            +"Lag ny rapport"
-                        }
-                        div(classes = "create-form") {
-                            form {
-                                label {
-                                    +"Url til siden "
-                                    input {
-                                        type = InputType.text
-                                        placeholder = "Url"
-                                        name = "page-url"
+                    div(classes = "create-form") {
+                        form {
+                            label {
+                                +"Url til siden "
+                                input {
+                                    type = InputType.text
+                                    placeholder = "Url"
+                                    name = "page-url"
 
+                                }
+                            }
+                            label {
+                                +" Organisasjonsenhet/team"
+                                select {
+                                    name = "orgunit"
+                                    option {
+                                        disabled = true
+                                        selected = true
+                                        +"Velg organisasjonsenhet/team"
                                     }
-                                    button {
-                                        hxSwapOuter()
-                                        hxTarget(".create-form")
-                                        hxPost("/reports/new")
-                                        +"Lag ny rapport"
+                                    orgUnits.map { orgUnit ->
+                                        option {
+                                            value = orgUnit.id
+                                            +orgUnit.name
+                                        }
                                     }
                                 }
+                            }
+
+                            button {
+                                hxSwapOuter()
+                                hxTarget(".create-form")
+                                hxPost("/reports/new")
+                                +"Lag ny rapport"
                             }
                         }
                     }
