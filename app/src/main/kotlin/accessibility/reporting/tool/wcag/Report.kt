@@ -50,6 +50,12 @@ class Report(
     }
 
     fun toJson(): String = objectMapper.writeValueAsString(this)
+    fun status(): String = when {
+        successCriteria.any { it.status == Status.NOT_TESTED } -> "Ikke ferdig"
+        successCriteria.any { it.status == Status.NON_COMPLIANT } -> "${successCriteria.count { it.status == Status.NON_COMPLIANT }} avvik"
+        successCriteria.all { it.status == Status.NOT_APPLICABLE || it.status == Status.COMPLIANT } -> "Ingen avvik"
+        else -> "Ukjent"
+    }
 }
 
 class TestData(val ident: String, val url: String)
@@ -134,7 +140,7 @@ data class SuccessCriterion(
             lawDoesNotApply,
             tooHardToComply,
             contentGroup,
-            Status.NON_COMPLIANT,
+            Status.NOT_TESTED,
             wcagUrl,
             helpUrl
         )

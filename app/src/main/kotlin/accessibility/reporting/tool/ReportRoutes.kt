@@ -31,6 +31,9 @@ fun Route.reports(repository: ReportRepository) {
                         +"Løsning: ${report.url}"
                     }
                     p {
+                        +"Status: ${report.status()}"
+                    }
+                    p {
                         +"Ansvarlig: ${report.user.email}"
                     }
 
