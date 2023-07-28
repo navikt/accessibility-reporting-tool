@@ -83,14 +83,15 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded"
         }.levelA(),
         1.perceivable("1.2.3", "Synstolking eller mediealternativ (forhåndsinnspilt)") {
-            description = "Tilby"
+            description =
+                "Tilby en beskrivende tekst eller et lydspor med beskrivelse for videoer som ikke er direktesendt."
             guideline = `1-2 Tidsbaserte medier`
             contentGroup = lydVideoAnimasjoner
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/audio-description-or-media-alternative-prerecorded"
         }.levelA(),
         1.perceivable("1.2.5", "Synstolking (forhåndsinnspilt)") {
-            description = "Tilby synstolking for alt forhåndsinnspilt videoinnhold i synkroniserte medier."
+            description = "Tilby synstolking til alle videoer som ikke er direktesendinger."
             guideline = `1-2 Tidsbaserte medier`
             contentGroup = lydVideoAnimasjoner
             tools = skjønn
@@ -105,21 +106,20 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships"
         }.levelA(),
         1.perceivable("1.3.2", "Meningsbærende rekkefølge") {
-            description = """Informasjon, struktur og relasjoner som formidles via presentasjonen, kan 
-                             bestemmes programmeringsmessig eller gjøres tilgjengelig(e) som tekst.""".trimMargin()
+            description = "TODO"
             guideline = `1-3 Mulig å tilpasse`
             tools = "disableHTML"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/meaningful-sequence"
         }.levelA(),
         1.perceivable("1.3.3", "Sensoriske egenskaper") {
-            description = "Alle lenkers mål og funksjon fremgår tydelig av lenketeksten."
+            description =
+                "Instruksjoner må ikke utelukkende være avhengige av form, størrelse, visuell plassering, orientering, eller lyd for å kunne bli forstått."
             guideline = `1-3 Mulig å tilpasse`
             tools = skjønn
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/sensory-characteristics"
         }.levelA(),
         1.perceivable("1.3.4", "Visningsretning") {
-            description = """Innholdet begrenser ikke visning og bruk til en bestemt visningsretning, som stående 
-                             eller liggende, med mindre en bestemt visningsretning er avgjørende""".trimMargin()
+            description = "Brukeren må få velge om innholdet skal vises i liggende eller stående retning."
             guideline = `1-3 Mulig å tilpasse`
             tools = devTools
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/orientation"
@@ -133,11 +133,38 @@ object Version1 {
         }.levelAA(),
         //1.4 Distinguishable
         1.perceivable("1.4.1", "Bruk av farge") {
-            description = "Sørg for at språket til innholdet på alle nettsider er angitt i koden."
+            description = "Ikke bruk presentasjon som bygger utelukkende på farge."
             guideline = `1-4 Mulig å skille fra hverandre`
             tools = skjønn
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/distinguishable"
         }.levelA(),
+        1.perceivable("1.4.2", "Styring av lyd") {
+            description = "Mulighet til å stoppe eller pause lyd som starter automatisk."
+            guideline = `1-4 Mulig å skille fra hverandre`
+            contentGroup = lydVideoAnimasjoner
+            tools = skjønn
+            wcagUrl = "https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-dis-audio.html"
+        }.levelA(),
+        1.perceivable("1.4.3", "Kontrast (minimum)") {
+            description = "Kontrastforholdet mellom teksten og bakgrunnen er minst 4,5:1."
+            guideline = `1-4 Mulig å skille fra hverandre`
+            tools = "$arcToolkit/$cca"
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/143-kontrast"
+            wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html"
+        }.levelAA(),
+        1.perceivable("1.4.4", "Endring av tekststørrelse") {
+            description = "Tekst kan bli endret til 200% størrelse uten tap av innhold eller funksjon."
+            guideline = `1-4 Mulig å skille fra hverandre`
+            tools = "Zoom"
+            wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/resize-text"
+        }.levelAA(),
+        1.perceivable("1.4.5", " Bilder av tekst") {
+            description = "Bruk tekst i stedet for bilder av tekst."
+            guideline = `1-4 Mulig å skille fra hverandre`
+            contentGroup = ikonerBilderGrafer
+            tools = skjønn
+            wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/images-of-text"
+        }.levelAA(),
         1.perceivable("1.4.10", "Dynamisk tilpasning (Reflow)") {
             description =
                 "Innhold skal kunne endres til 400 prosent størrelse ved 1280 piksler bredde, uten tap av informasjon eller funksjonalitet."
@@ -161,72 +188,43 @@ object Version1 {
         }.levelAA(),
         1.perceivable("1.4.13", "Pekerfølsomt innhold eller innhold ved tastaturfokus.") {
             description =
-                "Brukeren skal kunne kontrollere innhold på nettsiden som trigges av fokus med musepeker eller tastatur"
+                "Uheldige og feilaktige input via mus eller berøringsskjerm skal lettere kunne forhindres."
             guideline = `1-4 Mulig å skille fra hverandre`
             tools = skjønn
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus"
-        }.levelAA(),
-        1.perceivable("1.4.2", "Styring av lyd") {
-            description = "Mulighet til å stoppe eller pause lyd som starter automatisk."
-            guideline = `1-4 Mulig å skille fra hverandre`
-            contentGroup = lydVideoAnimasjoner
-            tools = skjønn
-            wcagUrl = "https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-dis-audio.html"
-        }.levelA(),
-        1.perceivable("1.4.3", "Kontrast (minimum)") {
-            description = "Kontrastforholdet mellom teksten og bakgrunnen er minst 4,5:1."
-            guideline = `1-4 Mulig å skille fra hverandre`
-            tools = "$arcToolkit/$cca"
-            helpUrl = "https://aksel.nav.no/god-praksis/artikler/143-kontrast"
-            wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html"
-        }.levelAA(),
-        1.perceivable("1.4.4", "Endring av tekststørrelse") {
-            description =
-                "For sider som medfører juridiske forpliktelser må det være mulig å kunne angre, kontrollere eller bekrefte dataene som sendes inn."
-            guideline = `1-4 Mulig å skille fra hverandre`
-            tools = "Zoom"
-            wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/resize-text"
-        }.levelAA(),
-        1.perceivable("1.4.5", " Bilder av tekst") {
-            description = "Innhold på nettsiden skal kunne brukes med enkel pekerinput."
-            guideline = `1-4 Mulig å skille fra hverandre`
-            contentGroup = ikonerBilderGrafer
-            tools = skjønn
-            wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/images-of-text"
         }.levelAA(),
 
 
         //2.1 Keyboard Accessible
         2.operable("2.1.1", "Tastatur") {
-            description = "Uheldige og feilaktige input via mus eller berøringsskjerm skal lettere kunne forhindres."
+            description = "All funksjonalitet skal kunne brukes kun ved hjelp av tastatur."
             guideline = `2-1 Tilgjengelig med tastatur`
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/keyboard"
         }.levelA(),
         2.operable("2.1.2", "Ingen tastaturfelle") {
-            description =
-                "Funksjonalitet som kan betjenes med å bevege enheten eller ved brukerbevegelse, skal også kunne betjenes med brukersnittkomponenter."
+            description = "Unngå tastaturfeller"
             guideline = `2-1 Tilgjengelig med tastatur`
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/no-keyboard-trap"
         }.levelA(),
         2.operable("2.1.4", "Hurtigtaster som består av ett tegn") {
-            description = "Brukeren må få velge om innholdet skal vises i liggende eller stående retning."
+            description = "Brukeren skal enkelt kunne slå av hurtigtaster som består av ett tegn."
+
             guideline = `2-1 Tilgjengelig med tastatur`
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/character-key-shortcuts"
         }.levelA(),
         //2.2 Enough Time
         2.operable("2.2.1", "Justerbar hastighet") {
-            description =
-                "Innhold skal kunne endres til 400 prosent størrelse ved 1280 piksler bredde, uten tap av informasjon eller funksjonalitet."
+            description = "Tidsbegrensninger skal kunne justeres av brukeren."
             guideline = `2-2 Nok tid`
             contentGroup = "Tidsbegrenset innhold"
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/timing-adjustable"
         }.levelA(),
         2.operable("2.2.2", " Pause, stopp, skjul") {
-            description = "Tekstavstanden skal kunne overstyres for å gjøre teksten lettere å lese."
+            description = "Gi brukeren mulighet til å stoppe pause eller skjule innhold som automatisk endrer seg."
             guideline = `2-2 Nok tid`
             contentGroup = "Innhold som automatisk endrer seg eller oppdaterer"
             tools = "Skjønn"
@@ -234,7 +232,7 @@ object Version1 {
         }.levelA(),
         //2.3 Seizures and Physical Reactions
         2.operable("2.3.1", "Terskelverdi på maksimalt tre glimt") {
-            description = "Gi brukeren mulighet til å stoppe eller pause lyd som starter automatisk."
+            description = "Innhold skal ikke blinke mer enn tre ganger per sekund."
             guideline = Guidelines.`2-3 Anfall og andre fysiske reaksjoner`
             contentGroup = "Innhold som blinker"
             tools = "Skjønn"
@@ -242,31 +240,31 @@ object Version1 {
         }.levelA(),
         //2.4 Navigable
         2.operable("2.4.1", "Hoppe over blokker") {
-            description = "Tekst kan bli endret til 200% størrelse uten tap av innhold eller funksjon."
+            description = "Gi brukeren mulighet til å hoppe direkte til hovedinnholdet."
             guideline = `2-4 Navigerbar`
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/bypass-blocks"
         }.levelA(),
         2.operable("2.4.2", "Sidetitler") {
-            description = "Brukeren skal enkelt kunne slå av hurtigtaster som består av ett tegn."
+            description = "Bruk nyttige og tydelige sidetitler."
             guideline = `2-4 Navigerbar`
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/page-titled"
         }.levelA(),
         2.operable("2.4.3", "Fokusrekkefølge") {
-            description = "Tidsbegrensninger skal kunne justeres av brukeren."
+            description = "TODO"
             guideline = `2-4 Navigerbar`
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/focus-order"
         }.levelA(),
         2.operable("2.4.4", " Formål med lenke (i kontekst)") {
-            description = "Gi brukeren mulighet til å stoppe, pause eller skjule innhold som automatisk endrer seg."
+            description = "Alle lenkers mål og funksjon fremgår tydelig av lenketeksten."
             guideline = `2-4 Navigerbar`
             tools = devTools
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context"
         }.levelA(),
         2.operable("2.4.5", "Flere måter") {
-            description = "Skjemaelementer er kodet med inndataformål."
+            description = "Tilby brukeren flere måter å navigere på."
             guideline = `2-4 Navigerbar`
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/multiple-ways"
@@ -278,74 +276,75 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/headings-and-labels"
         }.levelAA(),
         2.operable("2.4.7", " Synlig fokus") {
-            description = "Alle sider skal være uten store kodefeil."
+            description = "Sørg for at alt innhold får synlig fokus når du navigerer med tastatur."
             guideline = `2-4 Navigerbar`
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/focus-visible"
         }.levelAA(),
         //2.5 Input Modalities
         2.operable("2.5.1", "Pekerbevegelser") {
-            description = "Alle komponenter har navn og rolle bestemt i koden."
+            description =
+                "Funksjonalitet som kan betjenes med å bevege enheten eller ved brukerbevegelse skal også kunne betjenes med brukersnittkomponenter."
             guideline = `2-5 Inndatametode`
             tools = "Mus"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/pointer-gestures"
         }.levelA(),
         2.operable("2.5.2", "Pekeravbrytelse") {
-            description = "Ting skal være kodet som det det ser ut som."
+            description = "TODO"
             guideline = `2-5 Inndatametode`
             tools = "Mus"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/pointer-cancellation"
         }.levelA(),
         2.operable("2.5.3", "Ledetekst i navn") {
-            description = "Presenter innhold i en meningsfull rekkefølge."
+            description = "TODO"
             guideline = `2-5 Inndatametode`
             contentGroup = "Skjemaer"
             tools = devTools
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/label-in-name"
         }.levelA(),
         2.operable("2.5.4 ", "Bevegelsesaktivering") {
-            description =
-                "Brukeren skal få statusbeskjeder om viktige endringer på nettsiden uten at det gir kontekstendring."
+            description = "TODO"
             guideline = `2-5 Inndatametode`
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/motion-actuation"
         }.levelA(),
         //3.1 Readable
         3.understandable("3.1.1", "Språk på siden") {
-            description =
-                "Brukeren skal ha mer kontroll over innholdet på nettsiden som får fokus med musepeker eller tastatur."
+            description = "Sørg for at språket til innholdet på alle nettsider er angitt i koden."
             guideline = `3-1 Leselig`
             tools = devTools
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/language-of-page"
         }.levelA(),
         3.understandable("3.1.2", "Språk på deler av innhold") {
-            description = "All funksjonalitet skal kunne brukes kun ved hjelp av tastatur."
+            description =
+                "Sørg for at alle deler av innholdet som er på et annet språk enn resten av siden er markert i koden."
             guideline = `3-1 Leselig`
             tools = devTools
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/language-of-parts"
+
         }.levelAA(),
         //3.2 Predictable
         3.understandable("3.2.1", "Fokus") {
-            description = "Unngå tastaturfeller."
+            description = "Når en komponent kommer i fokus medfører dette ikke automatisk betydelige endringer i siden."
             guideline = `3-2 Forutsigbar`
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/on-focus"
         }.levelA(),
         3.understandable("3.2.2", "Inndata") {
-            description = "Gi brukeren mulighet til å hoppe direkte til hovedinnholdet."
+            description = "Endring av verdien til et skjemafelt medfører ikke automatisk betydelige endringer i siden."
             guideline = `3-2 Forutsigbar`
             contentGroup = "Skjemaer"
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/on-input"
         }.levelA(),
         3.understandable("3.2.3", "Konsekvent navigering") {
-            description = "Presenter innholdet i en logisk rekkefølge."
+            description = "Navigasjonslinker som gjentas på flere sider skal ha en konsekvent rekkefølge."
             guideline = `3-2 Forutsigbar`
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/consistent-navigation"
         }.levelAA(),
         3.understandable("3.2.4", "Konsekvent identifikasjon") {
-            description = "Sørg for at alt innhold får synlig fokus når du navigerer med tastatur."
+            description = "Elementer som har samme funksjonalitet på tvers av flere sider er utformet likt."
             guideline = `3-2 Forutsigbar`
             tools = "Skjønn/DevTools"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/consistent-identification"
@@ -353,7 +352,7 @@ object Version1 {
         //3.3 Input Assistance
         3.understandable("3.3.1", "Identifikasjon av feil") {
             description =
-                "Når en komponent kommer i fokus medfører dette ikke automatisk betydelige endringer i siden."
+                "For feil som oppdages automatisk må du vise hvor feilen har oppstått og gi en tekstbeskrivelse av feilen."
             guideline = `3-3 Inndatahjelp`
             contentGroup = skjema
             tools = skjønn
@@ -361,21 +360,22 @@ object Version1 {
         }.levelA(),
         3.understandable("3.3.2", " Ledetekster eller instruksjoner") {
             description =
-                "Endring av verdien til et skjemafelt medfører ikke automatisk betydelige endringer i siden."
+                "Det vises ledetekster eller instruksjoner når du har skjemaelementer som må fylles ut."
             guideline = `3-3 Inndatahjelp`
             contentGroup = skjema
             tools = skjønn
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/labels-or-instructions"
         }.levelA(),
         3.understandable("3.3.3", "Forslag ved feil") {
-            description = "Gi brukeren et tekstalternativ for innhold som ikke er tekst."
+            description = "Dersom feil blir oppdaget automatisk, gi brukeren et forslag til hvordan feilen kan rettes."
             guideline = `3-3 Inndatahjelp`
             contentGroup = skjema
             tools = skjønn
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/error-suggestion"
         }.levelAA(),
         3.understandable("3.3.4", " Forhindring av feil (juridiske feil, økonomiske feil, datafeil)") {
-            description = "Gi brukeren et alternativ når innholdet presenteres kun som video eller lyd."
+            description =
+                "For sider som medfører juridiske forpliktelser må det være mulig å kunne angre, kontrollere eller bekrefte dataene som sendes inn."
             guideline = `3-3 Inndatahjelp`
             contentGroup = skjema
             tools = skjønn
@@ -383,14 +383,13 @@ object Version1 {
         }.levelAA(),
         //4.1 Compatible
         4.robust("4.1.1", "Parsing (oppdeling)") {
-            description = "Tilby teksting for video med lyd."
+            description = "Alle sider skal være uten store kodefeil."
             guideline = `4-1 Kompatibel`
             tools = arcToolkit
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/parsing"
         }.levelA(),
         4.robust("4.1.2", "Navn, rolle, verdi") {
-            description =
-                "Tilby en beskrivende tekst eller et lydspor med beskrivelse for videoer som ikke er direktesendt."
+            description = "Alle komponenter har navn og rolle bestemt i koden."
             guideline = `4-1 Kompatibel`
             tools = "ARC Toolkit/DevTools"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/name-role-value"
