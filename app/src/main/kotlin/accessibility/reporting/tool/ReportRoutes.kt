@@ -5,11 +5,9 @@ import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.css.body
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import java.lang.IllegalArgumentException

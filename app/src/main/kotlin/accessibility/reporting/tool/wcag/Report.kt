@@ -1,7 +1,6 @@
 package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.wcag.Status.*
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
@@ -9,7 +8,6 @@ import accessibility.reporting.tool.wcag.Version.V1
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import java.time.LocalDateTime
 
 
 class Report(
@@ -123,8 +121,8 @@ data class SuccessCriterion(
     var status: Status,
     val wcagUrl: String? = null,
     val helpUrl: String? = null,
-    val deviations: MutableList<Deviation> = mutableListOf()
 ) {
+    lateinit var wcagLevel: WcagLevel
     fun devationIsDesputed() =
         breakingTheLaw.isEmpty() && (lawDoesNotApply.isNotEmpty() || tooHardToComply.isNotEmpty())
 
@@ -133,35 +131,8 @@ data class SuccessCriterion(
     companion object {
         fun List<SuccessCriterion>.disputedDeviationCount() =
             count { it.status == NON_COMPLIANT && it.devationIsDesputed() }
+
         fun List<SuccessCriterion>.deviationCount() = count { it.status == NON_COMPLIANT && !it.devationIsDesputed() }
-        fun createEmpty(
-            contentGroup: String,
-            description: String,
-            guideline: String,
-            helpUrl: String? = null,
-            name: String,
-            number: String,
-            breakingTheLaw: String = "",
-            lawDoesNotApply: String = "",
-            tooHardToComply: String = "",
-            principle: String,
-            tools: String,
-            wcagUrl: String? = null
-        ): SuccessCriterion = SuccessCriterion(
-            name,
-            description,
-            principle,
-            guideline,
-            tools,
-            number,
-            breakingTheLaw,
-            lawDoesNotApply,
-            tooHardToComply,
-            contentGroup,
-            NOT_TESTED,
-            wcagUrl,
-            helpUrl
-        )
 
 
         fun fromJson(rawJson: JsonNode): SuccessCriterion = SuccessCriterion(
@@ -178,19 +149,13 @@ data class SuccessCriterion(
             status = Status.valueOf(rawJson["status"].asText()),
             wcagUrl = rawJson["wcagUrl"].takeIf { !it.isNull }?.asText(),
             helpUrl = rawJson["helpUrl"].takeIf { !it.isNull }?.asText(),
-            deviations = Deviation.fromJson(rawJson["deviations"])
-        )
+        ).apply {
+            wcagLevel =
+                rawJson["wcagLevel"]?.takeIf {this!=null && !it.isNull }?.asText()?.let { WcagLevel.valueOf(it) } ?: WcagLevel.UNKNOWN
+        }
     }
 }
 
-class Deviation(
-    val dateIndentified: LocalDateTime,
-    val description: String,
-    val correctedDate: LocalDateTime? = null,
-) {
-    companion object {
-        fun fromJson(jsonNode: JsonNode?): MutableList<Deviation> = jsonNode?.toList()?.map {
-            Deviation(dateIndentified = LocalDateTimeHelper.nowAtUtc(), description = "", correctedDate = null)
-        }?.toMutableList() ?: mutableListOf()
-    }
+enum class WcagLevel() {
+    A, AA, AAA, UNKNOWN
 }
