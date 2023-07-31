@@ -61,7 +61,6 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             userRoute(repository)
             reports(repository)
             landingPage(repository)
-            aggregatedReports(repository)
         }
         meta()
         staticResources("/static", "static") {
