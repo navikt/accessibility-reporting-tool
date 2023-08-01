@@ -32,9 +32,11 @@ class Report(
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
         }
 
-        fun fromJsonVersion1(rawJson: String, created: LocalDateTime, lastUpdate: LocalDateTime): Report =
-            jacksonObjectMapper().readTree(rawJson).let { jsonNode ->
-                Report(reportId = jsonNode["reportId"].asText(),
+        fun fromJsonVersion1(rawJson: String, created: LocalDateTime, lastChanged: LocalDateTime): Report {
+            val successCriterionIsStale = lastChanged.isBefore(Version1.lastTextUpdate)
+            return jacksonObjectMapper().readTree(rawJson).let { jsonNode ->
+                Report(
+                    reportId = jsonNode["reportId"].asText(),
                     url = jsonNode["url"].asText(),
                     organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }?.let { organizationJson ->
                         OrganizationUnit(
@@ -48,12 +50,19 @@ class Report(
                         TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
                     },
                     user = User(email = jsonNode["user"]["email"].asText(), jsonNode["user"]["name"].asText()),
-                    successCriteria = jsonNode["successCriteria"].map { SuccessCriterion.fromJson(it) },
+                    successCriteria = jsonNode["successCriteria"].map {
+                        SuccessCriterion.fromJson(
+                            it,
+                            V1,
+                            successCriterionIsStale
+                        )
+                    },
                     filters = jsonNode["filters"].map { it.asText() }.toMutableList(),
-                    lastChanged = lastUpdate,
+                    lastChanged = lastChanged,
                     created = created
                 )
             }
+        }
     }
 
     fun toJson(): String = objectMapper.writeValueAsString(this)
@@ -96,7 +105,9 @@ class OrganizationUnit(
 
 enum class Version(
     val deserialize: (String, LocalDateTime, LocalDateTime) -> Report,
-    val criteria: List<SuccessCriterion>
+    val criteria: List<SuccessCriterion>,
+    val updateCriteria: (SuccessCriterion) -> SuccessCriterion
 ) {
-    V1(Report::fromJsonVersion1, Version1.criteria)
+    V1(Report::fromJsonVersion1, Version1.criteria, Version1::updateCriterion);
+
 }

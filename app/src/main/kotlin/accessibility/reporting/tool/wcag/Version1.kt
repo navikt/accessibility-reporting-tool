@@ -25,9 +25,14 @@ import accessibility.reporting.tool.wcag.Version1.Tools.cca
 import accessibility.reporting.tool.wcag.Version1.Tools.devTools
 import accessibility.reporting.tool.wcag.Version1.Tools.skjønn
 import accessibility.reporting.tool.wcag.WcagLevel.*
+import mu.KotlinLogging
+import java.time.LocalDateTime
 
+val log = KotlinLogging.logger { }
 
 object Version1 {
+    val lastTextUpdate = LocalDateTime.parse("2023-08-01T17:24:00.00")
+
     private object ContectGroups {
         const val ikonerBilderGrafer = "Ikoner, bilder, grafer"
         const val lydVideoAnimasjoner = "Lyd, video, animasjoner"
@@ -269,7 +274,7 @@ object Version1 {
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/multiple-ways"
         }.levelAA(),
-        2.operable("2.4.6 ", "Overskrifter og ledetekster") {
+        2.operable("2.4.6", "Overskrifter og ledetekster") {
             description = "Brukere som bruker visuelle ledetekster skal også kunne bruke kodede ledetekster."
             guideline = `2-4 Navigerbar`
             tools = "Skjønn/headingsMap"
@@ -302,7 +307,7 @@ object Version1 {
             tools = devTools
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/label-in-name"
         }.levelA(),
-        2.operable("2.5.4 ", "Bevegelsesaktivering") {
+        2.operable("2.5.4", "Bevegelsesaktivering") {
             description = "TODO"
             guideline = `2-5 Inndatametode`
             tools = "Skjønn"
@@ -402,6 +407,27 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/status-messages.html"
         }.levelA()
     )
+
+    fun updateCriterion(originalSuccessCriterion: SuccessCriterion): SuccessCriterion {
+        val updatedCriterion = criteria
+            .find { it.number.trimMargin() == originalSuccessCriterion.number.trimMargin() }
+        return if (updatedCriterion == null) {
+            log.warn { "Fant ikke suksesskriterie med nummer ${originalSuccessCriterion.number} i Version1.criteria liste" }
+            originalSuccessCriterion
+        } else {
+            //TODO: legg til andre felt som evt blir oppdatert
+            originalSuccessCriterion.copy(
+                name = updatedCriterion.name,
+                description = updatedCriterion.description,
+                wcagUrl = updatedCriterion.wcagUrl,
+                helpUrl = updatedCriterion.helpUrl
+            ).apply {
+                wcagLevel = updatedCriterion.wcagLevel
+            }
+        }
+    }
+
+
 }
 
 private fun SuccessCriterion.levelA() =

@@ -16,7 +16,7 @@ data class SuccessCriterion(
     var status: Status,
     val wcagUrl: String? = null,
     val helpUrl: String? = null,
-    val wcagVersion:String = "2.1"
+    val wcagVersion: String = "2.1"
 ) {
     lateinit var wcagLevel: WcagLevel
     fun devationIsDesputed() =
@@ -27,27 +27,35 @@ data class SuccessCriterion(
     companion object {
         fun List<SuccessCriterion>.disputedDeviationCount() =
             count { it.status == Status.NON_COMPLIANT && it.devationIsDesputed() }
-        fun List<SuccessCriterion>.deviationCount() = count { it.status == Status.NON_COMPLIANT && !it.devationIsDesputed() }
+
+        fun List<SuccessCriterion>.deviationCount() =
+            count { it.status == Status.NON_COMPLIANT && !it.devationIsDesputed() }
 
 
-        fun fromJson(rawJson: JsonNode): SuccessCriterion = SuccessCriterion(
-            name = rawJson["name"].asText(),
-            description = rawJson["description"].asText(),
-            principle = rawJson["principle"].asText(),
-            guideline = rawJson["guideline"].asText(),
-            tools = rawJson["tools"].asText(),
-            number = rawJson["number"].asText(),
-            breakingTheLaw = rawJson["breakingTheLaw"].asText(),
-            lawDoesNotApply = rawJson["lawDoesNotApply"].asText(),
-            tooHardToComply = rawJson["tooHardToComply"].asText(),
-            contentGroup = rawJson["contentGroup"].asText(),
-            status = Status.valueOf(rawJson["status"].asText()),
-            wcagUrl = rawJson["wcagUrl"].takeIf { !it.isNull }?.asText(),
-            helpUrl = rawJson["helpUrl"].takeIf { !it.isNull }?.asText(),
-        ).apply {
-            wcagLevel =
-                rawJson["wcagLevel"]?.takeIf {this!=null && !it.isNull }?.asText()?.let { WcagLevel.valueOf(it) } ?: WcagLevel.UNKNOWN
-        }
+        fun fromJson(rawJson: JsonNode, version: Version, isStale:Boolean): SuccessCriterion =
+            SuccessCriterion(
+                name = rawJson["name"].asText(),
+                description = rawJson["description"].asText(),
+                principle = rawJson["principle"].asText(),
+                guideline = rawJson["guideline"].asText(),
+                tools = rawJson["tools"].asText(),
+                number = rawJson["number"].asText(),
+                breakingTheLaw = rawJson["breakingTheLaw"].asText(),
+                lawDoesNotApply = rawJson["lawDoesNotApply"].asText(),
+                tooHardToComply = rawJson["tooHardToComply"].asText(),
+                contentGroup = rawJson["contentGroup"].asText(),
+                status = Status.valueOf(rawJson["status"].asText()),
+                wcagUrl = rawJson["wcagUrl"].takeIf { !it.isNull }?.asText(),
+                helpUrl = rawJson["helpUrl"].takeIf { !it.isNull }?.asText()
+            ).apply {
+                wcagLevel =
+                    rawJson["wcagLevel"]?.takeIf { this != null && !it.isNull }?.asText()
+                        ?.let { WcagLevel.valueOf(it) } ?: WcagLevel.UNKNOWN
+            }.let {
+                if(isStale)
+                    version.updateCriteria(it)
+                else it
+            }
     }
 }
 

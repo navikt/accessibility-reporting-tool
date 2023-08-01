@@ -131,7 +131,7 @@ class ReportRepository(val database: Database) {
 object LocalDateTimeHelper {
 
     fun nowAtUtc(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-    val defaultCreatedDate = LocalDateTime.parse("2023-07-28T08:00:00.00")
+    val defaultCreatedDate: LocalDateTime = LocalDateTime.parse("2023-07-28T08:00:00.00")
 }
 
 private fun String.jsonB() = PGobject().apply {

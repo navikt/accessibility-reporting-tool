@@ -1,9 +1,5 @@
 package accessibility.reporting.tool.wcag
 
-import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.perceivable
-import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.understandable
-
-
 class SuccessCriterionInfo {
     lateinit var name: String
     lateinit var description: String
