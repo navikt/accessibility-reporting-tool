@@ -15,25 +15,26 @@ class ReportRepository(val database: Database) {
         //TODO: changelog
         database.update {
             queryOf(
-                """insert into report (report_id,report_data) 
-                    values (:id, :data) on conflict (report_id) do update set report_data=:data
-
+                """insert into report (report_id,report_data,created, last_changed) 
+                    values (:id, :data, :created, :lastChanged) on conflict (report_id) do update 
+                    | set report_data=:data, last_changed=:lastChanged
                 """.trimMargin(),
                 mapOf(
                     "id" to report.reportId,
-                    "data" to report.toJson().jsonB()
+                    "data" to report.toJson().jsonB(),
+                    "created" to report.created,
+                    "lastChanged" to report.lastChanged
                 )
             )
 
         }
-        // if we cant put-get we're screwed anyway
         return getReport(reportId = report.reportId)!!
     }
 
     fun getReport(reportId: String): Report? =
         database.query {
             queryOf(
-                "select report_data ->> 'version' as version, report_data from report where report_id=:reportid",
+                "select created, last_changed, report_data ->> 'version' as version, report_data from report where report_id=:reportid",
                 mapOf("reportid" to reportId)
             ).map { row -> report(row) }.asSingle
         }
@@ -47,7 +48,7 @@ class ReportRepository(val database: Database) {
         }.let { orgUnit ->
             val reports = if (orgUnit == null) emptyList() else database.list {
                 queryOf(
-                    """select report_data ->> 'version' as version, report_data 
+                    """select created, last_changed,report_data ->> 'version' as version, report_data 
                     |from report
                     |where report_data -> 'organizationUnit' ->> 'id' = :id """.trimMargin(),
                     mapOf("id" to id)
@@ -59,7 +60,7 @@ class ReportRepository(val database: Database) {
 
     fun getReportsForUser(userEmail: String): List<Report> = database.list {
         queryOf(
-            "select report_data ->> 'version' as version, report_data from report where report_data -> 'user'->>'email'=:email ",
+            "select created, last_changed, report_data ->> 'version' as version, report_data from report where report_data -> 'user'->>'email'=:email ",
             mapOf("email" to userEmail)
         ).map { row -> report(row) }.asList
     }
@@ -67,7 +68,7 @@ class ReportRepository(val database: Database) {
     fun getReports(): List<Report> =
         database.list {
             queryOf(
-                "select report_data ->> 'version' as version, report_data from report"
+                "select created, last_changed,report_data ->> 'version' as version, report_data from report"
             ).map { row -> report(row) }.asList
         }
 
@@ -112,7 +113,13 @@ class ReportRepository(val database: Database) {
             .asList
     }
 
-    private fun report(row: Row) = Version.valueOf(row.string("version")).deserialize(row.string("report_data"))
+    private fun report(row: Row) = Version.valueOf(row.string("version"))
+        .deserialize(
+            row.string("report_data"),
+            row.localDateTimeOrNull("created") ?: LocalDateTimeHelper.defaultCreatedDate,
+            row.localDateTimeOrNull("last_changed") ?: LocalDateTimeHelper.defaultCreatedDate
+        )
+
     private fun organizationUnit(row: Row) = OrganizationUnit(
         id = row.string("organization_unit_id"),
         name = row.string("name"),
@@ -122,7 +129,9 @@ class ReportRepository(val database: Database) {
 }
 
 object LocalDateTimeHelper {
+
     fun nowAtUtc(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
+    val defaultCreatedDate = LocalDateTime.parse("2023-07-28T08:00:00.00")
 }
 
 private fun String.jsonB() = PGobject().apply {

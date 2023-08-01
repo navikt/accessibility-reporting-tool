@@ -1,6 +1,8 @@
 package accessibility.reporting.tool
 
+import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Version
@@ -43,7 +45,9 @@ class ReportRoutesTest {
                 testData = null,
                 user = User(email = "tadda", name = "tadda"),
                 successCriteria = Version.V1.criteria,
-                filters = mutableListOf()
+                filters = mutableListOf(),
+                created = LocalDateTimeHelper.nowAtUtc(),
+                lastChanged = LocalDateTimeHelper.nowAtUtc()
             )
         )
 

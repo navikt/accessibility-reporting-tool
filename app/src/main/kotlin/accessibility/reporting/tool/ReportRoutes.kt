@@ -1,6 +1,7 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
@@ -87,7 +88,9 @@ fun Route.reports(repository: ReportRepository) {
                     testData = oldReport.testData,
                     url = oldReport.url,
                     user = call.user,
-                    version = Version.V1
+                    version = Version.V1,
+                    created = oldReport.created,
+                    lastChanged = LocalDateTimeHelper.nowAtUtc()
                 )
             )
             if (status == "non compliant") {
@@ -126,7 +129,9 @@ fun Route.reports(repository: ReportRepository) {
                         testData = null,
                         url = url,
                         user = call.user,
-                        version = Version.V1
+                        version = Version.V1,
+                        created = LocalDateTimeHelper.nowAtUtc(),
+                        lastChanged = LocalDateTimeHelper.nowAtUtc()
                     )
                 )
                 call.response.header("HX-Redirect", "/reports/$newReportId")

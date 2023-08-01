@@ -167,7 +167,9 @@ class ReportRepositoryTest {
         testData = null,
         user = User(email = testUserEmail, name = testUserName),
         successCriteria = Version.V1.criteria,
-        filters = mutableListOf()
+        filters = mutableListOf(),
+        lastChanged = LocalDateTimeHelper.nowAtUtc(),
+        created = LocalDateTimeHelper.nowAtUtc()
     )
 }
 
