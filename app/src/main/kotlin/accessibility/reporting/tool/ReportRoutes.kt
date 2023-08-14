@@ -76,7 +76,7 @@ fun Route.reports(repository: ReportRepository) {
                         breakingTheLaw = breakingTheLaw ?: criteria.breakingTheLaw,
                         lawDoesNotApply = lawDoesNotApply ?: criteria.lawDoesNotApply,
                         tooHardToComply = tooHardToComply ?: criteria.tooHardToComply
-                    )
+                    )?.apply { wcagLevel = criteria.wcagLevel }
                         ?: throw IllegalArgumentException("ukjent successkriterie")
                 }
 
