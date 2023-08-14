@@ -153,6 +153,7 @@ fun UL.reportListItem(report: Report) {
         button {
             hxDelete("/reports/${report.reportId}")
             hxSwapOuter()
+            hxConfirm("Er du sikker på at du vill slette denne erklæringen?")
             hxTarget(".report-list")
             +"Slett"
         }
