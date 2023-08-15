@@ -57,7 +57,7 @@ fun FlowContent.disclosureArea(
 }
 
 fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
-    div(classes = "radiogroup") {
+    div(classes = "radio-with-label") {
         input {
             id = "${sc.number}-${value_}"
             type = InputType.radio
@@ -77,14 +77,16 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
 fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     successCriterionInformation(sc)
     form(classes = sc.cssClass()) {
+        attributes["data-hx-trigger"] = "change from: .${sc.cssClass()} label"
+        hxPost("/reports/submit/${reportId}")
+        hxTarget(".${sc.cssClass()}")
+        hxSelect("form")
+        hxSwapOuter()
+        attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
         div {
             fieldSet {
-                hxPost("/reports/submit/${reportId}")
-                hxTarget(".${sc.cssClass()}")
-                hxSelect("form")
-                hxSwapOuter()
                 attributes["name"] = "status"
-                attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
+
                 legend { +"Oppfyller alt innhold på siden kravet?" }
                 statusRadio(sc, "compliant", Status.COMPLIANT, "Ja")
                 statusRadio(sc, "non compliant", Status.NON_COMPLIANT, "Nei")
