@@ -13,11 +13,12 @@ class ReportRepository(val database: Database) {
 
     fun upsertReport(report: Report): Report {
         //TODO: changelog
-        database.update {
+        val reports = database.query {
             queryOf(
                 """insert into report (report_id,report_data,created, last_changed) 
                     values (:id, :data, :created, :lastChanged) on conflict (report_id) do update 
                     | set report_data=:data, last_changed=:lastChanged
+                    | returning created, last_changed, report_data ->> 'version' as version, report_data,(select report_data from report where report_id=:id) as old_data
                 """.trimMargin(),
                 mapOf(
                     "id" to report.reportId,
@@ -25,10 +26,23 @@ class ReportRepository(val database: Database) {
                     "created" to report.created,
                     "lastChanged" to report.lastChanged
                 )
-            )
-
+            ).map { row ->
+                Pair(report(row), row.stringOrNull("old_data"))
+            }.asSingle
         }
-        return getReport(reportId = report.reportId)!!
+        val newReport = reports!!.first
+        database.update {
+            queryOf(
+                """insert into changelog (report_id, time,old_data,new_data) values (:reportId, :timeOfUpdate,:oldData, :newData)""".trimMargin(),
+                mapOf(
+                    "reportId" to newReport.reportId,
+                    "timeOfUpdate" to newReport.lastChanged,
+                    "oldData" to reports.second?.jsonB(),
+                    "newData" to newReport.toJson().jsonB()
+                )
+            )
+        }
+        return reports!!.first
     }
 
     fun getReport(reportId: String): Report? =

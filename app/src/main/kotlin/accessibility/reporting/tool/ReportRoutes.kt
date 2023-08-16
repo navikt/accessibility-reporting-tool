@@ -12,7 +12,9 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import java.lang.IllegalArgumentException
+import java.time.LocalDateTime
 import java.util.UUID
+
 
 fun Route.reports(repository: ReportRepository) {
 
@@ -26,22 +28,18 @@ fun Route.reports(repository: ReportRepository) {
             call.respondHtmlContent("Tilgjengelighetsærklæring") {
                 main {
                     h1 { +"Tilgjengelighetserklæring" }
-                    p {
-                        +"Løsning: ${report.url}"
-                    }
-                    p {
-                        +"Status: ${report.status()}"
-                    }
-                    p {
-                        +"Ansvarlig: ${report.user.email}"
-                    }
-
-                    p {
-                        +"Organisasjonsenhet/team: "
-                        report.organizationUnit?.let { org ->
-                            a {
-                                href = "/orgunit/${org.id}"
-                                +org.name
+                    div(classes = "statement-metadata") {
+                        statementMetadata("Løsning", report.url)
+                        statementMetadata("Status", report.status())
+                        statementMetadata("Sist oppdatert", report.lastChanged.displayFormat())
+                        statementMetadata("Ansvarlig", report.user.email)
+                        p {
+                            span(classes = "bold") { +"Organisasjonsenhet/team: " }
+                            report.organizationUnit?.let { org ->
+                                a {
+                                    href = "/orgunit/${org.id}"
+                                    +org.name
+                                }
                             }
                         }
                     }
@@ -186,3 +184,5 @@ fun Route.reports(repository: ReportRepository) {
         }
     }
 }
+
+private fun LocalDateTime.displayFormat(): String = "$dayOfMonth.$monthValue.$year"

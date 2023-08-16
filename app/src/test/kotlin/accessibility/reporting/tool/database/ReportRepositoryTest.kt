@@ -59,8 +59,15 @@ class ReportRepositoryTest {
             this.successCriteria.size shouldBe 49
         }
         repository.upsertReport(testReport)
-        //TODO: test på kopi
+        repository.upsertReport(testReport)
         repository.getReport(testReport.reportId).assert { require(this != null) }
+        database.list {
+            queryOf(
+                "SELECT * from changelog where report_id=:id",
+                mapOf("id" to testReport.reportId)
+            ).map { row -> row.string("report_id") }.asList
+        }.size shouldBe 3
+
     }
 
     @Test

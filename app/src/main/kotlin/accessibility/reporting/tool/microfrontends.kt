@@ -148,6 +148,12 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     }
 }
 
+internal fun DIV.statementMetadata(label: String, value: String) {
+    p {
+        span(classes = "bold") { +"$label: " }
+        span { +value }
+    }
+}
 
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")

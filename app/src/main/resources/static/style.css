@@ -49,3 +49,12 @@ button {
 .report-info p{
     margin-bottom: 8px;
 }
+
+.statement-metadata p{
+    margin-bottom: 16px;
+}
+
+.statement-metadata .bold{
+    font-weight: bold;
+}
+

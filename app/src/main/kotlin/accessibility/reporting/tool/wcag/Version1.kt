@@ -409,24 +409,23 @@ object Version1 {
     )
 
     fun updateCriterion(originalSuccessCriterion: SuccessCriterion): SuccessCriterion {
-        val updatedCriterion = criteria
-            .find { it.number.trimMargin() == originalSuccessCriterion.number.trimMargin() }
-        return if (updatedCriterion == null) {
+        val templateCriteria = criteria
+            .find { it.number.trimEnd() == originalSuccessCriterion.number.trimEnd() }
+        return if (templateCriteria == null) {
             log.warn { "Fant ikke suksesskriterie med nummer ${originalSuccessCriterion.number} i Version1.criteria liste" }
             originalSuccessCriterion
         } else {
             //TODO: legg til andre felt som evt blir oppdatert
             originalSuccessCriterion.copy(
-                name = updatedCriterion.name,
-                description = updatedCriterion.description,
-                wcagUrl = updatedCriterion.wcagUrl,
-                helpUrl = updatedCriterion.helpUrl
+                name = templateCriteria.name,
+                description = templateCriteria.description,
+                wcagUrl = templateCriteria.wcagUrl,
+                helpUrl = templateCriteria.helpUrl
             ).apply {
-                wcagLevel = updatedCriterion.wcagLevel
+                wcagLevel = templateCriteria.wcagLevel
             }
         }
     }
-
 
 }
 
