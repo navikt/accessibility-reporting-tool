@@ -17,7 +17,7 @@ summary {
     margin: 0 0 16px 0;
 }
 
-.radiogroup label {
+.radio-with-label label {
     display: inline;
 }
 
