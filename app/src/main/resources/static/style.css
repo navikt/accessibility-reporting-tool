@@ -1,76 +1,92 @@
 label {
-    display: block;
+  display: block;
 }
 
 body {
-    font-family: "Source Sans Pro", Arial, sans-serif;
-    line-height: 1.333;
-    font-size: 1.125rem
+  font-family: "Source Sans Pro", Arial, sans-serif;
+  line-height: 1.333;
+  font-size: 1.125rem;
 }
 
 body {
-    max-width: 50rem;
-    margin: 1rem auto;
+  max-width: 50rem;
+  margin: 1rem auto;
 }
 
 summary {
-    margin: 0 0 16px 0;
+  margin: 0 0 16px 0;
 }
 
 .radio-with-label label {
-    display: inline;
+  display: inline;
 }
 
 * {
-    color: #333;
+  color: #333;
 }
 
 nav {
-    border-bottom: #335ea8 solid 3px;
+  border-bottom: #335ea8 solid 3px;
 }
 
 nav ul li {
-    display: inline-block;
-    margin-left: 32px;
+  display: inline-block;
+  margin-left: 32px;
 }
 
 button {
-    margin-left: 24px;
+  margin-left: 24px;
 }
 
 .report-info {
-    margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 
-.report-info a{
-    display: block;
+.report-info a {
+  display: block;
 }
 
-.report-info p{
-    margin-bottom: 8px;
+.report-info p {
+  margin-bottom: 8px;
 }
 
-.statement-metadata p{
-    margin-bottom: 16px;
+.statement-metadata p {
+  margin-bottom: 16px;
+}
+.non-compliant-icon {
+  background: #ba0c13;
 }
 
-.statement-metadata .bold{
-    font-weight: bold;
+.statement-metadata .bold {
+  font-weight: bold;
+}
+.compliant-icon {
+  background: #2b883a;
 }
 
-.criterion-status h2{
-    display: inline-block;
-    margin-bottom: 4px;
-    font-size: 1.3em;
+.criterion-status h2 {
+  display: inline-block;
+  margin-bottom: 4px;
+  font-size: 1.3em;
+}
+.too-hard-icon {
+  background: #595959;
 }
 
-.criterion-status p{
+.criterion-status p {
   margin-top: 0;
+}
+.not-tested-icon {
+  background: #c07414;
 }
 
 .criterion-status h3 {
-    margin: 0;
+  margin: 0;
 }
 .criterion-status ul {
-    margin: 0;
+  margin: 0;
+}
+.icon {
+  height: 40px;
+  width: 40px;
 }

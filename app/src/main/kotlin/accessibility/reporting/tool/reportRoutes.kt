@@ -40,7 +40,10 @@ fun Route.reports(repository: ReportRepository) {
                         statementContributors(report.contributers)
                         statementOrganizationUnit(report.organizationUnit)
                     }
-                    div { report.successCriteria.map { a11yForm(it, id) } }
+                    summary(report)
+                    div {
+                        report.successCriteria.map { a11yForm(it, id) }
+                    }
                 }
             }
         }
@@ -79,7 +82,8 @@ fun Route.reports(repository: ReportRepository) {
                 // .div because I cannot find a .fragment or similar.
                 // This means that you have to hx-select on the other end
                 fun response() = createHTML().div {
-                    a11yForm(report.findCriterion(criterionNumber), id)
+
+                    a11yForm(report.findCriterion(index), id)
                 }
                 call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
             } else {

@@ -1,6 +1,7 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
 import accessibility.reporting.tool.wcag.Status.NOT_TESTED
@@ -11,8 +12,7 @@ import kotlinx.html.*
 
 fun HEAD.headContent(title: String) {
     meta { charset = "UTF-8" }
-    style {
-    }
+    style {}
     title { +"${title}" }
     script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
 
@@ -29,12 +29,7 @@ fun HEAD.headContent(title: String) {
 }
 
 fun FlowContent.disclosureArea(
-    sc: SuccessCriterion,
-    reportId: String,
-    text: String,
-    summary: String,
-    description: String,
-    dataName: String
+    sc: SuccessCriterion, reportId: String, text: String, summary: String, description: String, dataName: String
 ) {
     details {
         open = text.isNotEmpty()
@@ -109,13 +104,9 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                     "breaking-the-law"
                 )
                 disclosureArea(
-                    sc,
-                    reportId,
-                    sc.lawDoesNotApply,
-                    "Det er innhold i på siden som ikke er underlagt kravet.",
+                    sc, reportId, sc.lawDoesNotApply, "Det er innhold i på siden som ikke er underlagt kravet.",
 
-                    "Hvilket innhold er ikke underlagt kravet?",
-                    "law-does-not-apply"
+                    "Hvilket innhold er ikke underlagt kravet?", "law-does-not-apply"
                 )
                 disclosureArea(
                     sc,
@@ -174,7 +165,10 @@ fun UL.criterionIssues(heading: String, issueList: List<String>) {
 
 private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     div(classes = "report-info") {
-        h2 { +"${sc.number} ${sc.name}" }
+        h2 {
+            id = "${sc.number}-${sc.name}"
+            +"${sc.number} ${sc.name}"
+        }
         p { +sc.description }
         sc.helpUrl?.let {
             a {
@@ -203,8 +197,7 @@ internal fun DIV.statementMetadata(label: String, value: String) {
     }
 }
 
-fun SuccessCriterion.cssClass() =
-    "f" + this.successCriterionNumber.replace(".", "-")
+fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
 
 fun BODY.navbar() {
     nav {
@@ -224,5 +217,15 @@ fun UL.hrefListItem(listHref: String, text: String) {
             +text
         }
     }
+}
 
+    fun MAIN.summary(report: Report) {
+    div(classes = "summary") {
+        report.successCriteria.forEach({
+            a {
+                href = "#${it.number}-${it.name}"
+                unsafe { +toIcon(it) }
+            }
+        })
+    }
 }
