@@ -1,6 +1,8 @@
 package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.wcag.Status.*
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
@@ -8,6 +10,8 @@ import accessibility.reporting.tool.wcag.Version.V1
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.ktor.server.application.*
+import java.lang.IllegalArgumentException
 import java.time.LocalDateTime
 
 
@@ -76,6 +80,35 @@ class Report(
 
         else -> "Ukjent"
     }
+
+    fun updateCriteria(
+        criterionNumber: String,
+        statusString: String,
+        breakingTheLaw: String?,
+        lawDoesNotApply: String?,
+        tooHardToComply: String?
+    ): SuccessCriterion =
+        successCriteria.find { it.successCriterionNumber == criterionNumber }.let { criteria ->
+            criteria?.copy(
+                status = Status.undisplay(statusString),
+                breakingTheLaw = breakingTheLaw ?: criteria.breakingTheLaw,
+                lawDoesNotApply = lawDoesNotApply ?: criteria.lawDoesNotApply,
+                tooHardToComply = tooHardToComply ?: criteria.tooHardToComply
+            )?.apply { wcagLevel = criteria.wcagLevel }
+        } ?: throw IllegalArgumentException("ukjent successkriterie")
+
+    fun withUpdatedCriterion(criterion: SuccessCriterion, user: User): Report = Report(
+        organizationUnit = organizationUnit,
+        reportId = reportId,
+        successCriteria = successCriteria.map { if (it.number == criterion.number) criterion else it },
+        testData = testData,
+        url = url,
+        user = user,
+        version = version,
+        created = created,
+        lastChanged = LocalDateTimeHelper.nowAtUtc()
+    )
+
 }
 
 private val Int.punkter: String

@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
-import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
@@ -43,9 +42,7 @@ fun Route.reports(repository: ReportRepository) {
                             }
                         }
                     }
-                    div {
-                        report.successCriteria.map { a11yForm(it, id) }
-                    }
+                    div { report.successCriteria.map { a11yForm(it, id) } }
                 }
             }
         }
@@ -55,12 +52,7 @@ fun Route.reports(repository: ReportRepository) {
             repository.deleteReport(id)
             val reports = repository.getReportsForUser(call.user.email)
             fun response() = createHTML().ul(classes = "report-list") {
-                reports.map {
-                    reportListItem(
-                        it,
-                        true
-                    )
-                }
+                reports.map { report -> reportListItem(report, true) }
             }
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
@@ -69,45 +61,32 @@ fun Route.reports(repository: ReportRepository) {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val formParameters = call.receiveParameters()
             val status = formParameters["status"].toString()
-            val index = formParameters["index"].toString()
+            val criterionNumber = formParameters["index"].toString()
             val breakingTheLaw = formParameters["breaking-the-law"]
             val lawDoesNotApply = formParameters["law-does-not-apply"]
             val tooHardToComply = formParameters["too-hard-to-comply"]
             val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
             val criterion: SuccessCriterion =
-                oldReport.successCriteria.find { it.successCriterionNumber == index }.let { criteria ->
-                    criteria?.copy(
-                        status = Status.undisplay(status),
-                        breakingTheLaw = breakingTheLaw ?: criteria.breakingTheLaw,
-                        lawDoesNotApply = lawDoesNotApply ?: criteria.lawDoesNotApply,
-                        tooHardToComply = tooHardToComply ?: criteria.tooHardToComply
-                    )?.apply { wcagLevel = criteria.wcagLevel }
-                        ?: throw IllegalArgumentException("ukjent successkriterie")
-                }
-
-            val report = repository.upsertReport(
-                Report(
-                    organizationUnit = oldReport.organizationUnit,
-                    reportId = id,
-                    successCriteria = oldReport.successCriteria.map { if (it.number == criterion.number) criterion else it },
-                    testData = oldReport.testData,
-                    url = oldReport.url,
-                    user = call.user,
-                    version = Version.V1,
-                    created = oldReport.created,
-                    lastChanged = LocalDateTimeHelper.nowAtUtc()
+                oldReport.updateCriteria(
+                    criterionNumber = criterionNumber,
+                    statusString = status,
+                    breakingTheLaw = breakingTheLaw,
+                    lawDoesNotApply = lawDoesNotApply,
+                    tooHardToComply = tooHardToComply
                 )
-            )
+            val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
+
+
             if (status == "non compliant") {
                 // .div because I cannot find a .fragment or similar.
                 // This means that you have to hx-select on the other end
                 fun response() = createHTML().div {
-                    a11yForm(report.findCriterion(index), id)
+                    a11yForm(report.findCriterion(criterionNumber), id)
                 }
                 call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
             } else {
                 fun response() = createHTML().div {
-                    a11yForm(report.findCriterion(index), id)
+                    a11yForm(report.findCriterion(criterionNumber), id)
                 }
                 call.respondText(
                     contentType = ContentType.Text.Html,
@@ -124,21 +103,8 @@ fun Route.reports(repository: ReportRepository) {
                 val organizationUnit = formParameters["orgunit"].toString().let { id ->
                     repository.getOrganizationUnit(id)
                 }
-
                 val newReportId = UUID.randomUUID().toString()
-                repository.upsertReport(
-                    Report(
-                        organizationUnit = organizationUnit,
-                        reportId = newReportId,
-                        successCriteria = Version1.criteria,
-                        testData = null,
-                        url = url,
-                        user = call.user,
-                        version = Version.V1,
-                        created = LocalDateTimeHelper.nowAtUtc(),
-                        lastChanged = LocalDateTimeHelper.nowAtUtc()
-                    )
-                )
+                repository.upsertReport(Version1.newReport(organizationUnit, newReportId, url, call.user))
                 call.response.header("HX-Redirect", "/reports/$newReportId")
                 call.respond(HttpStatusCode.Created)
             }

@@ -163,30 +163,20 @@ fun SuccessCriterion.cssClass() =
 fun BODY.navbar() {
     nav {
         ul {
-            li {
-                a {
-                    href = "/"
-                    +"Forside"
-                }
-            }
-            li {
-                a {
-                    href = "/orgunit"
-                    +"Organisasjonsenheter"
-                }
-            }
-            li {
-                a {
-                    href = "/user"
-                    +"Dine erklæringer"
-                }
-            }
-            li {
-                a {
-                    href = "/oauth2/logout"
-                    +"Logg ut"
-                }
-            }
+            hrefListItem("/","Forside")
+            hrefListItem("/orgunit","Organisasjonsenheter")
+            hrefListItem("/user","Dine erklæringer")
+            hrefListItem("/oauth2/logout", "Logg ut")
         }
     }
+}
+
+fun UL.hrefListItem(listHref: String, text: String) {
+    li {
+        a {
+            href = listHref
+            +text
+        }
+    }
+
 }

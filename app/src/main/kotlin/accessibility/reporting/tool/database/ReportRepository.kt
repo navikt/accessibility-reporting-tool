@@ -42,7 +42,7 @@ class ReportRepository(val database: Database) {
                 )
             )
         }
-        return reports!!.first
+        return reports.first
     }
 
     fun getReport(reportId: String): Report? =

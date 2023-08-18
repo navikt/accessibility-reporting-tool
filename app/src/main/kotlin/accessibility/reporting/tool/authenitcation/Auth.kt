@@ -47,7 +47,7 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
                 )
             }
 
-            challenge { defaultScheme, realm ->
+            challenge { _, _ ->
                 call.respond(HttpStatusCode.Unauthorized)
             }
         }
@@ -56,11 +56,10 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
 
 data class User(val email: String, val name: String?) : Principal
 
-
-class AzureAuthContext() {
+class AzureAuthContext {
     var issuer: String = System.getenv("AZURE_OPENID_CONFIG_ISSUER") ?: ""
     val azureClientId: String = getAzureEnvVar("AZURE_APP_CLIENT_ID")
-    val azureWellKnownUrl: String = getAzureEnvVar("AZURE_APP_WELL_KNOWN_URL")
+    private val azureWellKnownUrl: String = getAzureEnvVar("AZURE_APP_WELL_KNOWN_URL")
 
     private val httpClient = HttpClient(CIO) {
         install(ContentNegotiation) {

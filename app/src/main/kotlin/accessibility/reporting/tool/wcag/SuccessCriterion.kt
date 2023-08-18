@@ -49,7 +49,7 @@ data class SuccessCriterion(
                 helpUrl = rawJson["helpUrl"].takeIf { !it.isNull }?.asText()
             ).apply {
                 wcagLevel =
-                    rawJson["wcagLevel"]?.takeIf { this != null && !it.isNull }?.asText()
+                    rawJson["wcagLevel"]?.takeIf { !it.isNull }?.asText()
                         ?.let { WcagLevel.valueOf(it) } ?: WcagLevel.UNKNOWN
             }.let {
                 if(isStale)

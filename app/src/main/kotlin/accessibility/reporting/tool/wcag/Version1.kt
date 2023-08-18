@@ -1,5 +1,7 @@
 package accessibility.reporting.tool.wcag
 
+import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.operable
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.perceivable
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.robust
@@ -32,6 +34,18 @@ val log = KotlinLogging.logger { }
 
 object Version1 {
     val lastTextUpdate = LocalDateTime.parse("2023-08-01T17:24:00.00")
+
+    fun newReport(organizationUnit: OrganizationUnit?, reportId: String, url: String, user: User) = Report(
+        organizationUnit = organizationUnit,
+        reportId = reportId,
+        successCriteria = Version1.criteria,
+        testData = null,
+        url = url,
+        user = user,
+        version = Version.V1,
+        created = LocalDateTimeHelper.nowAtUtc(),
+        lastChanged = LocalDateTimeHelper.nowAtUtc()
+    )
 
     private object ContectGroups {
         const val ikonerBilderGrafer = "Ikoner, bilder, grafer"
