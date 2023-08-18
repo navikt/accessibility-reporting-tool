@@ -10,8 +10,7 @@ import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.css.body
-import kotlinx.css.form
+import kotlinx.css.*
 import kotlinx.html.*
 
 
@@ -29,16 +28,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         +"epost: ${orgUnit.email}"
                     }
                     h2 { +"Tilgjengelighetserklæringer" }
-                    ul {
-                        reports.forEach { report ->
-                            li {
-                                a {
-                                    href = "/reports/${report.reportId}"
-                                    +report.url
-                                }
-                            }
-                        }
-                    }
+                    ul { reports.forEach { report -> reportListItem(report) } }
                 }
             } ?: run { call.respond(HttpStatusCode.NotFound) }
         }
@@ -140,11 +130,11 @@ fun Route.userRoute(repository: ReportRepository) {
     }
 }
 
-fun UL.reportListItem(report: Report) {
+fun UL.reportListItem(report: Report, allowDelete: Boolean = false) {
     li {
         a {
-            href = "reports/${report.reportId}"
-            +"${report.url}"
+            href = "/reports/${report.reportId}"
+            +report.url
         }
         button {
             hxDelete("/reports/${report.reportId}")

@@ -54,7 +54,14 @@ fun Route.reports(repository: ReportRepository) {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             repository.deleteReport(id)
             val reports = repository.getReportsForUser(call.user.email)
-            fun response() = createHTML().ul(classes = "report-list") { reports.map { reportListItem(it) } }
+            fun response() = createHTML().ul(classes = "report-list") {
+                reports.map {
+                    reportListItem(
+                        it,
+                        true
+                    )
+                }
+            }
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 

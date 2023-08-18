@@ -45,7 +45,7 @@ suspend fun ApplicationCall.respondHtmlContent(title: String, contenbuilder: BOD
         lang = "no"
         head { headContent(title) }
         body {
-            navbar(user.email)
+            navbar()
             contenbuilder()
         }
 

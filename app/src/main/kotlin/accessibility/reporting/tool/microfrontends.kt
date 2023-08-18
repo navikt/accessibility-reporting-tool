@@ -160,7 +160,7 @@ internal fun DIV.statementMetadata(label: String, value: String) {
 fun SuccessCriterion.cssClass() =
     "f" + this.successCriterionNumber.replace(".", "-")
 
-fun BODY.navbar(email: String) {
+fun BODY.navbar() {
     nav {
         ul {
             li {
@@ -184,7 +184,7 @@ fun BODY.navbar(email: String) {
             li {
                 a {
                     href = "/oauth2/logout"
-                    +"Logg ut ($email)"
+                    +"Logg ut"
                 }
             }
         }
