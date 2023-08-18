@@ -6,10 +6,10 @@ import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.operable
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.perceivable
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.robust
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.understandable
-import accessibility.reporting.tool.wcag.Version1.ContectGroups.ikonerBilderGrafer
-import accessibility.reporting.tool.wcag.Version1.ContectGroups.lydVideoAnimasjoner
-import accessibility.reporting.tool.wcag.Version1.ContectGroups.skjema
-import accessibility.reporting.tool.wcag.Version1.ContectGroups.tastatur
+import accessibility.reporting.tool.wcag.Version1.ContentGroups.ikonerBilderGrafer
+import accessibility.reporting.tool.wcag.Version1.ContentGroups.lydVideoAnimasjoner
+import accessibility.reporting.tool.wcag.Version1.ContentGroups.skjema
+import accessibility.reporting.tool.wcag.Version1.ContentGroups.tastatur
 import accessibility.reporting.tool.wcag.Version1.Guidelines.`1-1 Tekstalternativer`
 import accessibility.reporting.tool.wcag.Version1.Guidelines.`1-2 Tidsbaserte medier`
 import accessibility.reporting.tool.wcag.Version1.Guidelines.`1-3 Mulig å tilpasse`
@@ -33,12 +33,12 @@ import java.time.LocalDateTime
 val log = KotlinLogging.logger { }
 
 object Version1 {
-    val lastTextUpdate = LocalDateTime.parse("2023-08-01T17:24:00.00")
+    val lastTextUpdate: LocalDateTime = LocalDateTime.parse("2023-08-01T17:24:00.00")
 
     fun newReport(organizationUnit: OrganizationUnit?, reportId: String, url: String, user: User) = Report(
         organizationUnit = organizationUnit,
         reportId = reportId,
-        successCriteria = Version1.criteria,
+        successCriteria = criteriaTemplate,
         testData = null,
         url = url,
         user = user,
@@ -47,7 +47,7 @@ object Version1 {
         lastChanged = LocalDateTimeHelper.nowAtUtc()
     )
 
-    private object ContectGroups {
+    private object ContentGroups {
         const val ikonerBilderGrafer = "Ikoner, bilder, grafer"
         const val lydVideoAnimasjoner = "Lyd, video, animasjoner"
         const val skjema = "Skjema"
@@ -77,7 +77,7 @@ object Version1 {
         const val `4-1 Kompatibel` = "4.1 Kompatibel"
     }
 
-    val criteria = listOf(
+    val criteriaTemplate = listOf(
         //1.1 Non-text Content
         1.perceivable("1.1.1", "Ikke-tekstlig innhold") {
             description = "Gi brukeren et tekstalternativ for innhold som ikke er tekst."
@@ -423,7 +423,7 @@ object Version1 {
     )
 
     fun updateCriterion(originalSuccessCriterion: SuccessCriterion): SuccessCriterion {
-        val templateCriteria = criteria
+        val templateCriteria = criteriaTemplate
             .find { it.number.trimEnd() == originalSuccessCriterion.number.trimEnd() }
         return if (templateCriteria == null) {
             log.warn { "Fant ikke suksesskriterie med nummer ${originalSuccessCriterion.number} i Version1.criteria liste" }

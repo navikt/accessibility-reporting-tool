@@ -67,14 +67,14 @@ fun Route.reports(repository: ReportRepository) {
             val tooHardToComply = formParameters["too-hard-to-comply"]
             val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
             val criterion: SuccessCriterion =
-                oldReport.updateCriteria(
+                oldReport.updateCriterion(
                     criterionNumber = criterionNumber,
                     statusString = status,
                     breakingTheLaw = breakingTheLaw,
                     lawDoesNotApply = lawDoesNotApply,
                     tooHardToComply = tooHardToComply
                 )
-            val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
+            val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion))
 
 
             if (status == "non compliant") {
