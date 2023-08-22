@@ -50,7 +50,7 @@ fun Route.reports(repository: ReportRepository) {
         delete("/{id}") {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             repository.deleteReport(id)
-            val reports = repository.getReportsForUser(call.user.email)
+            val reports = repository.getReportsForUser(call.user.oid!!) //TODO fjern
             fun response() = createHTML().ul(classes = "report-list") {
                 reports.map { report -> reportListItem(report, true) }
             }
@@ -74,7 +74,7 @@ fun Route.reports(repository: ReportRepository) {
                     lawDoesNotApply = lawDoesNotApply,
                     tooHardToComply = tooHardToComply
                 )
-            val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion))
+            val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
 
 
             if (status == "non compliant") {

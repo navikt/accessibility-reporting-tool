@@ -72,10 +72,14 @@ class ReportRepository(val database: Database) {
             Pair(orgUnit, reports)
         }
 
-    fun getReportsForUser(userEmail: String): List<Report> = database.list {
+    fun getReportsForUser(oid: String): List<Report> = database.list {
+        //tmp fiks
         queryOf(
-            "select created, last_changed, report_data ->> 'version' as version, report_data from report where report_data -> 'user'->>'email'=:email ",
-            mapOf("email" to userEmail)
+            """select created, last_changed, report_data ->> 'version' as version, report_data from report
+                | where report_data -> 'user'->>'email'=:oid OR report_data -> 'user'->>'oid'=:oid""".trimMargin(),
+            mapOf(
+                "oid" to oid
+            )
         ).map { row -> report(row) }.asList
     }
 

@@ -12,7 +12,7 @@ import java.util.UUID
 
 class ReportTest {
     private val testOrg = OrganizationUnit.createNew(name = "Test organisasjonsenhet", email = "test@nav.no")
-    private val testUser = User("testuser@nav.no", "Test User")
+    private val testUser = User("testuser@nav.no", "Test User", UUID.randomUUID().toString())
 
     @Test
     fun `Finner kriterie basert på nummer`() {
@@ -43,7 +43,7 @@ class ReportTest {
             breakingTheLaw = "not cool"
         )
 
-        val updatedReport = testReport.withUpdatedCriterion(testUpdatedCriterion)
+        val updatedReport = testReport.withUpdatedCriterion(testUpdatedCriterion,testUser)
         updatedReport.assert {
             reportId shouldBe testReport.reportId
             user shouldBe testReport.user
@@ -66,7 +66,7 @@ class ReportTest {
             status = Status.COMPLIANT
         )
 
-        updatedReport.withUpdatedCriterion(testUpdatedCriterion2).assert{
+        updatedReport.withUpdatedCriterion(testUpdatedCriterion2, testUser).assert{
             successCriteria.count { it.status != Status.NOT_TESTED } shouldBe 2
         }
 

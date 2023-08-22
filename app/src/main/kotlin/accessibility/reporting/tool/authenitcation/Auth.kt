@@ -42,8 +42,8 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
             validate { jwtCredential ->
                 User(
                     name = jwtCredential.payload.getClaim("name")?.asString(),
-                    email = jwtCredential.payload.getClaim("email")?.asString()
-                        ?: jwtCredential.payload.getClaim("oid").asString()
+                    email = jwtCredential.payload.getClaim("email")?.asString()!!,
+                    oid = jwtCredential.payload.getClaim("oid").asString()!!
                 )
             }
 
@@ -54,7 +54,7 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
     }
 }
 
-data class User(val email: String, val name: String?) : Principal
+data class User(val email: String, val name: String?, val oid: String?) : Principal
 
 class AzureAuthContext {
     var issuer: String = System.getenv("AZURE_OPENID_CONFIG_ISSUER") ?: ""

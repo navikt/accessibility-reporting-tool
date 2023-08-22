@@ -27,6 +27,7 @@ class ReportRoutesTest {
     @Disabled
     @Test
     fun `når alle rapportRuter`() = testApplication {
+        val testUserOid = UUID.randomUUID().toString()
         application {
             authentication {
                 jwt {
@@ -43,7 +44,7 @@ class ReportRoutesTest {
                 organizationUnit = null,
                 version = Version.V1,
                 testData = null,
-                user = User(email = "tadda", name = "tadda"),
+                user = User(email = "tadda", name = "tadda", oid = testUserOid),
                 successCriteria = Version.V1.criteria,
                 filters = mutableListOf(),
                 created = LocalDateTimeHelper.nowAtUtc(),

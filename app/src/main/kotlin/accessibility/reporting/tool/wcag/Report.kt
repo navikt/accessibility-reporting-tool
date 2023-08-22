@@ -48,7 +48,11 @@ class Report(
                     testData = jsonNode["testData"].takeIf { !it.isEmpty }?.let { testDataJson ->
                         TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
                     },
-                    user = User(email = jsonNode["user"]["email"].asText(), jsonNode["user"]["name"].asText()),
+                    user = User(
+                        email = jsonNode["user"]["email"].asText(),
+                        name = jsonNode["user"]["name"].asText(),
+                        oid = jsonNode["user"]["oid"]?.takeIf { !it.isNull }?.asText()
+                    ),
                     successCriteria = jsonNode["successCriteria"].map {
                         SuccessCriterion.fromJson(
                             it,
@@ -95,13 +99,13 @@ class Report(
         successCriteria.find { it.number == criterionNumber }
             ?: throw IllegalArgumentException("Criteria with number $criterionNumber does not exists")
 
-    fun withUpdatedCriterion(criterion: SuccessCriterion): Report = Report(
+    fun withUpdatedCriterion(criterion: SuccessCriterion, updateBy: User): Report = Report(
         organizationUnit = organizationUnit,
         reportId = reportId,
         successCriteria = successCriteria.map { if (it.number == criterion.number) criterion else it },
         testData = testData,
         url = url,
-        user = user,
+        user = updateBy,
         version = version,
         created = created,
         lastChanged = LocalDateTimeHelper.nowAtUtc()

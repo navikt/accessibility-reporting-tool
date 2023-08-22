@@ -104,7 +104,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
 fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
-        val reports = repository.getReportsForUser(call.user.email)
+        val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
         call.respondHtmlContent(call.user.email) {
             h1 { +"Dine tilgjengelighetserklæringer" }
             ul(classes = "report-list") {

@@ -1,7 +1,10 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.wcag.Status
+import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
+import accessibility.reporting.tool.wcag.Status.NOT_TESTED
 import accessibility.reporting.tool.wcag.SuccessCriterion
+import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import kotlinx.html.*
 
 
@@ -90,7 +93,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                 legend { +"Oppfyller alt innhold på siden kravet?" }
                 statusRadio(sc, "compliant", Status.COMPLIANT, "Ja")
                 statusRadio(sc, "non compliant", Status.NON_COMPLIANT, "Nei")
-                statusRadio(sc, "not tested", Status.NOT_TESTED, "Ikke testet")
+                statusRadio(sc, "not tested", NOT_TESTED, "Ikke testet")
                 statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen innhold")
             }
         }
@@ -122,6 +125,45 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
                     "too-hard-to-comply"
                 )
             }
+        }
+    }
+}
+
+fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
+    val notTestedCount = successCriteria.count { it.status != NOT_TESTED }
+    val generalCriteriaContent = successCriteria.first()
+
+    div {
+        h2 { +"${generalCriteriaContent.number}:${generalCriteriaContent.name} (${generalCriteriaContent.wcagLevel})" }
+        if (successCriteria.deviationCount() == 0) {
+            p { +"Ingen avvik registrert" }
+            if(notTestedCount!=0){
+                p{ +"$notTestedCount gjenstår" }
+            }
+        } else {
+            successCriteria.filter { it.status == NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
+                .map { it.breakingTheLaw }.let {
+                    h3 { +"Det er innhold på siden som bryter kravet" }
+                    ul {
+                        it.forEach { li { +it } }
+                    }
+                }
+
+            successCriteria.filter { it.status == NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
+                .map { it.lawDoesNotApply }.let {
+                    h3 { +"Det er innhold i på siden som ikke er underlagt kravet" }
+                    ul {
+                        it.forEach { li { +it } }
+                    }
+                }
+
+            successCriteria.filter { it.status == NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
+                .map { it.tooHardToComply }.let {
+                    h3 { +"Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet." }
+                    ul {
+                        it.forEach { li { +it } }
+                    }
+                }
         }
     }
 }
@@ -163,9 +205,9 @@ fun SuccessCriterion.cssClass() =
 fun BODY.navbar() {
     nav {
         ul {
-            hrefListItem("/","Forside")
-            hrefListItem("/orgunit","Organisasjonsenheter")
-            hrefListItem("/user","Dine erklæringer")
+            hrefListItem("/", "Forside")
+            hrefListItem("/orgunit", "Organisasjonsenheter")
+            hrefListItem("/user", "Dine erklæringer")
             hrefListItem("/oauth2/logout", "Logg ut")
         }
     }

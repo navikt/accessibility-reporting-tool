@@ -26,6 +26,7 @@ class ReportRepositoryTest {
     private val repository = ReportRepository(database)
     private val testUserEmail = "tadda@test.tadda"
     private val testUserName = "Tadda Taddasen"
+    private val testUserOid = UUID.randomUUID().toString()
 
     @BeforeAll
     fun setup() {
@@ -114,7 +115,7 @@ class ReportRepositoryTest {
 
 
     @Test
-    fun `get projects for unit`() {
+    fun `get reports for unit`() {
         repository.upsertReport(dummyReportV1(orgUnit = testOrg))
         repository.upsertReport(dummyReportV1("http://dummyurl2.test", testOrg))
         repository.upsertReport(dummyReportV1("http://dummyurl3.test", testOrg))
@@ -146,9 +147,22 @@ class ReportRepositoryTest {
         repository.upsertReport(dummyReportV1())
         repository.upsertReport(dummyReportV1("http://dummyurl2.test"))
         repository.upsertReport(dummyReportV1("http://dummyurl3.test"))
-        repository.upsertReport(dummyReportV1("http://dummyurl4.test"))
+        repository.upsertReport(
+            dummyReportV1(
+                url = "http://dummyurl4.test",
+                user = User(email = testUserOid, name = null, oid = null)
+            )
+        )
 
-        repository.getReportsForUser(testUserEmail).assert {
+        repository.upsertReport(
+            dummyReportV1(
+                url = "http://dummyurl4.test",
+                user = User(email = "otheruser", name = null, oid = null)
+            )
+        )
+
+
+        repository.getReportsForUser(testUserOid).assert {
             size shouldBe 4 //TODO
             withClue("Report with url dummyUrl.test is missing") {
                 any { it.url == "http://dummyurl.test" } shouldBe true
@@ -166,13 +180,17 @@ class ReportRepositoryTest {
 
     }
 
-    private fun dummyReportV1(url: String = "http://dummyurl.test", orgUnit: OrganizationUnit? = null) = Report(
+    private fun dummyReportV1(
+        url: String = "http://dummyurl.test",
+        orgUnit: OrganizationUnit? = null,
+        user: User = User(email = testUserEmail, name = testUserName, oid = testUserOid)
+    ) = Report(
         reportId = UUID.randomUUID().toString(),
         url = url,
         organizationUnit = orgUnit,
         version = Version.V1,
         testData = null,
-        user = User(email = testUserEmail, name = testUserName),
+        user = user,
         successCriteria = Version.V1.criteria,
         filters = mutableListOf(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
