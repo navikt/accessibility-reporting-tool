@@ -108,7 +108,7 @@ fun Route.userRoute(repository: ReportRepository) {
         call.respondHtmlContent(call.user.email) {
             h1 { +"Dine tilgjengelighetserklæringer" }
             ul(classes = "report-list") {
-                reports.map { report -> reportListItem(report) }
+                reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
             }
             a {
                 href = "/reports/new"

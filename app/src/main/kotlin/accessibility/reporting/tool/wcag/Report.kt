@@ -111,6 +111,8 @@ class Report(
         lastChanged = LocalDateTimeHelper.nowAtUtc()
     )
 
+    fun userIsOwner(callUser: User): Boolean = user.oid == callUser.oid ||  user.email == callUser.oid//TODO: fjern sammenligning av oid på email
+
 }
 
 private val Int.punkter: String
