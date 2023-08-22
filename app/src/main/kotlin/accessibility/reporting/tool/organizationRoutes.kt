@@ -123,7 +123,7 @@ fun UL.reportListItem(report: Report, allowDelete: Boolean = false) {
     li {
         a {
             href = "/reports/${report.reportId}"
-            +report.url
+            +(report.descriptiveName ?: report.url)
         }
         if (allowDelete)
             button {

@@ -30,6 +30,9 @@ fun Route.reports(repository: ReportRepository) {
                     h1 { +"Tilgjengelighetserklæring" }
                     div(classes = "statement-metadata") {
                         statementMetadata("Løsning", report.url)
+                        report.descriptiveName?.let {
+                            statementMetadata("Beskrivelse", it)
+                        }
                         statementMetadata("Ansvarlig", report.user.email)
                         statementMetadata("Status", report.status())
                         statementMetadata("Sist oppdatert", report.lastChanged.displayFormat())
@@ -98,8 +101,18 @@ fun Route.reports(repository: ReportRepository) {
                 val organizationUnit = formParameters["orgunit"].toString().let { id ->
                     repository.getOrganizationUnit(id)
                 }
+                val descriptiveName = formParameters["descriptive-name"].toString()
+
                 val newReportId = UUID.randomUUID().toString()
-                repository.upsertReport(Version1.newReport(organizationUnit, newReportId, url, call.user))
+                repository.upsertReport(
+                    Version1.newReport(
+                        organizationUnit,
+                        newReportId,
+                        url,
+                        call.user,
+                        descriptiveName
+                    )
+                )
                 call.response.header("HX-Redirect", "/reports/$newReportId")
                 call.respond(HttpStatusCode.Created)
             }
@@ -123,6 +136,15 @@ fun Route.reports(repository: ReportRepository) {
                                     placeholder = "Url"
                                     name = "page-url"
 
+                                }
+                            }
+                            label {
+                                +"Beskrivelse (kort)"
+                                input {
+                                    type = InputType.text
+                                    required = true
+                                    placeholder = "Beskrivelse"
+                                    name = "descriptive-name"
                                 }
                             }
                             label {

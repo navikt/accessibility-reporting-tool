@@ -35,7 +35,13 @@ val log = KotlinLogging.logger { }
 object Version1 {
     val lastTextUpdate: LocalDateTime = LocalDateTime.parse("2023-08-01T17:24:00.00")
 
-    fun newReport(organizationUnit: OrganizationUnit?, reportId: String, url: String, user: User) = Report(
+    fun newReport(
+        organizationUnit: OrganizationUnit?,
+        reportId: String,
+        url: String,
+        user: User,
+        descriptiveName: String
+    ) = Report(
         organizationUnit = organizationUnit,
         reportId = reportId,
         successCriteria = criteriaTemplate,
@@ -45,7 +51,8 @@ object Version1 {
         version = Version.V1,
         created = LocalDateTimeHelper.nowAtUtc(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
-        lastUpdatedBy = null
+        lastUpdatedBy = null,
+        descriptiveName = descriptiveName
     )
 
     private object ContentGroups {

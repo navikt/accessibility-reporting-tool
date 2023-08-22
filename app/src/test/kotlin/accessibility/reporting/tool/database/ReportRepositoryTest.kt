@@ -195,7 +195,8 @@ class ReportRepositoryTest {
         filters = mutableListOf(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         created = LocalDateTimeHelper.nowAtUtc(),
-        lastUpdatedBy = null
+        lastUpdatedBy = null,
+        descriptiveName = "Dummyname"
     )
 }
 

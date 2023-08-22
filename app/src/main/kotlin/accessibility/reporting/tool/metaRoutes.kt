@@ -26,20 +26,12 @@ fun Route.landingPage(repository: ReportRepository) {
 
             h1 { +"a11y rapporteringsverktøy for NAV" }
             h2 { +"Rapporter" }
-            ul {
-                reports.forEach { report ->
-                    li {
-                        a {
-                            href = "reports/${report.reportId}"
-                            +report.url
-                        }
-                    }
-                }
-            }
+            ul { reports.forEach { report -> reportListItem(report) } }
         }
 
     }
 }
+
 suspend fun ApplicationCall.respondHtmlContent(title: String, contenbuilder: BODY.() -> Unit) {
     respondHtml {
         lang = "no"

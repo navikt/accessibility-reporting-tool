@@ -49,7 +49,8 @@ class ReportRoutesTest {
                 filters = mutableListOf(),
                 created = LocalDateTimeHelper.nowAtUtc(),
                 lastChanged = LocalDateTimeHelper.nowAtUtc(),
-                lastUpdatedBy = null
+                lastUpdatedBy = null,
+                descriptiveName = "Somename"
             )
         )
 

@@ -16,6 +16,7 @@ import java.time.LocalDateTime
 class Report(
     val reportId: String,
     val url: String,
+    val descriptiveName: String?,
     val organizationUnit: OrganizationUnit?,
     val version: Version,
     val testData: TestData?,
@@ -39,6 +40,7 @@ class Report(
                 Report(
                     reportId = jsonNode["reportId"].asText(),
                     url = jsonNode["url"].asText(),
+                    descriptiveName = jsonNode["descriptiveName"]?.takeIf { !it.isNull }?.asText(),
                     organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }?.let { organizationJson ->
                         OrganizationUnit(
                             id = organizationJson["id"].asText(),
@@ -108,7 +110,8 @@ class Report(
         version = version,
         created = created,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
-        lastUpdatedBy = updateBy
+        lastUpdatedBy = updateBy,
+        descriptiveName = descriptiveName
     ).apply { if (!userIsOwner(updateBy)) contributers.add(updateBy) }
 
     fun userIsOwner(callUser: User): Boolean =
