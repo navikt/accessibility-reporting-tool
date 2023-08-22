@@ -38,7 +38,7 @@ class ReportRepository(val database: Database) {
                     "timeOfUpdate" to newReport.lastChanged,
                     "oldData" to reports.second?.jsonB(),
                     "newData" to newReport.toJson().jsonB(),
-                    "userOid" to report.lastUpdatedBy
+                    "userOid" to report.lastUpdatedBy?.oid
                 )
             )
         }
