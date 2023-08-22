@@ -131,40 +131,43 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
 }
 
 fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
-    val notTestedCount = successCriteria.count { it.status != NOT_TESTED }
     val generalCriteriaContent = successCriteria.first()
 
-    div {
+    div(classes = "criterion-status") {
         h2 { +"${generalCriteriaContent.number}:${generalCriteriaContent.name} (${generalCriteriaContent.wcagLevel})" }
         if (successCriteria.deviationCount() == 0) {
             p { +"Ingen avvik registrert" }
-            if (notTestedCount != 0) {
-                p { +"$notTestedCount gjenstår" }
-            }
         } else {
-            successCriteria.filter { it.status == NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
-                .map { it.breakingTheLaw }.let {
-                    h3 { +"Det er innhold på siden som bryter kravet" }
-                    ul {
-                        it.forEach { li { +it } }
-                    }
-                }
+            p { +"${successCriteria.deviationCount()} avvik registrert" }
+            ul {
+                successCriteria.filter { it.status == NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
+                    .map { it.breakingTheLaw }
+                    .let { criterionIssues("Det er innhold på siden som bryter kravet", it) }
 
-            successCriteria.filter { it.status == NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
-                .map { it.lawDoesNotApply }.let {
-                    h3 { +"Det er innhold i på siden som ikke er underlagt kravet" }
-                    ul {
-                        it.forEach { li { +it } }
-                    }
-                }
+                successCriteria.filter { it.status == NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
+                    .map { it.lawDoesNotApply }
+                    .let { criterionIssues("Det er innhold i på siden som ikke er underlagt kravet", it) }
 
-            successCriteria.filter { it.status == NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
-                .map { it.tooHardToComply }.let {
-                    h3 { +"Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet." }
-                    ul {
-                        it.forEach { li { +it } }
+
+                successCriteria.filter { it.status == NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
+                    .map { it.tooHardToComply }
+                    .let {
+                        criterionIssues(
+                            "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.",
+                            it
+                        )
                     }
-                }
+            }
+        }
+    }
+}
+
+
+fun UL.criterionIssues(heading: String, issueList: List<String>) {
+    if (issueList.isNotEmpty()) {
+        li { +heading }
+        ul {
+            issueList.forEach { li { +it } }
         }
     }
 }

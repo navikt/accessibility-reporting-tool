@@ -58,3 +58,19 @@ button {
     font-weight: bold;
 }
 
+.criterion-status h2{
+    display: inline-block;
+    margin-bottom: 4px;
+    font-size: 1.3em;
+}
+
+.criterion-status p{
+  margin-top: 0;
+}
+
+.criterion-status h3 {
+    margin: 0;
+}
+.criterion-status ul {
+    margin: 0;
+}
