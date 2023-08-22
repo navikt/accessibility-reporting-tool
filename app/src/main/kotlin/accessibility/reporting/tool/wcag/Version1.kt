@@ -44,7 +44,8 @@ object Version1 {
         user = user,
         version = Version.V1,
         created = LocalDateTimeHelper.nowAtUtc(),
-        lastChanged = LocalDateTimeHelper.nowAtUtc()
+        lastChanged = LocalDateTimeHelper.nowAtUtc(),
+        lastUpdatedBy = null
     )
 
     private object ContentGroups {

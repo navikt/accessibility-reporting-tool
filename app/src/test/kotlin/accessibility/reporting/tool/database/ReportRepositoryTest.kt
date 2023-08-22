@@ -194,7 +194,8 @@ class ReportRepositoryTest {
         successCriteria = Version.V1.criteria,
         filters = mutableListOf(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
-        created = LocalDateTimeHelper.nowAtUtc()
+        created = LocalDateTimeHelper.nowAtUtc(),
+        lastUpdatedBy = null
     )
 }
 

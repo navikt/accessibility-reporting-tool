@@ -1,5 +1,6 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
@@ -29,18 +30,12 @@ fun Route.reports(repository: ReportRepository) {
                     h1 { +"Tilgjengelighetserklæring" }
                     div(classes = "statement-metadata") {
                         statementMetadata("Løsning", report.url)
+                        statementMetadata("Ansvarlig", report.user.email)
                         statementMetadata("Status", report.status())
                         statementMetadata("Sist oppdatert", report.lastChanged.displayFormat())
-                        statementMetadata("Ansvarlig", report.user.email)
-                        p {
-                            span(classes = "bold") { +"Organisasjonsenhet/team: " }
-                            report.organizationUnit?.let { org ->
-                                a {
-                                    href = "/orgunit/${org.id}"
-                                    +org.name
-                                }
-                            }
-                        }
+                        statementMetadata("Sist oppdatert av", (report.lastUpdatedBy ?: report.user).email)
+                        statementContributors(report.contributers)
+                        statementOrganizationUnit(report.organizationUnit)
                     }
                     div { report.successCriteria.map { a11yForm(it, id) } }
                 }
@@ -153,6 +148,30 @@ fun Route.reports(repository: ReportRepository) {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+internal fun DIV.statementOrganizationUnit(organizationUnit: OrganizationUnit?) {
+    p {
+        span(classes = "bold") { +"Organisasjonsenhet/team: " }
+        organizationUnit?.let { org ->
+            a {
+                href = "/orgunit/${org.id}"
+                +org.name
+            }
+        }
+    }
+}
+
+internal fun DIV.statementContributors(contributers: List<User>) {
+    if (contributers.isNotEmpty())
+        p { span(classes = "bold") { +"Bidragsytere " } }
+    ul {
+        contributers.map { contributer ->
+            li {
+                +contributer.email
             }
         }
     }

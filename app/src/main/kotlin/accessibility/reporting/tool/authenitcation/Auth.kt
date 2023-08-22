@@ -5,6 +5,7 @@ import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -54,7 +55,25 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
     }
 }
 
-data class User(val email: String, val name: String?, val oid: String?) : Principal
+data class User(val email: String, val name: String?, val oid: String?) : Principal {
+
+    override fun equals(other: Any?): Boolean {
+        if (other is User) {
+            return other.email == this.oid || other.oid == this.oid || this.email == other.oid
+        }
+        return super.equals(other)
+    }
+
+    companion object {
+        fun fromJson(jsonNode: JsonNode?): User? = jsonNode?.takeIf { !it.isNull }?.let { node ->
+            User(
+                email = node["email"].asText(),
+                name = node["name"].asText(),
+                oid = node["oid"]?.takeIf { !it.isNull }?.asText()
+            )
+        }
+    }
+}
 
 class AzureAuthContext {
     var issuer: String = System.getenv("AZURE_OPENID_CONFIG_ISSUER") ?: ""

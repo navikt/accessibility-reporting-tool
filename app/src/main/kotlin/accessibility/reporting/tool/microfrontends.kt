@@ -1,5 +1,6 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
 import accessibility.reporting.tool.wcag.Status.NOT_TESTED
@@ -137,8 +138,8 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
         h2 { +"${generalCriteriaContent.number}:${generalCriteriaContent.name} (${generalCriteriaContent.wcagLevel})" }
         if (successCriteria.deviationCount() == 0) {
             p { +"Ingen avvik registrert" }
-            if(notTestedCount!=0){
-                p{ +"$notTestedCount gjenstår" }
+            if (notTestedCount != 0) {
+                p { +"$notTestedCount gjenstår" }
             }
         } else {
             successCriteria.filter { it.status == NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }

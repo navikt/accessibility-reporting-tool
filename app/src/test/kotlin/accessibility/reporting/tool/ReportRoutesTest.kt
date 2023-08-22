@@ -48,7 +48,8 @@ class ReportRoutesTest {
                 successCriteria = Version.V1.criteria,
                 filters = mutableListOf(),
                 created = LocalDateTimeHelper.nowAtUtc(),
-                lastChanged = LocalDateTimeHelper.nowAtUtc()
+                lastChanged = LocalDateTimeHelper.nowAtUtc(),
+                lastUpdatedBy = null
             )
         )
 

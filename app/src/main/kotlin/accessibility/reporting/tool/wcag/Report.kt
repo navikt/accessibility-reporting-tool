@@ -23,7 +23,9 @@ class Report(
     val successCriteria: List<SuccessCriterion>,
     val filters: MutableList<String> = mutableListOf(),
     val created: LocalDateTime,
-    val lastChanged: LocalDateTime
+    val lastChanged: LocalDateTime,
+    val contributers: MutableList<User> = mutableListOf(),
+    val lastUpdatedBy: User?
 ) {
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
@@ -48,11 +50,7 @@ class Report(
                     testData = jsonNode["testData"].takeIf { !it.isEmpty }?.let { testDataJson ->
                         TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
                     },
-                    user = User(
-                        email = jsonNode["user"]["email"].asText(),
-                        name = jsonNode["user"]["name"].asText(),
-                        oid = jsonNode["user"]["oid"]?.takeIf { !it.isNull }?.asText()
-                    ),
+                    user = User.fromJson(jsonNode["user"])!!,
                     successCriteria = jsonNode["successCriteria"].map {
                         SuccessCriterion.fromJson(
                             it,
@@ -62,7 +60,8 @@ class Report(
                     },
                     filters = jsonNode["filters"].map { it.asText() }.toMutableList(),
                     lastChanged = lastChanged,
-                    created = created
+                    created = created,
+                    lastUpdatedBy = User.fromJson(jsonNode["lastUpdatedBy"])
                 )
             }
         }
@@ -105,13 +104,15 @@ class Report(
         successCriteria = successCriteria.map { if (it.number == criterion.number) criterion else it },
         testData = testData,
         url = url,
-        user = updateBy,
+        user = if (userIsOwner(updateBy)) updateBy else user,
         version = version,
         created = created,
-        lastChanged = LocalDateTimeHelper.nowAtUtc()
-    )
+        lastChanged = LocalDateTimeHelper.nowAtUtc(),
+        lastUpdatedBy = updateBy
+    ).apply { if (!userIsOwner(updateBy)) contributers.add(updateBy) }
 
-    fun userIsOwner(callUser: User): Boolean = user.oid == callUser.oid ||  user.email == callUser.oid//TODO: fjern sammenligning av oid på email
+    fun userIsOwner(callUser: User): Boolean =
+        user.oid == callUser.oid || user.email == callUser.oid//TODO: fjern sammenligning av oid på email
 
 }
 

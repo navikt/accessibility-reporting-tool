@@ -1,0 +1,1 @@
+ALTER table changelog ADD column user_oid varchar

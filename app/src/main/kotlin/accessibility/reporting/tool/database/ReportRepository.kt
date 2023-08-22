@@ -12,7 +12,6 @@ import java.time.ZoneId
 class ReportRepository(val database: Database) {
 
     fun upsertReport(report: Report): Report {
-        //TODO: changelog
         val reports = database.query {
             queryOf(
                 """insert into report (report_id,report_data,created, last_changed) 
@@ -33,12 +32,13 @@ class ReportRepository(val database: Database) {
         val newReport = reports!!.first
         database.update {
             queryOf(
-                """insert into changelog (report_id, time,old_data,new_data) values (:reportId, :timeOfUpdate,:oldData, :newData)""".trimMargin(),
+                """insert into changelog (report_id, time,old_data,new_data,user_oid) values (:reportId, :timeOfUpdate,:oldData, :newData, :userOid)""".trimMargin(),
                 mapOf(
                     "reportId" to newReport.reportId,
                     "timeOfUpdate" to newReport.lastChanged,
                     "oldData" to reports.second?.jsonB(),
-                    "newData" to newReport.toJson().jsonB()
+                    "newData" to newReport.toJson().jsonB(),
+                    "userOid" to report.lastUpdatedBy
                 )
             )
         }

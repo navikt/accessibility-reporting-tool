@@ -43,7 +43,7 @@ class ReportTest {
             breakingTheLaw = "not cool"
         )
 
-        val updatedReport = testReport.withUpdatedCriterion(testUpdatedCriterion,testUser)
+        val updatedReport = testReport.withUpdatedCriterion(testUpdatedCriterion, testUser)
         updatedReport.assert {
             reportId shouldBe testReport.reportId
             user shouldBe testReport.user
@@ -51,11 +51,10 @@ class ReportTest {
             url shouldBe testReport.url
             lastChanged shouldBeAfter testReport.lastChanged
 
-            successCriteria.forEach {newReportCriterion ->
+            successCriteria.forEach { newReportCriterion ->
                 if (newReportCriterion.number != testUpdatedCriterion.number) {
-                    newReportCriterion shouldBe  Version1.criteriaTemplate.find { it.number == newReportCriterion.number }
-                }
-                else {
+                    newReportCriterion shouldBe Version1.criteriaTemplate.find { it.number == newReportCriterion.number }
+                } else {
                     newReportCriterion shouldNotBe Version1.criteriaTemplate.find { it.number == "1.3.2" }
                     newReportCriterion.status shouldBe Status.NON_COMPLIANT
                     newReportCriterion.breakingTheLaw shouldBe "not cool"
@@ -66,9 +65,14 @@ class ReportTest {
             status = Status.COMPLIANT
         )
 
-        updatedReport.withUpdatedCriterion(testUpdatedCriterion2, testUser).assert{
+        val contributor =
+            User("other.user@test.ja", "Contributor Contributerson", UUID.randomUUID().toString())
+        updatedReport.withUpdatedCriterion(testUpdatedCriterion2, contributor).assert {
             successCriteria.count { it.status != Status.NOT_TESTED } shouldBe 2
+            contributers.size shouldBe 1
+            contributers.first() shouldBe contributor
+            user shouldBe testUser
+            lastUpdatedBy shouldBe contributor
         }
-
     }
 }
