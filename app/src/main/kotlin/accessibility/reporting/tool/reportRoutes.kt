@@ -41,7 +41,11 @@ fun Route.reports(repository: ReportRepository) {
                         statementContributors(report.contributers)
                         statementOrganizationUnit(report.organizationUnit)
                     }
-                    summaryLinks(report)
+                    div {
+
+                        summaryLinks(report)
+
+                    }
                     div {
                         report.successCriteria.map { a11yForm(it, id) }
                     }
@@ -77,24 +81,13 @@ fun Route.reports(repository: ReportRepository) {
                     tooHardToComply = tooHardToComply
                 )
             val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
-            if (status == "non compliant") {
-                // .div because I cannot find a .fragment or similar.
-                // This means that you have to hx-select on the other end
-                fun response() = createHTML().div {
+            fun response(): String =
+                summaryLinksString(report) + createHTML().div { a11yForm(report.findCriterion(criterionNumber), id) }
 
-                    a11yForm(report.findCriterion(index), id)
-                }
-
-                call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
-            } else {
-                fun response() = createHTML().div {
-                    a11yForm(report.findCriterion(criterionNumber), id)
-                }
-                call.respondText(
-                    contentType = ContentType.Text.Html,
-                    HttpStatusCode.OK, ::response
-                )
-            }
+            call.respondText(
+                contentType = ContentType.Text.Html,
+                HttpStatusCode.OK, ::response
+            )
         }
 
         route("new") {

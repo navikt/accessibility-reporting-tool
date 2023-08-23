@@ -32,6 +32,9 @@ fun HTMLTag.hxSwapInner() {
 fun HTMLTag.hxVals(json: String) {
     attributes["data-hx-vals"] = json
 }
+fun HTMLTag.hxOOB(selector: String) {
+    attributes["data-hx-swap-oob"] = selector
+}
 
 fun HTMLTag.hxConfirm(message: String) {
     attributes["data-hx-confirm"] = message

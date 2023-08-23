@@ -8,6 +8,7 @@ import accessibility.reporting.tool.wcag.Status.NOT_TESTED
 import accessibility.reporting.tool.wcag.SuccessCriterion
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import kotlinx.html.*
+import kotlinx.html.stream.createHTML
 
 
 fun HEAD.headContent(title: String) {
@@ -81,7 +82,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
         hxTarget(".${sc.cssClass()}")
         hxSelect("form")
         hxSwapOuter()
-        attributes["hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
+        attributes["data-hx-vals"] = """{"index": "${sc.successCriterionNumber}"}"""
         div {
             fieldSet {
                 attributes["name"] = "status"
@@ -132,8 +133,7 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
             p { +"${successCriteria.deviationCount()} avvik registrert" }
             ul {
                 successCriteria.filter { it.status == NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
-                    .map { it.breakingTheLaw }
-                    .let { criterionIssues("Det er innhold på siden som bryter kravet", it) }
+                    .map { it.breakingTheLaw }.let { criterionIssues("Det er innhold på siden som bryter kravet", it) }
 
                 successCriteria.filter { it.status == NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
                     .map { it.lawDoesNotApply }
@@ -141,11 +141,9 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
 
 
                 successCriteria.filter { it.status == NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
-                    .map { it.tooHardToComply }
-                    .let {
+                    .map { it.tooHardToComply }.let {
                         criterionIssues(
-                            "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.",
-                            it
+                            "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.", it
                         )
                     }
             }
@@ -219,13 +217,23 @@ fun UL.hrefListItem(listHref: String, text: String) {
     }
 }
 
-fun FlowContent.summaryLinks(report: Report) {
-    div(classes = "summary") {
-        report.successCriteria.forEach({
-            a {
-                href = "#${it.number}-${it.name}"
-                unsafe { +toIcon(it) }
-            }
-        })
-    }
+fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
+    hxOOB("outerHTML:.summary")
+    report.successCriteria.forEach({
+        a {
+            href = "#${it.number}-${it.name}"
+            unsafe { +toIcon(it) }
+        }
+    })
 }
+
+fun summaryLinksString(report: Report) = createHTML().div(classes = "summary") {
+    hxOOB("outherHTML:.summary")
+    report.successCriteria.forEach({
+        a {
+            href = "#${it.number}-${it.name}"
+            unsafe { +toIcon(it) }
+        }
+    })
+}
+
