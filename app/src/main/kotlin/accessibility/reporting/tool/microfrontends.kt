@@ -168,25 +168,23 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
             +"${sc.number} ${sc.name}"
         }
         p { +sc.description }
-        sc.helpUrl?.let {
-            a {
-                href = it
-                target = "_blank"
-                rel = "noopener noreferrer"
-                +"Hvordan teste (åpner i ny fane)"
-            }
-        }
-        sc.wcagUrl?.let {
-            a {
-                href = it
-                target = "_blank"
-                rel = "noopener noreferrer"
-                +"WCAG definisjon (åpner i ny fane)"
 
+        (sc.helpUrl ?: sc.wcagUrl)?.let { helpUrl ->
+            a {
+                href = helpUrl
+                target = "_blank"
+                rel = "noopener noreferrer"
+                +if (sc.helpUrl != null) {
+                    "Hvordan teste (åpner i ny fane)"
+                } else {
+                    "WCAG definisjon (åpner i ny fane)"
+                }
             }
         }
+
     }
 }
+
 
 internal fun DIV.statementMetadata(label: String, value: String) {
     p {
