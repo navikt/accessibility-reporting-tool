@@ -217,21 +217,23 @@ fun UL.hrefListItem(listHref: String, text: String) {
 
 fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
     hxOOB("outerHTML:.summary")
-    report.successCriteria.forEach({
+    report.successCriteria.forEach {
         a {
             href = "#${it.number}-${it.name}"
             unsafe { +toIcon(it) }
         }
-    })
+    }
 }
 
 fun summaryLinksString(report: Report) = createHTML().div(classes = "summary") {
     hxOOB("outherHTML:.summary")
-    report.successCriteria.forEach({
+    report.successCriteria.forEach {
         a {
             href = "#${it.number}-${it.name}"
             unsafe { +toIcon(it) }
         }
-    })
+    }
 }
+
+
 
