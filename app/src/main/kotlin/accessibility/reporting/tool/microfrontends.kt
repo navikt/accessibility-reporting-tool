@@ -1,6 +1,5 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
@@ -186,11 +185,17 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
 }
 
 
-internal fun DIV.statementMetadata(label: String, value: String) {
-    p {
-        span(classes = "bold") { +"$label: " }
-        span { +value }
+internal fun DIV.statementMetadata(label: String, value: String, hxOOBId: String? = null) {
+    p { statementMetadataInnerHtml(label,value,hxOOBId) }
+}
+
+internal fun P.statementMetadataInnerHtml(label: String, value: String, hxOOBId: String?) {
+    hxOOBId?.let { hxId ->
+        id = hxId
+        attributes["data-hx-swap-oob"] = hxId
     }
+    span(classes = "bold") { +"$label: " }
+    span { +value }
 }
 
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
