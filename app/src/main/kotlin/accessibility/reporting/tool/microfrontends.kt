@@ -219,7 +219,7 @@ fun UL.hrefListItem(listHref: String, text: String) {
     }
 }
 
-    fun MAIN.summary(report: Report) {
+fun FlowContent.summaryLinks(report: Report) {
     div(classes = "summary") {
         report.successCriteria.forEach({
             a {

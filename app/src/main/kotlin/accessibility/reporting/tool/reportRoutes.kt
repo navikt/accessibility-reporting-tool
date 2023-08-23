@@ -10,6 +10,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
+import kotlinx.html.stream.appendHTML
 import kotlinx.html.stream.createHTML
 import java.lang.IllegalArgumentException
 import java.time.LocalDateTime
@@ -40,7 +41,7 @@ fun Route.reports(repository: ReportRepository) {
                         statementContributors(report.contributers)
                         statementOrganizationUnit(report.organizationUnit)
                     }
-                    summary(report)
+                    summaryLinks(report)
                     div {
                         report.successCriteria.map { a11yForm(it, id) }
                     }
@@ -76,8 +77,6 @@ fun Route.reports(repository: ReportRepository) {
                     tooHardToComply = tooHardToComply
                 )
             val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
-
-
             if (status == "non compliant") {
                 // .div because I cannot find a .fragment or similar.
                 // This means that you have to hx-select on the other end
@@ -85,6 +84,7 @@ fun Route.reports(repository: ReportRepository) {
 
                     a11yForm(report.findCriterion(index), id)
                 }
+
                 call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
             } else {
                 fun response() = createHTML().div {
