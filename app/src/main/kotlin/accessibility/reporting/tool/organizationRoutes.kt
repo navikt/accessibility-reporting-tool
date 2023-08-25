@@ -41,8 +41,10 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         p {
                             +"epost: ${orgUnit.email}"
                         }
-                        h2 { +"Tilgjengelighetserklæringer" }
-                        ul { reports.forEach { report -> reportListItem(report) } }
+                        if (reports.isNotEmpty()) {
+                            h2 { +"Tilgjengelighetserklæringer" }
+                            ul { reports.forEach { report -> reportListItem(report) } }
+                        } else p { +"${orgUnit.name} har ingen tilgjengelighetserklæringer enda" }
                     }
                 } ?: run { call.respond(HttpStatusCode.NotFound) }
             }
@@ -107,9 +109,11 @@ fun Route.userRoute(repository: ReportRepository) {
         val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
         call.respondHtmlContent(call.user.email) {
             h1 { +"Dine tilgjengelighetserklæringer" }
-            ul(classes = "report-list") {
-                reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
-            }
+            if (reports.isNotEmpty())
+                ul(classes = "report-list") {
+                    reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
+                }
+            else p { +"Du har ingen tilgjengelighetserklæringer enda" }
             a {
                 href = "/reports/new"
                 +"Lag ny erklæring"
