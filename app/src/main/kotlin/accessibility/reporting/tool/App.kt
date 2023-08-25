@@ -6,20 +6,15 @@ import accessibility.reporting.tool.database.Environment
 import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.SuccessCriterion
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
-import io.ktor.server.html.*
 import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.html.*
-import kotliquery.queryOf
 import mu.KotlinLogging
 import java.lang.IllegalArgumentException
 
@@ -62,7 +57,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             userRoute(repository)
             reports(repository)
             landingPage(repository)
-            aggregatedStatements(repository)
+            statementAdimnRoutes(repository)
         }
         meta()
         staticResources("/static", "static") {
