@@ -60,7 +60,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         }
                         input {
                             id = "text-input-name"
-                            name = "name"
+                            name = "unit-name"
                             type = InputType.text
                             required = true
                         }
@@ -70,7 +70,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         }
                         input {
                             id = "input-email"
-                            name = "email"
+                            name = "unit-email"
                             type = InputType.email
                             required = true
                         }
@@ -84,8 +84,8 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
             post {
                 val params = call.receiveParameters()
-                val email = params["email"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha en email")
-                val name = params["name"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha ett navn")
+                val email = params["unit-email"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha en email")
+                val name = params["unit-name"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha ett navn")
 
                 repository.insertOrganizationUnit(
                     OrganizationUnit.createNew(

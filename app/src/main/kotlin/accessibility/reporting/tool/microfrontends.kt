@@ -88,9 +88,9 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
 
                 legend { +"Oppfyller alt innhold på siden kravet?" }
                 statusRadio(sc, "compliant", Status.COMPLIANT, "Ja")
-                statusRadio(sc, "non compliant", Status.NON_COMPLIANT, "Nei")
-                statusRadio(sc, "not tested", NOT_TESTED, "Ikke testet")
-                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen innhold")
+                statusRadio(sc, "non-compliant", Status.NON_COMPLIANT, "Nei")
+                statusRadio(sc, "not-tested", NOT_TESTED, "Ikke testet")
+                statusRadio(sc, "not-applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen innhold")
             }
         }
         if (sc.status == Status.NON_COMPLIANT) {
@@ -163,7 +163,7 @@ fun UL.criterionIssues(heading: String, issueList: List<String>) {
 private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     div(classes = "report-info") {
         h2 {
-            id = "${sc.number}-${sc.name}"
+            id = "sc${sc.number}"
             +"${sc.number} ${sc.name}"
         }
         p { +sc.description }
@@ -202,6 +202,7 @@ fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".",
 
 fun BODY.navbar() {
     nav {
+        attributes["aria-label"] = "Hovedmeny"
         ul {
             hrefListItem("/", "Forside")
             hrefListItem("/orgunit", "Organisasjonsenheter")
@@ -220,27 +221,27 @@ fun UL.hrefListItem(listHref: String, text: String) {
     }
 }
 
-fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
+fun FlowContent.summaryLinks(report: Report) = ul(classes = "summary") {
     hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
-        div {
+        li {
             a {
-                href = "#${it.number}-${it.name}"
+                href = "#sc${it.number}"
                 unsafe { +toIcon(it) }
-                +"${it.number}-${it.name}"
+                +"${it.number} ${it.name}"
             }
         }
     }
 }
 
-fun summaryLinksString(report: Report) = createHTML().div(classes = "summary") {
+fun summaryLinksString(report: Report) = createHTML().ul(classes = "summary") {
     hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
-        div {
+        li {
             a {
-                href = "#${it.number}-${it.name}"
+                href = "#sc${it.number}"
                 unsafe { +toIcon(it) }
-                +"${it.number}-${it.name}"
+                +"${it.number} ${it.name}"
             }
         }
     }

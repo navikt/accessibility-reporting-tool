@@ -7,7 +7,7 @@ import accessibility.reporting.tool.wcag.SuccessCriterion
 fun compliant(title: String, id: String) = """<svg width="24" 
   role="img" 
   aria-hidden="false"
-  aria-labelledby="${id}" 
+  aria-labelledby="sc${id}" 
   focusable="false"
 class="compliant-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M3.75 12C3.75 7.44365 7.44365 3.75 12 3.75C16.5563 3.75 20.25 7.44365 20.25 12C20.25 16.5563 16.5563 20.25 12 20.25C7.44365 20.25 3.75 16.5563 3.75 12ZM12 2.25C6.61522 2.25 2.25 6.61522 2.25 12C2.25 17.3848 6.61522 21.75 12 21.75C17.3848 21.75 21.75 17.3848 21.75 12C21.75 6.61522 17.3848 2.25 12 2.25ZM16.5725 9.48446C16.8401 9.16825 16.8007 8.69502 16.4845 8.42746C16.1683 8.1599 15.695 8.19934 15.4275 8.51554L10.454 14.3933L8.03033 11.9697C7.73744 11.6768 7.26256 11.6768 6.96967 11.9697C6.67678 12.2626 6.67678 12.7374 6.96967 13.0303L9.96967 16.0303C10.118 16.1786 10.3216 16.2581 10.5312 16.2494C10.7407 16.2406 10.9371 16.1446 11.0725 15.9845L16.5725 9.48446Z" 
@@ -17,7 +17,7 @@ fill="#FFFFFF"/>
 fun nonCompliant(title: String, id: String) =  """<svg width="24" 
   role="img" 
   aria-hidden="false"
-  aria-labelledby="${id}" 
+  aria-labelledby="sc${id}" 
   focusable="false"
 class="non-compliant-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <title>${title}</title>
@@ -28,7 +28,7 @@ fill="#FFFFFF"/>
 fun notTested(title:String, id: String) ="""<svg width="24" 
   role="img" 
   aria-hidden="false"
-  aria-labelledby="${id}" 
+  aria-labelledby="sc${id}" 
   focusable="false"
 class="not-tested-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <title>${title}</title>
@@ -39,11 +39,11 @@ fill="#FFFFFF"/>
 fun tooHard(title:String,id:String) = """<svg width="24" 
    role="img" 
   aria-hidden="false"
-  aria-labelledby="${id}" 
+  aria-labelledby="sc${id}" 
   aria-labelledby="title-id" 
   focusable="false"
   class="too-hard-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <title id=${id}>${title}</title>
+  <title id="sc${id}">${title}</title>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.25C12.2731 2.25 12.5245 2.3984 12.6565 2.63743L22.1828 19.8874C22.3111 20.1198 22.3071 20.4026 22.1722 20.6312C22.0373 20.8597 21.7917 21 21.5263 21H2.47372C2.20832 21 1.96268 20.8597 1.8278 20.6312C1.69292 20.4026 1.68888 20.1198 1.81718 19.8874L11.3435 2.63743C11.4755 2.3984 11.7269 2.25 12 2.25ZM20.2553 19.5L12 4.55142L3.74467 19.5H20.2553ZM12 8.75C12.4142 8.75 12.75 9.08579 12.75 9.5V13.5C12.75 13.9142 12.4142 14.25 12 14.25C11.5858 14.25 11.25 13.9142 11.25 13.5V9.5C11.25 9.08579 11.5858 8.75 12 8.75ZM12 15.5C11.4477 15.5 11 15.9477 11 16.5C11 17.0523 11.4477 17.5 12 17.5C12.5523 17.5 13 17.0523 13 16.5C13 15.9477 12.5523 15.5 12 15.5Z" 
 fill="#FFFFFF"/>
 </svg>"""

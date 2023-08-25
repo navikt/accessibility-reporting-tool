@@ -25,10 +25,16 @@ fun Route.landingPage(repository: ReportRepository) {
         call.respondHtmlContent("a11y rapportering") {
 
             h1 { +"a11y rapporteringsverktøy for NAV" }
-            h2 { +"Rapporter" }
+            p {
+                a {
+                    href = "/reports/new"
+                    +"Lag ny erklæring"
+                }
+            }
+            h2 { +"Dine rapporter" }
             ul { reports.forEach { report -> reportListItem(report) } }
-        }
 
+        }
     }
 }
 

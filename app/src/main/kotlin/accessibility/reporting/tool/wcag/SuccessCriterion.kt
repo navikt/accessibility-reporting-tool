@@ -64,7 +64,7 @@ enum class WcagLevel() {
 }
 
 enum class Status(val display: String) {
-    COMPLIANT("compliant"), NON_COMPLIANT("non compliant"), NOT_APPLICABLE("not applicable"), NOT_TESTED("not tested");
+    COMPLIANT("compliant"), NON_COMPLIANT("non-compliant"), NOT_APPLICABLE("not-applicable"), NOT_TESTED("not-tested");
 
     companion object {
 

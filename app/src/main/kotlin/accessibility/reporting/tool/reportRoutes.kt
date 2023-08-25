@@ -44,10 +44,9 @@ fun Route.reports(repository: ReportRepository) {
                         statementContributors(report.contributers)
                         statementOrganizationUnit(report.organizationUnit)
                     }
-                    div {
-
+                    nav {
+                        attributes["aria-label"] = "Status"
                         summaryLinks(report)
-
                     }
                     div {
                         report.successCriteria.map { a11yForm(it, id) }
