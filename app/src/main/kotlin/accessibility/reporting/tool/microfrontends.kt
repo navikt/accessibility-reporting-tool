@@ -76,7 +76,7 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
 fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     successCriterionInformation(sc)
     form(classes = sc.cssClass()) {
-        attributes["data-hx-trigger"] = "change from: .${sc.cssClass()} label"
+        hxTrigger("change")
         hxPost("/reports/submit/${reportId}")
         hxTarget(".${sc.cssClass()}")
         hxSelect("form")
@@ -192,7 +192,7 @@ internal fun DIV.statementMetadata(label: String, value: String, hxOOBId: String
 internal fun P.statementMetadataInnerHtml(label: String, value: String, hxOOBId: String?) {
     hxOOBId?.let { hxId ->
         id = hxId
-        attributes["data-hx-swap-oob"] = hxId
+        hxOOB("$hxId")
     }
     span(classes = "bold") { +"$label: " }
     span { +value }
@@ -231,7 +231,7 @@ fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
 }
 
 fun summaryLinksString(report: Report) = createHTML().div(classes = "summary") {
-    hxOOB("outherHTML:.summary")
+    hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
         a {
             href = "#${it.number}-${it.name}"
