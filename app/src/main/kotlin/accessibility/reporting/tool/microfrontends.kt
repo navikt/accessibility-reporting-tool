@@ -1,6 +1,5 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
@@ -77,7 +76,7 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
 fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     successCriterionInformation(sc)
     form(classes = sc.cssClass()) {
-        attributes["data-hx-trigger"] = "change from: .${sc.cssClass()} label"
+        hxTrigger("change")
         hxPost("/reports/submit/${reportId}")
         hxTarget(".${sc.cssClass()}")
         hxSelect("form")
@@ -186,11 +185,17 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
 }
 
 
-internal fun DIV.statementMetadata(label: String, value: String) {
-    p {
-        span(classes = "bold") { +"$label: " }
-        span { +value }
+internal fun DIV.statementMetadata(label: String, value: String, hxOOBId: String? = null) {
+    p { statementMetadataInnerHtml(label,value,hxOOBId) }
+}
+
+internal fun P.statementMetadataInnerHtml(label: String, value: String, hxOOBId: String?) {
+    hxOOBId?.let { hxId ->
+        id = hxId
+        hxOOB("$hxId")
     }
+    span(classes = "bold") { +"$label: " }
+    span { +value }
 }
 
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
@@ -226,7 +231,7 @@ fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
 }
 
 fun summaryLinksString(report: Report) = createHTML().div(classes = "summary") {
-    hxOOB("outherHTML:.summary")
+    hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
         a {
             href = "#${it.number}-${it.name}"

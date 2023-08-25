@@ -48,7 +48,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
 
                 else -> {
                     log.error { "Ukjent feil: ${cause.message}" }
-                    log.debug { cause.stackTrace }
+                    log.error { cause.stackTrace.contentToString() }
                     call.respondText(text = "500: ${cause.message}", status = HttpStatusCode.InternalServerError)
 
                 }

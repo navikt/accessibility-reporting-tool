@@ -10,7 +10,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
-import kotlinx.html.stream.appendHTML
 import kotlinx.html.stream.createHTML
 import java.lang.IllegalArgumentException
 import java.time.LocalDateTime
@@ -35,9 +34,13 @@ fun Route.reports(repository: ReportRepository) {
                             statementMetadata("Beskrivelse", it)
                         }
                         statementMetadata("Ansvarlig", report.user.email)
-                        statementMetadata("Status", report.status())
-                        statementMetadata("Sist oppdatert", report.lastChanged.displayFormat())
-                        statementMetadata("Sist oppdatert av", (report.lastUpdatedBy ?: report.user).email)
+                        statementMetadata("Status", report.status(), "metadata-status")
+                        statementMetadata("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")
+                        statementMetadata(
+                            "Sist oppdatert av",
+                            (report.lastUpdatedBy ?: report.user).email,
+                            "metadata-oppdatert-av"
+                        )
                         statementContributors(report.contributers)
                         statementOrganizationUnit(report.organizationUnit)
                     }
@@ -81,8 +84,12 @@ fun Route.reports(repository: ReportRepository) {
                     tooHardToComply = tooHardToComply
                 )
             val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
-            fun response(): String =
-                summaryLinksString(report) + createHTML().div { a11yForm(report.findCriterion(criterionNumber), id) }
+
+            fun response(): String = updatedMetadataString(report) + summaryLinksString(report) + createHTML().div {
+                a11yForm(
+                    report.findCriterion(criterionNumber), id
+                )
+            }
 
             call.respondText(
                 contentType = ContentType.Text.Html,
@@ -195,5 +202,15 @@ internal fun DIV.statementContributors(contributers: List<User>) {
         }
     }
 }
+
+fun updatedMetadataString(report: Report): String = """
+    ${createHTML().p { statementMetadataInnerHtml("Status", report.status(), "metadata-status") }}
+    ${createHTML().p { statementMetadataInnerHtml("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")}}
+    ${createHTML().p { statementMetadataInnerHtml(
+    "Sist oppdatert av",
+    (report.lastUpdatedBy ?: report.user).email,
+    "metadata-oppdatert-av"
+) }}""".trimMargin()
+
 
 private fun LocalDateTime.displayFormat(): String = "$dayOfMonth.$monthValue.$year"
