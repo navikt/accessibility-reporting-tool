@@ -16,7 +16,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
     route("orgunit") {
 
         get {
-            call.respondHtmlContent("Organisasjonsenheter") {
+            call.respondHtmlContent("Organisasjonsenheter", NavBarItem.ORG_ENHETER) {
                 h1 { +"Organisasjonsenheter" }
                 ul {
                     repository.getAllOrganizationUnits().forEach { orgUnit ->
@@ -36,7 +36,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 val (org, reports) = repository.getReportForOrganizationUnit(unitId)
 
                 org?.let { orgUnit ->
-                    call.respondHtmlContent(orgUnit.name) {
+                    call.respondHtmlContent(orgUnit.name, NavBarItem.BRUKER) {
                         h1 { +orgUnit.name }
                         p {
                             +"epost: ${orgUnit.email}"
@@ -52,7 +52,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
         route("new") {
             get {
-                call.respondHtmlContent("Legg til organisasjonsenhet") {
+                call.respondHtmlContent("Legg til organisasjonsenhet", NavBarItem.ORG_ENHETER) {
                     h1 { +"Legg til organisasjonsenhet" }
                     form {
                         hxPost("/orgunit/new")
@@ -107,7 +107,7 @@ fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
         val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
-        call.respondHtmlContent(call.user.email) {
+        call.respondHtmlContent(call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
             if (reports.isNotEmpty())
                 ul(classes = "report-list") {

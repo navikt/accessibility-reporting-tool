@@ -14,7 +14,7 @@ fun Route.aggregatedStatements(reportRepository: ReportRepository) {
                 .groupBy { it.number }
                 .map { it.value }
 
-            call.respondHtmlContent("Status for hele NAV") {
+            call.respondHtmlContent("Status for hele NAV", NavBarItem.NONE) {
                 h1 { +"Status for hele NAV" }
                 groupedCriteria.forEach { criterionStatus(it) }
             }

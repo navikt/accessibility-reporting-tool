@@ -1,5 +1,6 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.NavBarItem.*
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
@@ -200,16 +201,30 @@ internal fun P.statementMetadataInnerHtml(label: String, value: String, hxOOBId:
 
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
 
-fun BODY.navbar() {
+fun BODY.navbar(currentItem: NavBarItem) {
     nav {
         attributes["aria-label"] = "Hovedmeny"
         ul {
-            hrefListItem("/", "Forside")
-            hrefListItem("/orgunit", "Organisasjonsenheter")
-            hrefListItem("/user", "Dine erklæringer")
-            hrefListItem("/oauth2/logout", "Logg ut")
+            FORSIDE.li(currentItem, this)
+            ORG_ENHETER.li(currentItem, this)
+            BRUKER.li(currentItem, this)
+            LOGG_UT.li(currentItem, this)
         }
     }
+}
+
+enum class NavBarItem(val itemHref: String, val itemText: String) {
+    FORSIDE("/", "Forside"),
+    ORG_ENHETER("/orgunit", "Organisasjonsenheter"),
+    BRUKER("/user", "Dine erklæringer"),
+    LOGG_UT("/oauth2/logout", "Logg ut"),
+    NONE("", "");
+
+    fun li(navBarItem: NavBarItem, ul: UL) =
+        if (navBarItem == this@NavBarItem)
+            ul.li { +itemText }
+        else
+            ul.hrefListItem(itemHref, itemText)
 }
 
 fun UL.hrefListItem(listHref: String, text: String) {

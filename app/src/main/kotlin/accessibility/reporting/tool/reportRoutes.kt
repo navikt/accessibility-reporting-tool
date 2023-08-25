@@ -25,7 +25,7 @@ fun Route.reports(repository: ReportRepository) {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             val report = repository.getReport(id) ?: throw IllegalArgumentException()
 
-            call.respondHtmlContent("Tilgjengelighetsærklæring") {
+            call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
                 main {
                     h1 { +"Tilgjengelighetserklæring" }
                     div(classes = "statement-metadata") {
@@ -122,7 +122,7 @@ fun Route.reports(repository: ReportRepository) {
 
             get {
                 val orgUnits = repository.getAllOrganizationUnits()
-                call.respondHtmlContent("Ny tilgjengelighetserklæring") {
+                call.respondHtmlContent("Ny tilgjengelighetserklæring", NavBarItem.NONE) {
                     h1 {
                         +"Lag ny tilgjengelighetserklæring"
                     }

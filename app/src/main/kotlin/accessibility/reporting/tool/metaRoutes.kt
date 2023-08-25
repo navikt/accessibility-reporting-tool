@@ -1,5 +1,6 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.NavBarItem.FORSIDE
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import io.ktor.http.*
@@ -22,7 +23,7 @@ fun Routing.meta() {
 fun Route.landingPage(repository: ReportRepository) {
     get {
         val reports = repository.getReports()
-        call.respondHtmlContent("a11y rapportering") {
+        call.respondHtmlContent("a11y rapportering", FORSIDE) {
 
             h1 { +"a11y rapporteringsverktøy for NAV" }
             p {
@@ -38,12 +39,12 @@ fun Route.landingPage(repository: ReportRepository) {
     }
 }
 
-suspend fun ApplicationCall.respondHtmlContent(title: String, contenbuilder: BODY.() -> Unit) {
+suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBarItem,contenbuilder: BODY.() -> Unit) {
     respondHtml {
         lang = "no"
         head { headContent(title) }
         body {
-            navbar()
+            navbar(navBarItem)
             contenbuilder()
         }
 
