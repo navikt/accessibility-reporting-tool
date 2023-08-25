@@ -60,8 +60,21 @@ button {
 .statement-metadata .bold {
   font-weight: bold;
 }
+
 .compliant-icon {
   background: #2b883a;
+}
+
+.too-hard-icon {
+  background: #595959;
+}
+
+.not-tested-icon {
+  background: #c07414;
+}
+
+.criterion-status p {
+  margin-top: 0;
 }
 
 .criterion-status h2 {
@@ -69,23 +82,15 @@ button {
   margin-bottom: 4px;
   font-size: 1.3em;
 }
-.too-hard-icon {
-  background: #595959;
-}
-
-.criterion-status p {
-  margin-top: 0;
-}
-.not-tested-icon {
-  background: #c07414;
-}
 
 .criterion-status h3 {
   margin: 0;
 }
+
 .criterion-status ul {
   margin: 0;
 }
+
 .icon {
   height: 40px;
   width: 40px;

@@ -186,7 +186,7 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
 
 
 internal fun DIV.statementMetadata(label: String, value: String, hxOOBId: String? = null) {
-    p { statementMetadataInnerHtml(label,value,hxOOBId) }
+    p { statementMetadataInnerHtml(label, value, hxOOBId) }
 }
 
 internal fun P.statementMetadataInnerHtml(label: String, value: String, hxOOBId: String?) {
@@ -223,9 +223,12 @@ fun UL.hrefListItem(listHref: String, text: String) {
 fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
     hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
-        a {
-            href = "#${it.number}-${it.name}"
-            unsafe { +toIcon(it) }
+        div {
+            a {
+                href = "#${it.number}-${it.name}"
+                unsafe { +toIcon(it) }
+                +"${it.number}-${it.name}"
+            }
         }
     }
 }
@@ -233,9 +236,12 @@ fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
 fun summaryLinksString(report: Report) = createHTML().div(classes = "summary") {
     hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
-        a {
-            href = "#${it.number}-${it.name}"
-            unsafe { +toIcon(it) }
+        div {
+            a {
+                href = "#${it.number}-${it.name}"
+                unsafe { +toIcon(it) }
+                +"${it.number}-${it.name}"
+            }
         }
     }
 }
