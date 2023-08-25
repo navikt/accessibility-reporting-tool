@@ -44,7 +44,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         if (reports.isNotEmpty()) {
                             h2 { +"Tilgjengelighetserklæringer" }
                             ul { reports.forEach { report -> reportListItem(report) } }
-                        } else p { + "${orgUnit.name} har ingen tilgjengelighetserklæringer enda" }
+                        } else p { +"${orgUnit.name} har ingen tilgjengelighetserklæringer enda" }
                     }
                 } ?: run { call.respond(HttpStatusCode.NotFound) }
             }
@@ -113,8 +113,7 @@ fun Route.userRoute(repository: ReportRepository) {
                 ul(classes = "report-list") {
                     reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
                 }
-            else
-            else p { + "Du har ingen tilgjengelighetserklæringer enda" }
+            else p { +"Du har ingen tilgjengelighetserklæringer enda" }
             a {
                 href = "/reports/new"
                 +"Lag ny erklæring"
