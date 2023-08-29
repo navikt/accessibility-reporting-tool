@@ -1,8 +1,7 @@
 package accessibility.reporting.tool.database
 
-import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.Version
+import accessibility.reporting.tool.wcag.*
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Row
 import kotliquery.queryOf
 import org.postgresql.util.PGobject
@@ -64,8 +63,9 @@ class ReportRepository(val database: Database) {
                 queryOf(
                     """select created, last_changed,report_data ->> 'version' as version, report_data 
                     |from report
-                    |where report_data -> 'organizationUnit' ->> 'id' = :id """.trimMargin(),
-                    mapOf("id" to id)
+                    |where report_data -> 'organizationUnit' ->> 'id' = :id
+                    |or report_data ->> 'fromOrganizationUnits' LIKE :idRegex""".trimMargin(),
+                    mapOf("id" to id, "idRegex" to "%${orgUnit.id}%")
                 ).map { row -> report(row) }.asList
             }
 
@@ -131,12 +131,41 @@ class ReportRepository(val database: Database) {
             .asList
     }
 
+    fun getAggregatedReports(): List<AggregatedReport> =
+        database.list {
+            queryOf(
+                """select created, last_changed,report_data ->> 'version' as version, report_data from report
+                    |where report_data ->> 'reportType' = 'AGGREGATED'
+                """.trimMargin()
+
+            ).map { row -> aggregatedReport(row) }.asList
+        }
+
+
+    fun getAggregatedReport(reportId: String): AggregatedReport? = database.query {
+        queryOf(
+            "select created, last_changed, report_data ->> 'version' as version, report_data from report where report_id=:reportid",
+            mapOf("reportid" to reportId)
+        ).map { row -> aggregatedReport(row) }.asSingle
+    }
+
     private fun report(row: Row) = Version.valueOf(row.string("version"))
         .deserialize(
-            row.string("report_data"),
+            row.string("report_data").let { jacksonObjectMapper().readTree(it) },
             row.localDateTimeOrNull("created") ?: LocalDateTimeHelper.defaultCreatedDate,
             row.localDateTimeOrNull("last_changed") ?: LocalDateTimeHelper.defaultCreatedDate
         )
+
+    private fun aggregatedReport(row: Row): AggregatedReport {
+        val reportJson = row.string("report_data").let { jacksonObjectMapper().readTree(it) }
+        return Version.valueOf(row.string("version"))
+            .deserialize(
+                reportJson,
+                row.localDateTimeOrNull("created") ?: LocalDateTimeHelper.defaultCreatedDate,
+                row.localDateTimeOrNull("last_changed") ?: LocalDateTimeHelper.defaultCreatedDate
+            ).toAggregatedReport(reportJson)
+
+    }
 
     private fun organizationUnit(row: Row) = OrganizationUnit(
         id = row.string("organization_unit_id"),

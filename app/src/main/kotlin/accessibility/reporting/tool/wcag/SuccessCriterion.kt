@@ -32,7 +32,7 @@ data class SuccessCriterion(
             count { it.status == Status.NON_COMPLIANT && !it.devationIsDesputed() }
 
 
-        fun fromJson(rawJson: JsonNode, version: Version, isStale:Boolean): SuccessCriterion =
+        fun fromJson(rawJson: JsonNode, version: Version, isStale: Boolean): SuccessCriterion =
             SuccessCriterion(
                 name = rawJson["name"].asText(),
                 description = rawJson["description"].asText(),
@@ -52,7 +52,7 @@ data class SuccessCriterion(
                     rawJson["wcagLevel"]?.takeIf { !it.isNull }?.asText()
                         ?.let { WcagLevel.valueOf(it) } ?: WcagLevel.UNKNOWN
             }.let {
-                if(isStale)
+                if (isStale)
                     version.updateCriteria(it)
                 else it
             }
@@ -75,5 +75,14 @@ enum class Status(val display: String) {
             NOT_TESTED.display -> NOT_TESTED
             else -> throw IllegalArgumentException()
         }
+
+        fun resolveStatus(successcriteriaGroup: List<SuccessCriterion>): Status =
+            when {
+                successcriteriaGroup.all { it.status != NOT_TESTED } && successcriteriaGroup.any { it.status == NON_COMPLIANT } -> NOT_TESTED
+                successcriteriaGroup.all { it.status == COMPLIANT } -> COMPLIANT
+                successcriteriaGroup.all { it.status == NOT_APPLICABLE } -> NOT_APPLICABLE
+                else -> NOT_TESTED
+            }
+
     }
 }

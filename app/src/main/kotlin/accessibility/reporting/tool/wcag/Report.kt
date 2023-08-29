@@ -6,6 +6,7 @@ import accessibility.reporting.tool.wcag.Status.*
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
 import accessibility.reporting.tool.wcag.Version.V1
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -13,7 +14,7 @@ import java.lang.IllegalArgumentException
 import java.time.LocalDateTime
 
 
-class Report(
+open class Report(
     val reportId: String,
     val url: String,
     val descriptiveName: String?,
@@ -26,7 +27,8 @@ class Report(
     val created: LocalDateTime,
     val lastChanged: LocalDateTime,
     val contributers: MutableList<User> = mutableListOf(),
-    val lastUpdatedBy: User?
+    val lastUpdatedBy: User?,
+    val reportType: ReportType = ReportType.SINGLE
 ) {
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
@@ -34,9 +36,9 @@ class Report(
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
         }
 
-        fun fromJsonVersion1(rawJson: String, created: LocalDateTime, lastChanged: LocalDateTime): Report {
+        fun fromJsonVersion1(reportJson: JsonNode, created: LocalDateTime, lastChanged: LocalDateTime): Report {
             val successCriterionIsStale = lastChanged.isBefore(Version1.lastTextUpdate)
-            return jacksonObjectMapper().readTree(rawJson).let { jsonNode ->
+            return reportJson.let { jsonNode ->
                 Report(
                     reportId = jsonNode["reportId"].asText(),
                     url = jsonNode["url"].asText(),
@@ -63,11 +65,22 @@ class Report(
                     filters = jsonNode["filters"].map { it.asText() }.toMutableList(),
                     lastChanged = lastChanged,
                     created = created,
-                    lastUpdatedBy = User.fromJson(jsonNode["lastUpdatedBy"])
+                    lastUpdatedBy = User.fromJson(jsonNode["lastUpdatedBy"]),
+                    reportType = jsonNode["reportType"]
+                        .takeIf { !it.isNull }?.let { ReportType.valueOf(it.asText()) }
+                        ?: ReportType.SINGLE
                 )
             }
         }
     }
+
+
+    fun toAggregatedReport(reportJson: JsonNode) =
+        AggregatedReport.fromReport(
+            report = this,
+            fromReportIds = reportJson["fromReportIds"].toList().map { it.asText() },
+            fromOrganizationUnits = reportJson["fromOrganizationUnits"].toList().map { it.asText() })
+
 
     fun toJson(): String = objectMapper.writeValueAsString(this)
     fun status(): String = when {
@@ -145,10 +158,13 @@ class OrganizationUnit(
 
 
 enum class Version(
-    val deserialize: (String, LocalDateTime, LocalDateTime) -> Report,
+    val deserialize: (JsonNode, LocalDateTime, LocalDateTime) -> Report,
     val criteria: List<SuccessCriterion>,
     val updateCriteria: (SuccessCriterion) -> SuccessCriterion
 ) {
     V1(Report::fromJsonVersion1, Version1.criteriaTemplate, Version1::updateCriterion);
+}
 
+enum class ReportType {
+    AGGREGATED, SINGLE
 }

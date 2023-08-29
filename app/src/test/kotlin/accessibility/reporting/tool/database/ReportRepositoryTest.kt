@@ -2,11 +2,10 @@ package accessibility.reporting.tool.database
 
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.Version
+import accessibility.reporting.tool.wcag.*
 import assert
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import kotliquery.queryOf
@@ -54,6 +53,11 @@ class ReportRepositoryTest {
     @Test
     fun upsertReport() {
         val testReport = dummyReportV1()
+        val testAggregatedReport = AggregatedReport.aggregate(
+            listOf(dummyReportV1()),
+            user = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+            descriptiveName = "aggregatedReport"
+        )
         repository.upsertReport(testReport)
         repository.getReport(testReport.reportId).assert {
             require(this != null)
@@ -61,7 +65,13 @@ class ReportRepositoryTest {
         }
         repository.upsertReport(testReport)
         repository.upsertReport(testReport)
+        repository.upsertReport(testAggregatedReport)
         repository.getReport(testReport.reportId).assert { require(this != null) }
+        repository.getReportsForUser(testUserOid).apply {
+            size shouldBe 2
+            count { it.reportType == ReportType.SINGLE } shouldBe 1
+            count { it.reportType == ReportType.AGGREGATED } shouldBe 1
+        }
         database.list {
             queryOf(
                 "SELECT * from changelog where report_id=:id",
@@ -119,12 +129,17 @@ class ReportRepositoryTest {
         repository.upsertReport(dummyReportV1(orgUnit = testOrg))
         repository.upsertReport(dummyReportV1("http://dummyurl2.test", testOrg))
         repository.upsertReport(dummyReportV1("http://dummyurl3.test", testOrg))
-        repository.upsertReport(dummyReportV1("http://dummyurl4.test", testOrg))
+        repository.upsertReport(
+            AggregatedReport.aggregate(
+                listOf(dummyReportV1("http://dummyurl4.test", testOrg)),
+                user = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+                descriptiveName = "aggregatedReport"
+            )
+        )
 
         repository.getReportForOrganizationUnit(testOrg.id).assert {
             require(first != null)
             second.assert {
-                size shouldBe 4
                 withClue("Report with url dummyUrl.test is missing") {
                     any { it.url == "http://dummyurl.test" } shouldBe true
                 }
@@ -176,6 +191,35 @@ class ReportRepositoryTest {
             withClue("Report with url dummyurl4.test is missing") {
                 any { it.url == "http://dummyurl4.test" } shouldBe true
             }
+        }
+
+    }
+
+    @Test
+    fun `get aggregregatedReports`() {
+        val testReport = dummyReportV1()
+        val testReport2 = dummyReportV1()
+        val testAggregatedReport = AggregatedReport.aggregate(
+            listOf(testReport),
+            user = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+            descriptiveName = "aggregatedReport"
+        )
+        val testAggregatedReport2 = AggregatedReport.aggregate(
+            listOf(testReport2, testReport),
+            user = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+            descriptiveName = "aggregatedReport"
+        )
+        repository.upsertReport(testReport)
+        repository.upsertReport(testAggregatedReport)
+        repository.upsertReport(testAggregatedReport2)
+
+        repository.getAggregatedReports().assert {
+            size shouldBe 2
+        }
+
+        repository.getAggregatedReport(testAggregatedReport2.reportId).assert {
+            require(this != null)
+            fromReportIds shouldContainExactlyInAnyOrder listOf(testReport2.reportId, testReport.reportId)
         }
 
     }
