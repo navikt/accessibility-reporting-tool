@@ -67,7 +67,7 @@ open class Report(
                     created = created,
                     lastUpdatedBy = User.fromJson(jsonNode["lastUpdatedBy"]),
                     reportType = jsonNode["reportType"]
-                        .takeIf { !it.isNull }?.let { ReportType.valueOf(it.asText()) }
+                        .takeIf { it != null }?.let { ReportType.valueOf(it.asText()) }
                         ?: ReportType.SINGLE
                 )
             }

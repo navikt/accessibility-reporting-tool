@@ -4,6 +4,7 @@ import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.ReportType
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -127,7 +128,12 @@ fun UL.reportListItem(report: Report, allowDelete: Boolean = false) {
     li {
         a {
             href = "/reports/${report.reportId}"
-            +(report.descriptiveName ?: report.url)
+            +(report.descriptiveName ?: report.url).let {
+                if (report.reportType == ReportType.AGGREGATED)
+                    "$it(samlerapport)"
+                else
+                    it
+            }
         }
         if (allowDelete)
             button {
