@@ -11,10 +11,15 @@ body {
 body {
   max-width: 50rem;
   margin: 1rem auto;
+  padding: 0 1em;
+}
+
+body > * {
+  outline: 1px solid red;
 }
 
 summary {
-  margin: 0 0 16px 0;
+  margin: 0 0 1em 0;
 }
 
 .radio-with-label label {
@@ -25,21 +30,24 @@ summary {
   color: #333;
 }
 
-nav {
+#hovedmeny {
   border-bottom: #335ea8 solid 3px;
 }
 
-nav ul li {
+#hovedmeny li {
   display: inline-block;
-  margin-left: 32px;
+  margin-left: 2em;
 }
 
+
+
+
 button {
-  margin-left: 24px;
+  margin-left: 1.5em;
 }
 
 .report-info {
-  margin-bottom: 16px;
+  margin-bottom: 1em;
 }
 
 .report-info a {
@@ -47,11 +55,11 @@ button {
 }
 
 .report-info p {
-  margin-bottom: 8px;
+  margin-bottom: .5em;
 }
 
 .statement-metadata p {
-  margin-bottom: 16px;
+  margin-bottom: 1em;
 }
 .non-compliant-icon {
   background: #ba0c13;
@@ -79,7 +87,7 @@ button {
 
 .criterion-status h2 {
   display: inline-block;
-  margin-bottom: 4px;
+  margin-bottom: .5em;
   font-size: 1.3em;
 }
 
@@ -93,6 +101,6 @@ button {
 
 .icon {
   border-radius: 50%;
-  height: 24px;
-  width: 24px;
+  height: 1.5em;
+  width: 1.5em;
 }
