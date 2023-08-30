@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.NavBarItem.FORSIDE
-import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -32,12 +31,13 @@ fun Route.landingPage(repository: ReportRepository) {
                     +"Lag ny erklæring"
                 }
             }
-            h2 { +"Dine rapporter" }
-            ul { reports.forEach { report -> reportListItem(report) } }
-
+            h2 { +"Rapporter" }
+            reportList(reports)
         }
     }
 }
+
+
 
 suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBarItem,contenbuilder: BODY.() -> Unit) {
     respondHtml {

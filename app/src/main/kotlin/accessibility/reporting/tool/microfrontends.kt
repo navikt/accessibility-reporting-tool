@@ -263,4 +263,9 @@ fun summaryLinksString(report: Report) = createHTML().ul(classes = "summary") {
 }
 
 
-
+fun BODY.reportList(reports: List<Report>) {
+    if (reports.isNotEmpty())
+        ul(classes = "report-list") {
+            reports.sortedByDescending { it.lastChanged }.forEach { report -> reportListItem(report) }
+        }
+}

@@ -22,6 +22,10 @@ data class SuccessCriterion(
     fun devationIsDesputed() =
         breakingTheLaw.isEmpty() && (lawDoesNotApply.isNotEmpty() || tooHardToComply.isNotEmpty())
 
+    fun setNonApplicable(contentGroupsFilter: List<String>): Boolean =
+       contentGroupsFilter.contains(this.contentGroup)
+
+
     val successCriterionNumber = number
 
     companion object {

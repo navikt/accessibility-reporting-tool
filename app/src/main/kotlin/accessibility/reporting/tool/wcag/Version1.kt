@@ -40,11 +40,16 @@ object Version1 {
         reportId: String,
         url: String,
         user: User,
-        descriptiveName: String
+        descriptiveName: String,
+        contentGroupsFilter: List<String>
     ) = Report(
         organizationUnit = organizationUnit,
         reportId = reportId,
-        successCriteria = criteriaTemplate,
+        successCriteria = criteriaTemplate.map {
+            if (it.setNonApplicable(contentGroupsFilter)) {
+                it.copy(status = Status.NOT_APPLICABLE)
+            } else it
+        },
         testData = null,
         url = url,
         user = user,
@@ -55,7 +60,7 @@ object Version1 {
         descriptiveName = descriptiveName
     )
 
-    private object ContentGroups {
+    object ContentGroups {
         const val ikonerBilderGrafer = "Ikoner, bilder, grafer"
         const val lydVideoAnimasjoner = "Lyd, video, animasjoner"
         const val skjema = "Skjema"

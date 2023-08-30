@@ -44,8 +44,8 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         }
                         if (reports.isNotEmpty()) {
                             h2 { +"Tilgjengelighetserklæringer" }
-                            ul { reports.forEach { report -> reportListItem(report) } }
-                        } else p { +"${orgUnit.name} har ingen tilgjengelighetserklæringer enda" }
+                            reportList(reports)
+                        } else p { +"${orgUnit.name} har ingen tilgjengelighetserklæringer ennå" }
                     }
                 } ?: run { call.respond(HttpStatusCode.NotFound) }
             }
@@ -111,9 +111,7 @@ fun Route.userRoute(repository: ReportRepository) {
         call.respondHtmlContent(call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
             if (reports.isNotEmpty())
-                ul(classes = "report-list") {
-                    reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
-                }
+                reportList(reports)
             else p { +"Du har ingen tilgjengelighetserklæringer enda" }
             a {
                 href = "/reports/new"

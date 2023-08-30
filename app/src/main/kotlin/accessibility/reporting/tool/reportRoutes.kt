@@ -59,8 +59,8 @@ fun Route.reports(repository: ReportRepository) {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             repository.deleteReport(id)
             val reports = repository.getReportsForUser(call.user.oid!!) //TODO fjern
-            fun response() = createHTML().ul(classes = "report-list") {
-                reports.map { report -> reportListItem(report, true) }
+            fun response() = createHTML().body {
+                reportList(reports)
             }
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
@@ -105,6 +105,9 @@ fun Route.reports(repository: ReportRepository) {
                     repository.getOrganizationUnit(id)
                 }
                 val descriptiveName = formParameters["descriptive-name"].toString()
+                val disableContentGroup = formParameters["contains-multimedia"].toString().let {
+
+                }
 
                 val newReportId = UUID.randomUUID().toString()
                 repository.upsertReport(
@@ -113,7 +116,8 @@ fun Route.reports(repository: ReportRepository) {
                         newReportId,
                         url,
                         call.user,
-                        descriptiveName
+                        descriptiveName,
+                        emptyList()
                     )
                 )
                 call.response.header("HX-Redirect", "/reports/$newReportId")
@@ -204,12 +208,24 @@ internal fun DIV.statementContributors(contributers: List<User>) {
 
 fun updatedMetadataString(report: Report): String = """
     ${createHTML().p { statementMetadataInnerHtml("Status", report.status(), "metadata-status") }}
-    ${createHTML().p { statementMetadataInnerHtml("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")}}
-    ${createHTML().p { statementMetadataInnerHtml(
-    "Sist oppdatert av",
-    (report.lastUpdatedBy ?: report.user).email,
-    "metadata-oppdatert-av"
-) }}""".trimMargin()
+    ${
+    createHTML().p {
+        statementMetadataInnerHtml(
+            "Sist oppdatert",
+            report.lastChanged.displayFormat(),
+            "metadata-oppdatert"
+        )
+    }
+}
+    ${
+    createHTML().p {
+        statementMetadataInnerHtml(
+            "Sist oppdatert av",
+            (report.lastUpdatedBy ?: report.user).email,
+            "metadata-oppdatert-av"
+        )
+    }
+}""".trimMargin()
 
 
 private fun LocalDateTime.displayFormat(): String = "$dayOfMonth.$monthValue.$year"

@@ -21,7 +21,8 @@ class ReportTest {
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
             user = testUser,
-            descriptiveName = "Some name"
+            descriptiveName = "Some name",
+            contentGroupsFilter = emptyList()
         )
 
         testReport.findCriterion("1.1.1") shouldBe Version1.criteriaTemplate.first()
@@ -37,7 +38,8 @@ class ReportTest {
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
             user = testUser,
-            descriptiveName = "some name 2"
+            descriptiveName = "some name 2",
+            contentGroupsFilter = emptyList()
         )
 
         val testUpdatedCriterion = Version1.criteriaTemplate.find { it.number == "1.3.2" }!!.copy(
