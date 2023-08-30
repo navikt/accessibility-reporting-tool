@@ -105,9 +105,6 @@ fun Route.reports(repository: ReportRepository) {
                     repository.getOrganizationUnit(id)
                 }
                 val descriptiveName = formParameters["descriptive-name"].toString()
-                val disableContentGroup = formParameters["contains-multimedia"].toString().let {
-
-                }
 
                 val newReportId = UUID.randomUUID().toString()
                 repository.upsertReport(
