@@ -7,38 +7,16 @@ body {
   font-size: 1.125rem;
   color: #333;
 
-  /*max-width: 50rem;*/
+  max-width: 60rem;
   margin: 1rem auto;
   padding: 0 1em;
 }
 
 /* Layout for report registration page */
 
-.report-header {
-  grid-area: report-header;
-}
-
-.sc-toc {
-  grid-area: sc-toc;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.sc-list {
-  grid-area: sc-list;
-}
+.report-header { grid-area: report-header; }
+.sc-toc        { grid-area: sc-toc;        }
+.sc-list       { grid-area: sc-list;       }
 
 .report-container {
   display: grid;
@@ -51,7 +29,7 @@ body {
 
 @media screen and (min-width: 768px) {
   .report-container {
-    grid-template-columns: 1fr 3fr;
+    grid-template-columns: 2fr 5fr;
     grid-template-areas:
       "report-header  report-header"
       "sc-toc sc-list";
@@ -119,11 +97,36 @@ body {
 
 
 .sc-list h2 {
-  margin: 0 0 .5em;
+  margin: 0;
 }
 
+.sc-list form {
+  margin: 1em 0 2em;
+}
 
+.report-info p {
+  margin: .5em 0;
+}
 
+.sc-list fieldset {
+  margin-bottom: 1em;
+}
+
+.sc-list details {
+  margin-left: 1.5em;
+}
+
+.sc-list details:not(:last-child) summary {
+  margin: 0 0 1em 0;
+}
+
+.to-top {
+  position: fixed;
+  background-color: #fff;
+  right: 0;
+  bottom: 0;
+  padding: .25em;
+}
 
 
 
@@ -140,9 +143,7 @@ label {
 }
 
 
-summary {
-  margin: 0 0 1em 0;
-}
+
 
 .radio-with-label label {
   display: inline;
@@ -176,17 +177,7 @@ button {
   margin-left: 1.5em;
 }
 
-.report-info {
-  margin-bottom: 1em;
-}
 
-.report-info a {
-  display: block;
-}
-
-.report-info p {
-  margin-bottom: .5em;
-}
 
 
 .criterion-status p {
