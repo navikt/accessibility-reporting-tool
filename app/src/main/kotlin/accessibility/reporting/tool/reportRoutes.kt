@@ -26,31 +26,54 @@ fun Route.reports(repository: ReportRepository) {
             val report = repository.getReport(id) ?: throw IllegalArgumentException()
 
             call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
-                main {
-                    h1 { +"Tilgjengelighetserklæring" }
-                    div(classes = "statement-metadata") {
-                        statementMetadata("Løsning", report.url)
-                        report.descriptiveName?.let {
-                            statementMetadata("Beskrivelse", it)
+                main(classes = "report-container") {
+                    header(classes = "report-header") {
+                        h1 { +"Tilgjengelighetserklæring (enkeltside)" }
+                        div(classes = "statement-metadata") {
+                            statementMetadataDl(
+                                listOf(
+                                    Triple("URL", report.url, null),
+                                    Triple("Ansvarlig", report.user.email, null),
+                                    Triple("Status", report.status(), "metadata-status"),
+                                    Triple("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")
+                                ) +
+
+                                        (if (!report.descriptiveName.isNullOrBlank()) {
+                                            listOf(Triple("Beskrivelse", report.descriptiveName, null))
+                                        } else {
+                                            emptyList()
+                                        })
+
+                                        +
+
+                                        Triple(
+                                            "Sist oppdatert av",
+                                            (report.lastUpdatedBy ?: report.user).email,
+                                            "metadata-oppdatert-av"
+                                        )
+
+                            )
+
+                            statementContributors(report.contributers)
+                            statementOrganizationUnit(report.organizationUnit)
                         }
-                        statementMetadata("Ansvarlig", report.user.email)
-                        statementMetadata("Status", report.status(), "metadata-status")
-                        statementMetadata("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")
-                        statementMetadata(
-                            "Sist oppdatert av",
-                            (report.lastUpdatedBy ?: report.user).email,
-                            "metadata-oppdatert-av"
-                        )
-                        statementContributors(report.contributers)
-                        statementOrganizationUnit(report.organizationUnit)
                     }
-                    nav {
+
+                    nav(classes = "sc-toc") {
                         attributes["aria-label"] = "Status"
                         summaryLinks(report)
                     }
-                    div {
+
+                    div(classes = "sc-list") {
                         report.successCriteria.map { a11yForm(it, id) }
                     }
+
+                    a(classes = "to-top") {
+                        href = "#sc1.1.1"
+                        +"Til toppen"
+                    }
+
+
                 }
             }
         }
@@ -74,14 +97,13 @@ fun Route.reports(repository: ReportRepository) {
             val lawDoesNotApply = formParameters["law-does-not-apply"]
             val tooHardToComply = formParameters["too-hard-to-comply"]
             val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
-            val criterion: SuccessCriterion =
-                oldReport.updateCriterion(
-                    criterionNumber = criterionNumber,
-                    statusString = status,
-                    breakingTheLaw = breakingTheLaw,
-                    lawDoesNotApply = lawDoesNotApply,
-                    tooHardToComply = tooHardToComply
-                )
+            val criterion: SuccessCriterion = oldReport.updateCriterion(
+                criterionNumber = criterionNumber,
+                statusString = status,
+                breakingTheLaw = breakingTheLaw,
+                lawDoesNotApply = lawDoesNotApply,
+                tooHardToComply = tooHardToComply
+            )
             val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
 
             fun response(): String = updatedMetadataString(report) + summaryLinksString(report) + createHTML().div {
@@ -91,8 +113,7 @@ fun Route.reports(repository: ReportRepository) {
             }
 
             call.respondText(
-                contentType = ContentType.Text.Html,
-                HttpStatusCode.OK, ::response
+                contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response
             )
         }
 
@@ -109,11 +130,7 @@ fun Route.reports(repository: ReportRepository) {
                 val newReportId = UUID.randomUUID().toString()
                 repository.upsertReport(
                     Version1.newReport(
-                        organizationUnit,
-                        newReportId,
-                        url,
-                        call.user,
-                        descriptiveName
+                        organizationUnit, newReportId, url, call.user, descriptiveName
                     )
                 )
                 call.response.header("HX-Redirect", "/reports/$newReportId")
@@ -191,8 +208,7 @@ internal fun DIV.statementOrganizationUnit(organizationUnit: OrganizationUnit?) 
 }
 
 internal fun DIV.statementContributors(contributers: List<User>) {
-    if (contributers.isNotEmpty())
-        p { span(classes = "bold") { +"Bidragsytere " } }
+    if (contributers.isNotEmpty()) p { span(classes = "bold") { +"Bidragsytere " } }
     ul {
         contributers.map { contributer ->
             li {
@@ -203,13 +219,29 @@ internal fun DIV.statementContributors(contributers: List<User>) {
 }
 
 fun updatedMetadataString(report: Report): String = """
-    ${createHTML().p { statementMetadataInnerHtml("Status", report.status(), "metadata-status") }}
-    ${createHTML().p { statementMetadataInnerHtml("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")}}
-    ${createHTML().p { statementMetadataInnerHtml(
-    "Sist oppdatert av",
-    (report.lastUpdatedBy ?: report.user).email,
-    "metadata-oppdatert-av"
-) }}""".trimMargin()
+    ${
+    createHTML().dd {
+        id = "metadata-status"
+        hxOOB("true")
+        +"${report.status()}"
+    }
+}    
+    
+    ${
+    createHTML().dd {
+        id = "metadata-oppdatert"
+        hxOOB("true")
+        +"${report.lastChanged.displayFormat()}"
+    }
+}
+    
+    ${
+    createHTML().dd {
+        id = "metadata-oppdatert-av"
+        hxOOB("true")
+        +"${(report.lastUpdatedBy ?: report.user).email}"
+    }
+}""".trimMargin()
 
 
 private fun LocalDateTime.displayFormat(): String = "$dayOfMonth.$monthValue.$year"

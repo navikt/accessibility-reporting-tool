@@ -1,64 +1,104 @@
-label {
-  display: block;
-}
+/* Theme */
+
 
 body {
   font-family: "Source Sans Pro", Arial, sans-serif;
   line-height: 1.333;
   font-size: 1.125rem;
-}
-
-body {
-  max-width: 50rem;
-  margin: 1rem auto;
-}
-
-summary {
-  margin: 0 0 16px 0;
-}
-
-.radio-with-label label {
-  display: inline;
-}
-
-* {
   color: #333;
+
+  /*max-width: 50rem;*/
+  margin: 1rem auto;
+  padding: 0 1em;
 }
 
-nav {
-  border-bottom: #335ea8 solid 3px;
+/* Layout for report registration page */
+
+.report-header {
+  grid-area: report-header;
 }
 
-nav ul li {
-  display: inline-block;
-  margin-left: 32px;
+.sc-toc {
+  grid-area: sc-toc;
 }
 
-button {
-  margin-left: 24px;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.sc-list {
+  grid-area: sc-list;
 }
 
-.report-info {
-  margin-bottom: 16px;
+.report-container {
+  display: grid;
+  gap: 1em;
+  grid-template-areas:
+    "report-header"
+    "sc-toc"
+    "sc-list";
 }
 
-.report-info a {
-  display: block;
+@media screen and (min-width: 768px) {
+  .report-container {
+    grid-template-columns: 1fr 3fr;
+    grid-template-areas:
+      "report-header  report-header"
+      "sc-toc sc-list";
+  }
 }
 
-.report-info p {
-  margin-bottom: 8px;
+
+/* Report registration page Table of Contents */
+
+.sc-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1.5em;
 }
 
-.statement-metadata p {
-  margin-bottom: 16px;
+
+.sc-toc li {
+  margin-bottom: .25em;
 }
+
+.sc-toc a {
+  text-decoration: none;
+  position: relative;
+}
+
+
+
+.sc-toc li:hover {
+  background-color: #e7f4fb;
+}
+.sc-toc a:hover {
+  text-decoration: underline;
+}
+
+
+.icon {
+  border-radius: 50%;
+  height: 1em;
+  width: 1em;
+  position: absolute;
+  top: .125em;
+  left: -1.5em;
+
+}
+
 .non-compliant-icon {
   background: #ba0c13;
-}
-
-.statement-metadata .bold {
-  font-weight: bold;
 }
 
 .compliant-icon {
@@ -73,13 +113,89 @@ button {
   background: #c07414;
 }
 
+
+
+
+
+
+.sc-list h2 {
+  margin: 0 0 .5em;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+label {
+  display: block;
+}
+
+
+summary {
+  margin: 0 0 1em 0;
+}
+
+.radio-with-label label {
+  display: inline;
+}
+
+
+
+#hovedmeny {
+  border-bottom: #335ea8 solid 3px;
+}
+
+#hovedmeny ul {
+  margin: 0;
+  padding: 0;
+}
+
+#hovedmeny li {
+  display: inline-block;
+}
+
+#hovedmeny li:not(:last-child) {
+  margin-right: 2em;
+}
+
+
+
+
+
+
+button {
+  margin-left: 1.5em;
+}
+
+.report-info {
+  margin-bottom: 1em;
+}
+
+.report-info a {
+  display: block;
+}
+
+.report-info p {
+  margin-bottom: .5em;
+}
+
+
 .criterion-status p {
   margin-top: 0;
 }
 
 .criterion-status h2 {
   display: inline-block;
-  margin-bottom: 4px;
+  margin: .5em;
   font-size: 1.3em;
 }
 
@@ -89,10 +205,4 @@ button {
 
 .criterion-status ul {
   margin: 0;
-}
-
-.icon {
-  border-radius: 50%;
-  height: 24px;
-  width: 24px;
 }

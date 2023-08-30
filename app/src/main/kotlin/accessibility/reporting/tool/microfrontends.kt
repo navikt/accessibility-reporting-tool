@@ -151,7 +151,6 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
     }
 }
 
-
 fun UL.criterionIssues(heading: String, issueList: List<String>) {
     if (issueList.isNotEmpty()) {
         li { +heading }
@@ -185,7 +184,6 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     }
 }
 
-
 internal fun DIV.statementMetadata(label: String, value: String, hxOOBId: String? = null) {
     p { statementMetadataInnerHtml(label, value, hxOOBId) }
 }
@@ -199,10 +197,31 @@ internal fun P.statementMetadataInnerHtml(label: String, value: String, hxOOBId:
     span { +value }
 }
 
+fun DIV.statementMetadataDl(statuses: List<Triple<String, String, String?>>) {
+    dl {
+        statuses.forEach{
+
+            dt {
+                +"${it.first}"
+            }
+
+            dd {
+                it.third?.let { hxId ->
+                    id = hxId
+                    hxOOB("true")
+                }
+
+                +"${it.second}"
+            }
+        }
+    }
+}
+
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
 
 fun BODY.navbar(currentItem: NavBarItem) {
     nav {
+        id = "hovedmeny"
         attributes["aria-label"] = "Hovedmeny"
         ul {
             FORSIDE.li(currentItem, this)
@@ -261,6 +280,3 @@ fun summaryLinksString(report: Report) = createHTML().ul(classes = "summary") {
         }
     }
 }
-
-
-
