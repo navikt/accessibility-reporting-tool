@@ -151,7 +151,6 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
     }
 }
 
-
 fun UL.criterionIssues(heading: String, issueList: List<String>) {
     if (issueList.isNotEmpty()) {
         li { +heading }
@@ -184,7 +183,6 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
 
     }
 }
-
 
 internal fun DIV.statementMetadata(label: String, value: String, hxOOBId: String? = null) {
     p { statementMetadataInnerHtml(label, value, hxOOBId) }
@@ -282,6 +280,3 @@ fun summaryLinksString(report: Report) = createHTML().ul(classes = "summary") {
         }
     }
 }
-
-
-

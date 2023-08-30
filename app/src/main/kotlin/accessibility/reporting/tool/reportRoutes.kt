@@ -26,43 +26,54 @@ fun Route.reports(repository: ReportRepository) {
             val report = repository.getReport(id) ?: throw IllegalArgumentException()
 
             call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
-                main {
-                    h1 { +"Tilgjengelighetserklæring" }
-                    div(classes = "statement-metadata") {
-                        statementMetadataDl(
-                            listOf(
-                                Triple("Løsning", report.url, null),
-                                Triple("Ansvarlig", report.user.email, null),
-                                Triple("Status", report.status(), "metadata-status"),
-                                Triple("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")
-                            ) +
+                main(classes = "report-container") {
+                    header(classes = "report-header") {
+                        h1 { +"Tilgjengelighetserklæring (enkeltside)" }
+                        div(classes = "statement-metadata") {
+                            statementMetadataDl(
+                                listOf(
+                                    Triple("URL", report.url, null),
+                                    Triple("Ansvarlig", report.user.email, null),
+                                    Triple("Status", report.status(), "metadata-status"),
+                                    Triple("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")
+                                ) +
 
-                                    (if (!report.descriptiveName.isNullOrBlank()) {
-                                        listOf(Triple("Beskrivelse", report.descriptiveName, null))
-                                    } else {
-                                        emptyList()
-                                    })
+                                        (if (!report.descriptiveName.isNullOrBlank()) {
+                                            listOf(Triple("Beskrivelse", report.descriptiveName, null))
+                                        } else {
+                                            emptyList()
+                                        })
 
-                                    +
+                                        +
 
-                                    Triple(
-                                        "Sist oppdatert av",
-                                        (report.lastUpdatedBy ?: report.user).email,
-                                        "metadata-oppdatert-av"
-                                    )
+                                        Triple(
+                                            "Sist oppdatert av",
+                                            (report.lastUpdatedBy ?: report.user).email,
+                                            "metadata-oppdatert-av"
+                                        )
 
-                        )
+                            )
 
-                        statementContributors(report.contributers)
-                        statementOrganizationUnit(report.organizationUnit)
+                            statementContributors(report.contributers)
+                            statementOrganizationUnit(report.organizationUnit)
+                        }
                     }
-                    nav {
+
+                    nav(classes = "sc-toc") {
                         attributes["aria-label"] = "Status"
                         summaryLinks(report)
                     }
-                    div {
+
+                    div(classes = "sc-list") {
                         report.successCriteria.map { a11yForm(it, id) }
                     }
+
+                    a(classes = "to-top") {
+                        href = "#sc1.1.1"
+                        +"Til toppen"
+                    }
+
+
                 }
             }
         }

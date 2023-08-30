@@ -1,22 +1,144 @@
-label {
-  display: block;
-}
+/* Theme */
+
 
 body {
   font-family: "Source Sans Pro", Arial, sans-serif;
   line-height: 1.333;
   font-size: 1.125rem;
-}
+  color: #333;
 
-body {
-  max-width: 50rem;
+  /*max-width: 50rem;*/
   margin: 1rem auto;
   padding: 0 1em;
 }
 
-body > * {
-  outline: 1px solid red;
+/* Layout for report registration page */
+
+.report-header {
+  grid-area: report-header;
 }
+
+.sc-toc {
+  grid-area: sc-toc;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.sc-list {
+  grid-area: sc-list;
+}
+
+.report-container {
+  display: grid;
+  gap: 1em;
+  grid-template-areas:
+    "report-header"
+    "sc-toc"
+    "sc-list";
+}
+
+@media screen and (min-width: 768px) {
+  .report-container {
+    grid-template-columns: 1fr 3fr;
+    grid-template-areas:
+      "report-header  report-header"
+      "sc-toc sc-list";
+  }
+}
+
+
+/* Report registration page Table of Contents */
+
+.sc-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1.5em;
+}
+
+
+.sc-toc li {
+  margin-bottom: .25em;
+}
+
+.sc-toc a {
+  text-decoration: none;
+  position: relative;
+}
+
+
+
+.sc-toc li:hover {
+  background-color: #e7f4fb;
+}
+.sc-toc a:hover {
+  text-decoration: underline;
+}
+
+
+.icon {
+  border-radius: 50%;
+  height: 1em;
+  width: 1em;
+  position: absolute;
+  top: .125em;
+  left: -1.5em;
+
+}
+
+.non-compliant-icon {
+  background: #ba0c13;
+}
+
+.compliant-icon {
+  background: #2b883a;
+}
+
+.too-hard-icon {
+  background: #595959;
+}
+
+.not-tested-icon {
+  background: #c07414;
+}
+
+
+
+
+
+
+.sc-list h2 {
+  margin: 0 0 .5em;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+label {
+  display: block;
+}
+
 
 summary {
   margin: 0 0 1em 0;
@@ -26,18 +148,26 @@ summary {
   display: inline;
 }
 
-* {
-  color: #333;
-}
+
 
 #hovedmeny {
   border-bottom: #335ea8 solid 3px;
 }
 
+#hovedmeny ul {
+  margin: 0;
+  padding: 0;
+}
+
 #hovedmeny li {
   display: inline-block;
-  margin-left: 2em;
 }
+
+#hovedmeny li:not(:last-child) {
+  margin-right: 2em;
+}
+
+
 
 
 
@@ -58,28 +188,6 @@ button {
   margin-bottom: .5em;
 }
 
-.statement-metadata p {
-  margin-bottom: 1em;
-}
-.non-compliant-icon {
-  background: #ba0c13;
-}
-
-.statement-metadata .bold {
-  font-weight: bold;
-}
-
-.compliant-icon {
-  background: #2b883a;
-}
-
-.too-hard-icon {
-  background: #595959;
-}
-
-.not-tested-icon {
-  background: #c07414;
-}
 
 .criterion-status p {
   margin-top: 0;
@@ -87,7 +195,7 @@ button {
 
 .criterion-status h2 {
   display: inline-block;
-  margin-bottom: .5em;
+  margin: .5em;
   font-size: 1.3em;
 }
 
@@ -97,10 +205,4 @@ button {
 
 .criterion-status ul {
   margin: 0;
-}
-
-.icon {
-  border-radius: 50%;
-  height: 1.5em;
-  width: 1.5em;
 }
