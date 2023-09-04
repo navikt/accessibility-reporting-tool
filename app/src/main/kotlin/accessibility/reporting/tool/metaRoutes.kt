@@ -38,15 +38,3 @@ fun Route.landingPage(repository: ReportRepository) {
         }
     }
 }
-
-suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBarItem,contenbuilder: BODY.() -> Unit) {
-    respondHtml {
-        lang = "no"
-        head { headContent(title) }
-        body {
-            navbar(navBarItem)
-            contenbuilder()
-        }
-
-    }
-}

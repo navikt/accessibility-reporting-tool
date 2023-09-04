@@ -32,10 +32,10 @@ fun Route.reports(repository: ReportRepository) {
                         div(classes = "statement-metadata") {
                             statementMetadataDl(
                                 listOf(
-                                    Triple("URL", report.url, null),
-                                    Triple("Ansvarlig", report.user.email, null),
-                                    Triple("Status", report.status(), "metadata-status"),
-                                    Triple("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")
+                                    Metadata("URL", report.url, null),
+                                    Metadata("Ansvarlig", report.user.email, null),
+                                    Metadata("Status", report.status(), "metadata-status"),
+                                    Metadata("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")
                                 ) +
 
                                         (if (!report.descriptiveName.isNullOrBlank()) {

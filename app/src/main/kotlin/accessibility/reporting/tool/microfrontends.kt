@@ -7,24 +7,36 @@ import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
 import accessibility.reporting.tool.wcag.Status.NOT_TESTED
 import accessibility.reporting.tool.wcag.SuccessCriterion
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
+import io.ktor.server.application.*
+import io.ktor.server.html.*
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 
+suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBarItem, contenbuilder: BODY.() -> Unit) {
+    respondHtml {
+        lang = "no"
+        head {
+            meta { charset = "UTF-8" }
+            style {}
+            title { +"${title}" }
+            script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
 
-fun HEAD.headContent(title: String) {
-    meta { charset = "UTF-8" }
-    style {}
-    title { +"${title}" }
-    script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
+            link {
+                rel = "preload"
+                href = "https://cdn.nav.no/aksel/@navikt/ds-css/2.9.0/index.min.css"
+                attributes["as"] = "style"
+            }
+            link {
+                rel = "stylesheet"
+                href = "/static/style.css"
 
-    link {
-        rel = "preload"
-        href = "https://cdn.nav.no/aksel/@navikt/ds-css/2.9.0/index.min.css"
-        attributes["as"] = "style"
-    }
-    link {
-        rel = "stylesheet"
-        href = "/static/style.css"
+            }
+        }
+
+        body {
+            navbar(navBarItem)
+            contenbuilder()
+        }
 
     }
 }
@@ -184,38 +196,29 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     }
 }
 
-internal fun DIV.statementMetadata(label: String, value: String, hxOOBId: String? = null) {
-    p { statementMetadataInnerHtml(label, value, hxOOBId) }
-}
-
-internal fun P.statementMetadataInnerHtml(label: String, value: String, hxOOBId: String?) {
-    hxOOBId?.let { hxId ->
-        id = hxId
-        hxOOB("$hxId")
-    }
-    span(classes = "bold") { +"$label: " }
-    span { +value }
-}
-
-fun DIV.statementMetadataDl(statuses: List<Triple<String, String, String?>>) {
+fun DIV.statementMetadataDl(statuses: List<Metadata>) {
     dl {
-        statuses.forEach{
-
-            dt {
-                +"${it.first}"
-            }
-
+        statuses.forEach {
+            dt { +it.label }
             dd {
-                it.third?.let { hxId ->
+                it.hxId?.let { hxId ->
                     id = hxId
                     hxOOB("true")
                 }
-
-                +"${it.second}"
+                +it.value
             }
         }
     }
 }
+
+typealias Metadata = Triple<String, String, String?>
+
+private val Metadata.label: String
+    get() = first
+private val Metadata.value: String
+    get() = second
+private val Metadata.hxId: String?
+    get() = third
 
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
 
@@ -280,3 +283,5 @@ fun summaryLinksString(report: Report) = createHTML().ul(classes = "summary") {
         }
     }
 }
+
+
