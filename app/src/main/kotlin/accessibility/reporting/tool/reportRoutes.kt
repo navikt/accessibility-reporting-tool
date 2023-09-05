@@ -2,6 +2,7 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -10,7 +11,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
-import java.time.LocalDateTime
 import java.util.UUID
 
 
@@ -88,8 +88,6 @@ fun Route.reports(repository: ReportRepository) {
                         href = "#sc1.1.1"
                         +"Til toppen"
                     }
-
-
                 }
             }
         }
@@ -244,60 +242,3 @@ fun Route.reports(repository: ReportRepository) {
         }
     }
 }
-
-
-fun SELECT.orgSelector(organizations: List<OrganizationUnit>, report: Report) {
-    name = "org-selector"
-    hxTrigger("change")
-    hxPost("/reports/organization/${report.reportId}")
-    hxSwapOuter()
-    organizations
-        .filter { it.id != report.organizationUnit?.id }
-        .forEach {
-            option {
-                selected = false
-                value = it.id
-                text(it.name)
-            }
-        }
-    report.organizationUnit?.let {
-        option {
-            value = it.id
-            selected = true
-            text(it.name)
-        }
-    }
-        ?: option {
-            disabled = true
-            selected = true
-            text("Ingen organisasjonsenhet valgt")
-        }
-}
-
-fun updatedMetadataStatus(report: Report): String = """
-    ${
-    createHTML().dd {
-        id = "metadata-status"
-        hxOOB("true")
-        +"${report.status()}"
-    }
-}    
-    
-    ${
-    createHTML().dd {
-        id = "metadata-oppdatert"
-        hxOOB("true")
-        +report.lastChanged.displayFormat()
-    }
-}
-    
-    ${
-    createHTML().dd {
-        id = "metadata-oppdatert-av"
-        hxOOB("true")
-        +(report.lastUpdatedBy ?: report.user).email
-    }
-}""".trimMargin()
-
-
-private fun LocalDateTime.displayFormat(): String = "$dayOfMonth.$monthValue.$year"

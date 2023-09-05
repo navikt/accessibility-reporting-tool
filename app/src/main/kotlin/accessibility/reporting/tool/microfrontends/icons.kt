@@ -1,4 +1,4 @@
-package accessibility.reporting.tool
+package accessibility.reporting.tool.microfrontends
 
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.SuccessCriterion
