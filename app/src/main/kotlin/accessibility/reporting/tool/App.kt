@@ -1,5 +1,6 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.accessibility.reporting.tool.adminRoutes
 import accessibility.reporting.tool.authenitcation.AzureAuthContext
 import accessibility.reporting.tool.authenitcation.installAuthentication
 import accessibility.reporting.tool.database.Environment
@@ -57,6 +58,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             userRoute(repository)
             reports(repository)
             landingPage(repository)
+            adminRoutes(repository)
         }
         meta()
         staticResources("/static", "static") {

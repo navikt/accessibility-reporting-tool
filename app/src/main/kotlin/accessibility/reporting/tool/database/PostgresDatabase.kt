@@ -1,7 +1,9 @@
 package accessibility.reporting.tool.database
 
+import accessibility.reporting.tool.authenitcation.User
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.ktor.util.*
 
 
 class PostgresDatabase(environment: Environment) : Database {
@@ -42,9 +44,9 @@ class PostgresDatabase(environment: Environment) : Database {
 
 
 class Environment(
-    val dbHost: String = System.getenv("DB_HOST"),
-    val dbPort: String = System.getenv("DB_PORT"),
-    val dbName: String = System.getenv("DB_DATABASE"),
+    dbHost: String = System.getenv("DB_HOST"),
+    dbPort: String = System.getenv("DB_PORT"),
+    dbName: String = System.getenv("DB_DATABASE"),
     val dbUser: String = System.getenv("DB_USERNAME"),
     val dbPassword: String = System.getenv("DB_PASSWORD"),
 
@@ -54,4 +56,9 @@ class Environment(
     } else {
         "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
     }
+}
+
+object Admins {
+    private val admins = System.getenv("ADMINS")?.split(",") ?: emptyList()
+    fun isAdmin(user: User) = admins.any { it.lowercase() == user.email.lowercase() }
 }
