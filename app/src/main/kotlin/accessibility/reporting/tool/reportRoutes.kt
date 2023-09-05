@@ -1,6 +1,5 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
@@ -11,7 +10,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
-import java.lang.IllegalArgumentException
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -22,8 +20,9 @@ fun Route.reports(repository: ReportRepository) {
 
         get("{id}") {
 
-            val id = call.parameters["id"] ?: throw IllegalArgumentException()
-            val report = repository.getReport(id) ?: throw IllegalArgumentException()
+            val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
+            val report = repository.getReport(reportId) ?: throw IllegalArgumentException()
+            val organizations = repository.getAllOrganizationUnits()
 
             call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
                 main(classes = "report-container") {
@@ -31,35 +30,48 @@ fun Route.reports(repository: ReportRepository) {
                         h1 { +"Tilgjengelighetserklæring (enkeltside)" }
                         div(classes = "statement-metadata") {
                             statementMetadataDl(report.reportId,
-                                mutableListOf<Metadata>().apply {
+                                mutableListOf<StatementMetadata>().apply {
                                     add(
-                                        Metadata(
+                                        StatementMetadata(
                                             "Tittel",
                                             report.descriptiveName ?: report.url,
                                             hxUpdateName = "report-title"
                                         )
                                     )
 
-                                    add(Metadata("URL", report.url, hxUpdateName = "page-url"))
-                                    add(Metadata("Ansvarlig", report.user.email, null))
-                                    add(Metadata("Status", report.status(), hxOOBId = "metadata-status"))
+                                    add(StatementMetadata("URL", report.url, hxUpdateName = "page-url"))
+                                    add(StatementMetadata("Ansvarlig", report.user.email, null))
+                                    add(StatementMetadata("Status", report.status(), hxId = "metadata-status"))
                                     add(
-                                        Metadata(
-                                            "Sist oppdatert",
-                                            report.lastChanged.displayFormat(),
-                                            "metadata-oppdatert"
+                                        StatementMetadata(
+                                            label = "Sist oppdatert",
+                                            value = report.lastChanged.displayFormat(),
+                                            hxId = "metadata-oppdatert"
                                         )
                                     )
-                                    Metadata(
-                                        "Sist oppdatert av",
-                                        (report.lastUpdatedBy ?: report.user).email,
-                                        "metadata-oppdatert-av"
+                                    StatementMetadata(
+                                        label = "Sist oppdatert av",
+                                        value = (report.lastUpdatedBy ?: report.user).email,
+                                        hxId = "metadata-oppdatert-av"
                                     )
+
+                                    report.contributers.let {
+                                        if (it.isNotEmpty())
+                                            StatementMetadata("Bidragsytere", it.joinToString { "," })
+                                    }
+                                    add(StatementMetadata(label = "Organisasjonsenhet", value = null, ddProducer = {
+                                        dd {
+                                            select {
+                                                orgSelector(organizations, report)
+                                            }
+                                        }
+                                    }))
+
                                 }
+
                             )
 
-                            statementContributors(report.contributers)
-                            statementOrganizationUnit(report.organizationUnit)
+
                         }
                     }
 
@@ -69,7 +81,7 @@ fun Route.reports(repository: ReportRepository) {
                     }
 
                     div(classes = "sc-list") {
-                        report.successCriteria.map { a11yForm(it, id) }
+                        report.successCriteria.map { a11yForm(it, reportId) }
                     }
 
                     a(classes = "to-top") {
@@ -133,6 +145,26 @@ fun Route.reports(repository: ReportRepository) {
                 ?.let { repository.upsertReport(it) }
 
             call.respond(HttpStatusCode.OK)
+        }
+
+        post("/organization/{id}") {
+            val formParameters = call.receiveParameters()
+            val organizations = repository.getAllOrganizationUnits()
+            val report =
+                repository.getReport(call.parameters["id"] ?: throw IllegalArgumentException("Rapport-id mangler"))
+                    ?.withUpdatedMetadata(
+                        title = null,
+                        pageUrl = null,
+                        organizationUnit = organizations.find { it.id == formParameters["org-selector"] },
+                        updateBy = call.user
+                    )
+                    ?.let { repository.upsertReport(it) }
+
+
+            fun response() = createHTML().select {
+                orgSelector(organizations, report!!)
+            }
+            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 
         route("new") {
@@ -213,27 +245,33 @@ fun Route.reports(repository: ReportRepository) {
     }
 }
 
-internal fun DIV.statementOrganizationUnit(organizationUnit: OrganizationUnit?) {
-    p {
-        span(classes = "bold") { +"Organisasjonsenhet/team: " }
-        organizationUnit?.let { org ->
-            a {
-                href = "/orgunit/${org.id}"
-                +org.name
-            }
-        }
-    }
-}
 
-internal fun DIV.statementContributors(contributers: List<User>) {
-    if (contributers.isNotEmpty()) p { span(classes = "bold") { +"Bidragsytere " } }
-    ul {
-        contributers.map { contributer ->
-            li {
-                +contributer.email
+fun SELECT.orgSelector(organizations: List<OrganizationUnit>, report: Report) {
+    name = "org-selector"
+    hxTrigger("change")
+    hxPost("/reports/organization/${report.reportId}")
+    hxSwapOuter()
+    organizations
+        .filter { it.id != report.organizationUnit?.id }
+        .forEach {
+            option {
+                selected = false
+                value = it.id
+                text(it.name)
             }
         }
+    report.organizationUnit?.let {
+        option {
+            value = it.id
+            selected = true
+            text(it.name)
+        }
     }
+        ?: option {
+            disabled = true
+            selected = true
+            text("Ingen organisasjonsenhet valgt")
+        }
 }
 
 fun updatedMetadataStatus(report: Report): String = """
@@ -249,7 +287,7 @@ fun updatedMetadataStatus(report: Report): String = """
     createHTML().dd {
         id = "metadata-oppdatert"
         hxOOB("true")
-        +"${report.lastChanged.displayFormat()}"
+        +report.lastChanged.displayFormat()
     }
 }
     
@@ -257,7 +295,7 @@ fun updatedMetadataStatus(report: Report): String = """
     createHTML().dd {
         id = "metadata-oppdatert-av"
         hxOOB("true")
-        +"${(report.lastUpdatedBy ?: report.user).email}"
+        +(report.lastUpdatedBy ?: report.user).email
     }
 }""".trimMargin()
 

@@ -196,13 +196,11 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     }
 }
 
-fun DIV.statementMetadataDl(reportId: String, statuses: List<Metadata>) {
+fun DIV.statementMetadataDl(reportId: String, statuses: List<StatementMetadata>) {
     dl {
         statuses.forEach { metadata ->
             dt { +metadata.label }
-            metadata.hxUpdateName?.let {
-                definitionInput(metadata.value, it, reportId, metadata.hxOOBId)
-            } ?: definitionItem(metadata.value, metadata.hxOOBId)
+            metadata.definitionItem(this, reportId)
         }
     }
 }
@@ -233,7 +231,24 @@ fun DL.definitionItem(text: String, hxId: String?) {
     }
 }
 
-class Metadata(val label: String, val value: String, val hxOOBId: String? = null, val hxUpdateName: String? = null)
+class StatementMetadata(
+    val label: String,
+    val value: String?,
+    private val ddProducer: (DL.(String) -> Unit)? = null,
+    val hxId: String? = null,
+    val hxUpdateName: String? = null
+) {
+    fun definitionItem(dl: DL, reportId: String) = when {
+        ddProducer != null -> ddProducer.let { dl.it(reportId) }
+        hxUpdateName != null -> dl.definitionInput(
+            text = value!!,
+            hxUpdateName = hxUpdateName,
+            reportId = reportId,
+            hxId = hxId
+        )
+        else -> dl.definitionItem(value!!, hxId)
+    }
+}
 
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
 
