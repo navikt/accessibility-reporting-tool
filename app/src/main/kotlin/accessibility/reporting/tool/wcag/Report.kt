@@ -114,6 +114,21 @@ class Report(
         descriptiveName = descriptiveName
     ).apply { if (!userIsOwner(updateBy)) contributers.add(updateBy) }
 
+    fun withUpdatedMetadata(title:String?, pageUrl:String?, organizationUnit: OrganizationUnit?,updateBy: User) = Report(
+        reportId = reportId,
+        url = pageUrl?:url,
+        descriptiveName = title?:descriptiveName,
+        organizationUnit = organizationUnit?:this.organizationUnit,
+        version = version,
+        testData = testData,
+        user = user,
+        successCriteria = successCriteria,
+        filters = filters,
+        created = created,
+        lastChanged = LocalDateTimeHelper.nowAtUtc(),
+        lastUpdatedBy = updateBy
+    ).apply { if (!userIsOwner(updateBy)) contributers.add(updateBy) }
+
     fun userIsOwner(callUser: User): Boolean =
         user.oid == callUser.oid || user.email == callUser.oid//TODO: fjern sammenligning av oid på email
 

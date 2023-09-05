@@ -1,33 +1,11 @@
-package accessibility.reporting.tool
+package accessibility.reporting.tool.microfrontends
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Status
-import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
-import accessibility.reporting.tool.wcag.Status.NOT_TESTED
 import accessibility.reporting.tool.wcag.SuccessCriterion
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
-
-
-fun HEAD.headContent(title: String) {
-    meta { charset = "UTF-8" }
-    style {}
-    title { +"${title}" }
-    script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
-
-    link {
-        rel = "preload"
-        href = "https://cdn.nav.no/aksel/@navikt/ds-css/2.9.0/index.min.css"
-        attributes["as"] = "style"
-    }
-    link {
-        rel = "stylesheet"
-        href = "/static/style.css"
-
-    }
-}
 
 fun FlowContent.disclosureArea(
     sc: SuccessCriterion, reportId: String, text: String, summary: String, description: String, dataName: String
@@ -35,12 +13,12 @@ fun FlowContent.disclosureArea(
     details {
         open = text.isNotEmpty()
         summary {
-            +"${summary}"
+            +summary
         }
         div {
             label {
                 htmlFor = "${sc.successCriterionNumber}-${dataName}"
-                +"${description}"
+                +description
             }
             textArea {
                 id = "${sc.successCriterionNumber}-${dataName}"
@@ -50,25 +28,25 @@ fun FlowContent.disclosureArea(
                 name = dataName
                 cols = "80"
                 rows = "10"
-                +"${text}"
+                +text
             }
         }
     }
 }
 
-fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
+fun FIELDSET.statusRadio(sc: SuccessCriterion, value: String, status: Status, display: String) {
     div(classes = "radio-with-label") {
         input {
-            id = "${sc.number}-${value_}"
+            id = "${sc.number}-${value}"
             type = InputType.radio
             if (sc.status == status) {
                 checked = true
             }
-            value = value_
+            this.value = value
             name = "status"
         }
         label {
-            htmlFor = "${sc.number}-${value_}"
+            htmlFor = "${sc.number}-${value}"
             +display
         }
     }
@@ -77,7 +55,7 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, d
 fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     successCriterionInformation(sc)
     form(classes = sc.cssClass()) {
-        attributes["data-hx-trigger"] = "change from: .${sc.cssClass()} label"
+        hxTrigger("change")
         hxPost("/reports/submit/${reportId}")
         hxTarget(".${sc.cssClass()}")
         hxSelect("form")
@@ -89,9 +67,9 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
 
                 legend { +"Oppfyller alt innhold på siden kravet?" }
                 statusRadio(sc, "compliant", Status.COMPLIANT, "Ja")
-                statusRadio(sc, "non compliant", Status.NON_COMPLIANT, "Nei")
-                statusRadio(sc, "not tested", NOT_TESTED, "Ikke testet")
-                statusRadio(sc, "not applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen innhold")
+                statusRadio(sc, "non-compliant", Status.NON_COMPLIANT, "Nei")
+                statusRadio(sc, "not-tested", Status.NOT_TESTED, "Ikke testet")
+                statusRadio(sc, "not-applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen innhold")
             }
         }
         if (sc.status == Status.NON_COMPLIANT) {
@@ -133,15 +111,15 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>, detailedView:B
             p { +"${successCriteria.deviationCount()} avvik registrert" }
             if(detailedView)
             ul {
-                successCriteria.filter { it.status == NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
+                successCriteria.filter { it.status == Status.NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
                     .map { it.breakingTheLaw }.let { criterionIssues("Det er innhold på siden som bryter kravet", it) }
 
-                successCriteria.filter { it.status == NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
+                successCriteria.filter { it.status == Status.NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
                     .map { it.lawDoesNotApply }
                     .let { criterionIssues("Det er innhold i på siden som ikke er underlagt kravet", it) }
 
 
-                successCriteria.filter { it.status == NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
+                successCriteria.filter { it.status == Status.NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
                     .map { it.tooHardToComply }.let {
                         criterionIssues(
                             "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.", it
@@ -151,7 +129,6 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>, detailedView:B
         }
     }
 }
-
 
 fun UL.criterionIssues(heading: String, issueList: List<String>) {
     if (issueList.isNotEmpty()) {
@@ -165,7 +142,7 @@ fun UL.criterionIssues(heading: String, issueList: List<String>) {
 private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     div(classes = "report-info") {
         h2 {
-            id = "${sc.number}-${sc.name}"
+            id = "sc${sc.number}"
             +"${sc.number} ${sc.name}"
         }
         p { +sc.description }
@@ -186,55 +163,30 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     }
 }
 
-
-internal fun DIV.statementMetadata(label: String, value: String) {
-    p {
-        span(classes = "bold") { +"$label: " }
-        span { +value }
-    }
-}
-
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
 
-fun BODY.navbar() {
-    nav {
-        ul {
-            hrefListItem("/", "Forside")
-            hrefListItem("/orgunit", "Organisasjonsenheter")
-            hrefListItem("/user", "Dine erklæringer")
-            hrefListItem("/oauth2/logout", "Logg ut")
-        }
-    }
-}
-
-fun UL.hrefListItem(listHref: String, text: String) {
-    li {
-        a {
-            href = listHref
-            +text
-        }
-    }
-}
-
-fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
+fun FlowContent.summaryLinks(report: Report) = ul(classes = "summary") {
     hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
-        a {
-            href = "#${it.number}-${it.name}"
-            unsafe { +toIcon(it) }
+        li {
+            a {
+                href = "#sc${it.number}"
+                unsafe { +toIcon(it) }
+                +"${it.number} ${it.name}"
+            }
         }
     }
 }
 
-fun summaryLinksString(report: Report) = createHTML().div(classes = "summary") {
-    hxOOB("outherHTML:.summary")
+fun summaryLinksString(report: Report) = createHTML().ul(classes = "summary") {
+    hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
-        a {
-            href = "#${it.number}-${it.name}"
-            unsafe { +toIcon(it) }
+        li {
+            a {
+                href = "#sc${it.number}"
+                unsafe { +toIcon(it) }
+                +"${it.number} ${it.name}"
+            }
         }
     }
 }
-
-
-

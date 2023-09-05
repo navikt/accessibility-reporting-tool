@@ -2,6 +2,7 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import io.ktor.http.*
@@ -16,7 +17,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
     route("orgunit") {
 
         get {
-            call.respondHtmlContent("Organisasjonsenheter") {
+            call.respondHtmlContent("Organisasjonsenheter", NavBarItem.ORG_ENHETER) {
                 h1 { +"Organisasjonsenheter" }
                 ul {
                     repository.getAllOrganizationUnits().forEach { orgUnit ->
@@ -36,13 +37,15 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 val (org, reports) = repository.getReportForOrganizationUnit(unitId)
 
                 org?.let { orgUnit ->
-                    call.respondHtmlContent(orgUnit.name) {
+                    call.respondHtmlContent(orgUnit.name, NavBarItem.BRUKER) {
                         h1 { +orgUnit.name }
                         p {
                             +"epost: ${orgUnit.email}"
                         }
-                        h2 { +"Tilgjengelighetserklæringer" }
-                        ul { reports.forEach { report -> reportListItem(report) } }
+                        if (reports.isNotEmpty()) {
+                            h2 { +"Tilgjengelighetserklæringer" }
+                            ul { reports.forEach { report -> reportListItem(report) } }
+                        } else p { +"${orgUnit.name} har ingen tilgjengelighetserklæringer enda" }
                     }
                 } ?: run { call.respond(HttpStatusCode.NotFound) }
             }
@@ -50,7 +53,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
         route("new") {
             get {
-                call.respondHtmlContent("Legg til organisasjonsenhet") {
+                call.respondHtmlContent("Legg til organisasjonsenhet", NavBarItem.ORG_ENHETER) {
                     h1 { +"Legg til organisasjonsenhet" }
                     form {
                         hxPost("/orgunit/new")
@@ -60,7 +63,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         }
                         input {
                             id = "text-input-name"
-                            name = "name"
+                            name = "unit-name"
                             type = InputType.text
                             required = true
                         }
@@ -70,7 +73,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         }
                         input {
                             id = "input-email"
-                            name = "email"
+                            name = "unit-email"
                             type = InputType.email
                             required = true
                         }
@@ -84,8 +87,8 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
             post {
                 val params = call.receiveParameters()
-                val email = params["email"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha en email")
-                val name = params["name"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha ett navn")
+                val email = params["unit-email"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha en email")
+                val name = params["unit-name"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha ett navn")
 
                 repository.insertOrganizationUnit(
                     OrganizationUnit.createNew(
@@ -105,11 +108,13 @@ fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
         val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
-        call.respondHtmlContent(call.user.email) {
+        call.respondHtmlContent(call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
-            ul(classes = "report-list") {
-                reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
-            }
+            if (reports.isNotEmpty())
+                ul(classes = "report-list") {
+                    reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
+                }
+            else p { +"Du har ingen tilgjengelighetserklæringer enda" }
             a {
                 href = "/reports/new"
                 +"Lag ny erklæring"

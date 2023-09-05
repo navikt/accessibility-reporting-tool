@@ -14,7 +14,7 @@ class LocalPostgresDatabase private constructor() : Database {
     companion object {
         private val instance by lazy {
             LocalPostgresDatabase().also {
-                it.migrate() shouldBe 2
+                it.migrate() shouldBe 3
             }
         }
 

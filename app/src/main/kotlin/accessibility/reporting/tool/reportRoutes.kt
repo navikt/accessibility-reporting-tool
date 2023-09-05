@@ -1,8 +1,8 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -10,10 +10,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
-import kotlinx.html.stream.appendHTML
 import kotlinx.html.stream.createHTML
-import java.lang.IllegalArgumentException
-import java.time.LocalDateTime
 import java.util.UUID
 
 
@@ -23,31 +20,73 @@ fun Route.reports(repository: ReportRepository) {
 
         get("{id}") {
 
-            val id = call.parameters["id"] ?: throw IllegalArgumentException()
-            val report = repository.getReport(id) ?: throw IllegalArgumentException()
+            val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
+            val report = repository.getReport(reportId) ?: throw IllegalArgumentException()
+            val organizations = repository.getAllOrganizationUnits()
 
-            call.respondHtmlContent("Tilgjengelighetsærklæring") {
-                main {
-                    h1 { +"Tilgjengelighetserklæring" }
-                    div(classes = "statement-metadata") {
-                        statementMetadata("Løsning", report.url)
-                        report.descriptiveName?.let {
-                            statementMetadata("Beskrivelse", it)
+            call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
+                main(classes = "report-container") {
+                    header(classes = "report-header") {
+                        h1 { +"Tilgjengelighetserklæring (enkeltside)" }
+                        div(classes = "statement-metadata") {
+                            statementMetadataDl(report.reportId,
+                                mutableListOf<StatementMetadata>().apply {
+                                    add(
+                                        StatementMetadata(
+                                            "Tittel",
+                                            report.descriptiveName ?: report.url,
+                                            hxUpdateName = "report-title"
+                                        )
+                                    )
+
+                                    add(StatementMetadata("URL", report.url, hxUpdateName = "page-url"))
+                                    add(StatementMetadata("Ansvarlig", report.user.email, null))
+                                    add(StatementMetadata("Status", report.status(), hxId = "metadata-status"))
+                                    add(
+                                        StatementMetadata(
+                                            label = "Sist oppdatert",
+                                            value = report.lastChanged.displayFormat(),
+                                            hxId = "metadata-oppdatert"
+                                        )
+                                    )
+                                    StatementMetadata(
+                                        label = "Sist oppdatert av",
+                                        value = (report.lastUpdatedBy ?: report.user).email,
+                                        hxId = "metadata-oppdatert-av"
+                                    )
+
+                                    report.contributers.let {
+                                        if (it.isNotEmpty())
+                                            StatementMetadata("Bidragsytere", it.joinToString { "," })
+                                    }
+                                    add(StatementMetadata(label = "Organisasjonsenhet", value = null, ddProducer = {
+                                        dd {
+                                            select {
+                                                orgSelector(organizations, report)
+                                            }
+                                        }
+                                    }))
+
+                                }
+
+                            )
+
+
                         }
-                        statementMetadata("Ansvarlig", report.user.email)
-                        statementMetadata("Status", report.status())
-                        statementMetadata("Sist oppdatert", report.lastChanged.displayFormat())
-                        statementMetadata("Sist oppdatert av", (report.lastUpdatedBy ?: report.user).email)
-                        statementContributors(report.contributers)
-                        statementOrganizationUnit(report.organizationUnit)
                     }
-                    div {
 
+                    nav(classes = "sc-toc") {
+                        attributes["aria-label"] = "Status"
                         summaryLinks(report)
-
                     }
-                    div {
-                        report.successCriteria.map { a11yForm(it, id) }
+
+                    div(classes = "sc-list") {
+                        report.successCriteria.map { a11yForm(it, reportId) }
+                    }
+
+                    a(classes = "to-top") {
+                        href = "#sc1.1.1"
+                        +"Til toppen"
                     }
                 }
             }
@@ -72,22 +111,58 @@ fun Route.reports(repository: ReportRepository) {
             val lawDoesNotApply = formParameters["law-does-not-apply"]
             val tooHardToComply = formParameters["too-hard-to-comply"]
             val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
-            val criterion: SuccessCriterion =
-                oldReport.updateCriterion(
-                    criterionNumber = criterionNumber,
-                    statusString = status,
-                    breakingTheLaw = breakingTheLaw,
-                    lawDoesNotApply = lawDoesNotApply,
-                    tooHardToComply = tooHardToComply
-                )
+            val criterion: SuccessCriterion = oldReport.updateCriterion(
+                criterionNumber = criterionNumber,
+                statusString = status,
+                breakingTheLaw = breakingTheLaw,
+                lawDoesNotApply = lawDoesNotApply,
+                tooHardToComply = tooHardToComply
+            )
             val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
-            fun response(): String =
-                summaryLinksString(report) + createHTML().div { a11yForm(report.findCriterion(criterionNumber), id) }
+
+            fun response(): String = updatedMetadataStatus(report) + summaryLinksString(report) + createHTML().div {
+                a11yForm(
+                    report.findCriterion(criterionNumber), id
+                )
+            }
 
             call.respondText(
-                contentType = ContentType.Text.Html,
-                HttpStatusCode.OK, ::response
+                contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response
             )
+        }
+
+        post("/metadata/{id}") {
+            val formParameters = call.receiveParameters()
+            repository.getReport(call.parameters["id"] ?: throw IllegalArgumentException())
+                ?.withUpdatedMetadata(
+                    title = formParameters["report-title"],
+                    pageUrl = formParameters["page-url"],
+                    organizationUnit = null, //TODO
+                    updateBy = call.user
+                )
+                ?.let { repository.upsertReport(it) }
+
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/organization/{id}") {
+            val formParameters = call.receiveParameters()
+            val organizations = repository.getAllOrganizationUnits()
+            val report =
+                repository.getReport(call.parameters["id"] ?: throw IllegalArgumentException("Rapport-id mangler"))
+                    ?.withUpdatedMetadata(
+                        title = null,
+                        pageUrl = null,
+                        organizationUnit = organizations.find { it.id == formParameters["org-selector"] },
+                        updateBy = call.user
+                    )
+                    ?.let { repository.upsertReport(it) }
+
+
+            fun response() = createHTML().select {
+                orgSelector(organizations, report!!)
+            }
+            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 
         route("new") {
@@ -103,11 +178,7 @@ fun Route.reports(repository: ReportRepository) {
                 val newReportId = UUID.randomUUID().toString()
                 repository.upsertReport(
                     Version1.newReport(
-                        organizationUnit,
-                        newReportId,
-                        url,
-                        call.user,
-                        descriptiveName
+                        organizationUnit, newReportId, url, call.user, descriptiveName
                     )
                 )
                 call.response.header("HX-Redirect", "/reports/$newReportId")
@@ -116,7 +187,7 @@ fun Route.reports(repository: ReportRepository) {
 
             get {
                 val orgUnits = repository.getAllOrganizationUnits()
-                call.respondHtmlContent("Ny tilgjengelighetserklæring") {
+                call.respondHtmlContent("Ny tilgjengelighetserklæring", NavBarItem.NONE) {
                     h1 {
                         +"Lag ny tilgjengelighetserklæring"
                     }
@@ -136,11 +207,11 @@ fun Route.reports(repository: ReportRepository) {
                                 }
                             }
                             label {
-                                +"Beskrivelse (kort)"
+                                +"Tittel"
                                 input {
                                     type = InputType.text
                                     required = true
-                                    placeholder = "Beskrivelse"
+                                    placeholder = "Tittel"
                                     name = "descriptive-name"
                                 }
                             }
@@ -171,29 +242,3 @@ fun Route.reports(repository: ReportRepository) {
         }
     }
 }
-
-internal fun DIV.statementOrganizationUnit(organizationUnit: OrganizationUnit?) {
-    p {
-        span(classes = "bold") { +"Organisasjonsenhet/team: " }
-        organizationUnit?.let { org ->
-            a {
-                href = "/orgunit/${org.id}"
-                +org.name
-            }
-        }
-    }
-}
-
-internal fun DIV.statementContributors(contributers: List<User>) {
-    if (contributers.isNotEmpty())
-        p { span(classes = "bold") { +"Bidragsytere " } }
-    ul {
-        contributers.map { contributer ->
-            li {
-                +contributer.email
-            }
-        }
-    }
-}
-
-private fun LocalDateTime.displayFormat(): String = "$dayOfMonth.$monthValue.$year"
