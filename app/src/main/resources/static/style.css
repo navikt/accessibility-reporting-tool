@@ -2,198 +2,186 @@
 
 
 body {
-  font-family: "Source Sans Pro", Arial, sans-serif;
-  line-height: 1.333;
-  font-size: 1.125rem;
-  color: #333;
+    font-family: "Source Sans Pro", Arial, sans-serif;
+    line-height: 1.333;
+    font-size: 1.125rem;
+    color: #333;
 
-  max-width: 60rem;
-  margin: 1rem auto;
-  padding: 0 1em;
+    max-width: 60rem;
+    margin: 1rem auto;
+    padding: 0 1em;
 }
 
 /* Layout for report registration page */
 
-.report-header { grid-area: report-header; }
-.sc-toc        { grid-area: sc-toc;        }
-.sc-list       { grid-area: sc-list;       }
+.report-header {
+    grid-area: report-header;
+}
+
+.sc-toc {
+    grid-area: sc-toc;
+}
+
+.sc-list {
+    grid-area: sc-list;
+}
 
 .report-container {
-  display: grid;
-  gap: 1em;
-  grid-template-areas:
+    display: grid;
+    gap: 1em;
+    grid-template-areas:
     "report-header"
     "sc-toc"
     "sc-list";
 }
 
 @media screen and (min-width: 768px) {
-  .report-container {
-    grid-template-columns: 2fr 5fr;
-    grid-template-areas:
+    .report-container {
+        grid-template-columns: 2fr 5fr;
+        grid-template-areas:
       "report-header  report-header"
       "sc-toc sc-list";
-  }
+    }
 }
 
 
 /* Report registration page Table of Contents */
 
 .sc-toc ul {
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0 1.5em;
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 1.5em;
 }
 
 
 .sc-toc li {
-  margin-bottom: .25em;
+    margin-bottom: .25em;
 }
 
 .sc-toc a {
-  text-decoration: none;
-  position: relative;
+    text-decoration: none;
+    position: relative;
 }
-
 
 
 .sc-toc li:hover {
-  background-color: #e7f4fb;
+    background-color: #e7f4fb;
 }
+
 .sc-toc a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 
 .icon {
-  border-radius: 50%;
-  height: 1em;
-  width: 1em;
-  position: absolute;
-  top: .125em;
-  left: -1.5em;
+    border-radius: 50%;
+    height: 1em;
+    width: 1em;
+    position: absolute;
+    top: .125em;
+    left: -1.5em;
 
 }
 
 .non-compliant-icon {
-  background: #ba0c13;
+    background: #ba0c13;
 }
 
 .compliant-icon {
-  background: #2b883a;
+    background: #2b883a;
 }
 
 .too-hard-icon {
-  background: #595959;
+    background: #595959;
 }
 
 .not-tested-icon {
-  background: #c07414;
+    background: #c07414;
 }
-
-
-
-
 
 
 .sc-list h2 {
-  margin: 0;
+    margin: 0;
 }
 
 .sc-list form {
-  margin: 1em 0 2em;
+    margin: 1em 0 2em;
 }
 
 .report-info p {
-  margin: .5em 0;
+    margin: .5em 0;
 }
 
 .sc-list fieldset {
-  margin-bottom: 1em;
+    margin-bottom: 1em;
 }
 
 .sc-list details {
-  margin-left: 1.5em;
+    margin-left: 1.5em;
 }
 
 .sc-list details:not(:last-child) summary {
-  margin: 0 0 1em 0;
+    margin: 0 0 1em 0;
 }
 
 .to-top {
-  position: fixed;
-  background-color: #fff;
-  right: 0;
-  bottom: 0;
-  padding: .25em;
+    position: fixed;
+    background-color: #fff;
+    right: 0;
+    bottom: 0;
+    padding: .25em;
 }
-
-
-
-
-
-
-
-
-
 
 
 label {
-  display: block;
+    display: block;
 }
-
-
 
 
 .radio-with-label label {
-  display: inline;
+    display: inline;
 }
-
 
 
 #hovedmeny {
-  border-bottom: #335ea8 solid 3px;
+    border-bottom: #335ea8 solid 3px;
 }
 
 #hovedmeny ul {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 #hovedmeny li {
-  display: inline-block;
+    display: inline-block;
 }
 
 #hovedmeny li:not(:last-child) {
-  margin-right: 2em;
+    margin-right: 2em;
 }
-
-
-
-
 
 
 button {
-  margin-left: 1.5em;
+    margin-left: 1.5em;
 }
-
-
 
 
 .criterion-status p {
-  margin-top: 0;
+    margin-top: 0;
 }
 
 .criterion-status h2 {
-  display: inline-block;
-  margin: .5em;
-  font-size: 1.3em;
+    display: inline-block;
+    margin: .5em;
+    font-size: 1.3em;
 }
 
 .criterion-status h3 {
-  margin: 0;
+    margin: 0;
 }
 
 .criterion-status ul {
-  margin: 0;
+    margin: 0;
 }
+
+

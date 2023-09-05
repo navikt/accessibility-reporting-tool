@@ -30,28 +30,32 @@ fun Route.reports(repository: ReportRepository) {
                     header(classes = "report-header") {
                         h1 { +"Tilgjengelighetserklæring (enkeltside)" }
                         div(classes = "statement-metadata") {
-                            statementMetadataDl(
-                                listOf(
-                                    Metadata("URL", report.url, null),
-                                    Metadata("Ansvarlig", report.user.email, null),
-                                    Metadata("Status", report.status(), "metadata-status"),
-                                    Metadata("Sist oppdatert", report.lastChanged.displayFormat(), "metadata-oppdatert")
-                                ) +
-
-                                        (if (!report.descriptiveName.isNullOrBlank()) {
-                                            listOf(Triple("Beskrivelse", report.descriptiveName, null))
-                                        } else {
-                                            emptyList()
-                                        })
-
-                                        +
-
-                                        Triple(
-                                            "Sist oppdatert av",
-                                            (report.lastUpdatedBy ?: report.user).email,
-                                            "metadata-oppdatert-av"
+                            statementMetadataDl(report.reportId,
+                                mutableListOf<Metadata>().apply {
+                                    add(
+                                        Metadata(
+                                            "Tittel",
+                                            report.descriptiveName ?: report.url,
+                                            hxUpdateName = "report-title"
                                         )
+                                    )
 
+                                    add(Metadata("URL", report.url, hxUpdateName = "page-url"))
+                                    add(Metadata("Ansvarlig", report.user.email, null))
+                                    add(Metadata("Status", report.status(), hxOOBId = "metadata-status"))
+                                    add(
+                                        Metadata(
+                                            "Sist oppdatert",
+                                            report.lastChanged.displayFormat(),
+                                            "metadata-oppdatert"
+                                        )
+                                    )
+                                    Metadata(
+                                        "Sist oppdatert av",
+                                        (report.lastUpdatedBy ?: report.user).email,
+                                        "metadata-oppdatert-av"
+                                    )
+                                }
                             )
 
                             statementContributors(report.contributers)
@@ -106,7 +110,7 @@ fun Route.reports(repository: ReportRepository) {
             )
             val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
 
-            fun response(): String = updatedMetadataString(report) + summaryLinksString(report) + createHTML().div {
+            fun response(): String = updatedMetadataStatus(report) + summaryLinksString(report) + createHTML().div {
                 a11yForm(
                     report.findCriterion(criterionNumber), id
                 )
@@ -115,6 +119,20 @@ fun Route.reports(repository: ReportRepository) {
             call.respondText(
                 contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response
             )
+        }
+
+        post("/metadata/{id}") {
+            val formParameters = call.receiveParameters()
+            repository.getReport(call.parameters["id"] ?: throw IllegalArgumentException())
+                ?.withUpdatedMetadata(
+                    title = formParameters["report-title"],
+                    pageUrl = formParameters["page-url"],
+                    organizationUnit = null, //TODO
+                    updateBy = call.user
+                )
+                ?.let { repository.upsertReport(it) }
+
+            call.respond(HttpStatusCode.OK)
         }
 
         route("new") {
@@ -159,11 +177,11 @@ fun Route.reports(repository: ReportRepository) {
                                 }
                             }
                             label {
-                                +"Beskrivelse (kort)"
+                                +"Tittel"
                                 input {
                                     type = InputType.text
                                     required = true
-                                    placeholder = "Beskrivelse"
+                                    placeholder = "Tittel"
                                     name = "descriptive-name"
                                 }
                             }
@@ -218,7 +236,7 @@ internal fun DIV.statementContributors(contributers: List<User>) {
     }
 }
 
-fun updatedMetadataString(report: Report): String = """
+fun updatedMetadataStatus(report: Report): String = """
     ${
     createHTML().dd {
         id = "metadata-status"

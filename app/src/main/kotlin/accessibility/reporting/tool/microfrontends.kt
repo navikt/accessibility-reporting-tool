@@ -18,7 +18,7 @@ suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBar
         head {
             meta { charset = "UTF-8" }
             style {}
-            title { +"${title}" }
+            title { +title }
             script { src = "https://unpkg.com/htmx.org/dist/htmx.js" }
 
             link {
@@ -47,12 +47,12 @@ fun FlowContent.disclosureArea(
     details {
         open = text.isNotEmpty()
         summary {
-            +"${summary}"
+            +summary
         }
         div {
             label {
                 htmlFor = "${sc.successCriterionNumber}-${dataName}"
-                +"${description}"
+                +description
             }
             textArea {
                 id = "${sc.successCriterionNumber}-${dataName}"
@@ -62,25 +62,25 @@ fun FlowContent.disclosureArea(
                 name = dataName
                 cols = "80"
                 rows = "10"
-                +"${text}"
+                +text
             }
         }
     }
 }
 
-fun FIELDSET.statusRadio(sc: SuccessCriterion, value_: String, status: Status, display: String) {
+fun FIELDSET.statusRadio(sc: SuccessCriterion, value: String, status: Status, display: String) {
     div(classes = "radio-with-label") {
         input {
-            id = "${sc.number}-${value_}"
+            id = "${sc.number}-${value}"
             type = InputType.radio
             if (sc.status == status) {
                 checked = true
             }
-            value = value_
+            this.value = value
             name = "status"
         }
         label {
-            htmlFor = "${sc.number}-${value_}"
+            htmlFor = "${sc.number}-${value}"
             +display
         }
     }
@@ -196,29 +196,44 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     }
 }
 
-fun DIV.statementMetadataDl(statuses: List<Metadata>) {
+fun DIV.statementMetadataDl(reportId: String, statuses: List<Metadata>) {
     dl {
-        statuses.forEach {
-            dt { +it.label }
-            dd {
-                it.hxId?.let { hxId ->
-                    id = hxId
-                    hxOOB("true")
-                }
-                +it.value
-            }
+        statuses.forEach { metadata ->
+            dt { +metadata.label }
+            metadata.hxUpdateName?.let {
+                definitionInput(metadata.value, it,reportId, metadata.hxOOBId)
+            } ?: definitionItem(metadata.value, metadata.hxOOBId)
         }
     }
 }
 
-typealias Metadata = Triple<String, String, String?>
+fun DL.definitionInput(text: String, hxUpdateName: String, reportId: String, hxId: String?) {
+    dd(classes = "editable-definition") {
+        hxId?.let { hxId ->
+            id = hxId
+            hxOOB("true")
+        }
+        input {
+            hxTrigger("change")
+            hxPost("/reports/metadata/$reportId")
+            type = InputType.text
+            name = hxUpdateName
+            value = text
+        }
+    }
+}
 
-private val Metadata.label: String
-    get() = first
-private val Metadata.value: String
-    get() = second
-private val Metadata.hxId: String?
-    get() = third
+fun DL.definitionItem(text: String, hxId: String?) {
+    dd {
+        hxId?.let { hxId ->
+            id = hxId
+            hxOOB("true")
+        }
+        +text
+    }
+}
+
+class Metadata(val label: String, val value: String, val hxOOBId: String? = null, val hxUpdateName: String? = null)
 
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
 
