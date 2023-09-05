@@ -201,7 +201,7 @@ fun DIV.statementMetadataDl(reportId: String, statuses: List<Metadata>) {
         statuses.forEach { metadata ->
             dt { +metadata.label }
             metadata.hxUpdateName?.let {
-                definitionInput(metadata.value, it,reportId, metadata.hxOOBId)
+                definitionInput(metadata.value, it, reportId, metadata.hxOOBId)
             } ?: definitionItem(metadata.value, metadata.hxOOBId)
         }
     }

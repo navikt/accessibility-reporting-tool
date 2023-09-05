@@ -24,6 +24,11 @@ fun Route.landingPage(repository: ReportRepository) {
     get {
         val reports = repository.getReports()
         call.respondHtmlContent("a11y rapportering", FORSIDE) {
+            img {
+                id="uu-katt"
+                src = "/static/UU-katt.svg"
+                role = "presentation"
+            }
 
             h1 { +"a11y rapporteringsverktøy for NAV" }
             p {
@@ -32,7 +37,7 @@ fun Route.landingPage(repository: ReportRepository) {
                     +"Lag ny erklæring"
                 }
             }
-            h2 { +"Dine rapporter" }
+            h2 { +"Rapporter" }
             ul { reports.forEach { report -> reportListItem(report) } }
 
         }
