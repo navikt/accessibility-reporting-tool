@@ -31,8 +31,46 @@ data class SuccessCriterion(
         fun List<SuccessCriterion>.deviationCount() =
             count { it.status == Status.NON_COMPLIANT && !it.devationIsDesputed() }
 
+        fun List<SuccessCriterion>.aggregate(): List<SuccessCriterion> =
+            groupBy { it.number }
+                .values
+                .map { list ->
+                    list.first().let { template ->
+                        SuccessCriterion(
+                            name = template.name,
+                            description = template.description,
+                            principle = template.principle,
+                            guideline = template.guideline,
+                            tools = template.tools,
+                            number = template.number,
+                            breakingTheLaw = list.mapNotNull { it.breakingTheLaw.ifBlank { null } }.joinToString("\n"),
+                            lawDoesNotApply = list.mapNotNull { it.lawDoesNotApply.ifBlank { null } }
+                                .joinToString("\n"),
+                            tooHardToComply = list.mapNotNull { it.tooHardToComply.ifBlank { null } }
+                                .joinToString("\n"),
+                            contentGroup = template.contentGroup,
+                            status = list.resolveStatus(),
+                            wcagUrl = template.wcagUrl,
+                            helpUrl = template.helpUrl,
+                            wcagVersion = template.wcagVersion
+                        )
+                    }
+                }
 
-        fun fromJson(rawJson: JsonNode, version: Version, isStale:Boolean): SuccessCriterion =
+        private fun List<SuccessCriterion>.resolveStatus(): Status =
+            when {
+                any { it.status == Status.NON_COMPLIANT } -> Status.NON_COMPLIANT
+                all { it.status == Status.NOT_APPLICABLE } -> Status.NOT_APPLICABLE
+                all { it.status == Status.COMPLIANT || it.status == Status.NOT_APPLICABLE } -> Status.COMPLIANT
+                all { it.status == Status.NOT_TESTED } -> Status.NOT_TESTED
+                else -> {
+                    log.warn { "Could not resolve status for successcriterium ${first().number}" }
+                    Status.NOT_TESTED
+                }
+            }
+
+
+        fun fromJson(rawJson: JsonNode, version: Version, isStale: Boolean): SuccessCriterion =
             SuccessCriterion(
                 name = rawJson["name"].asText(),
                 description = rawJson["description"].asText(),
@@ -52,7 +90,7 @@ data class SuccessCriterion(
                     rawJson["wcagLevel"]?.takeIf { !it.isNull }?.asText()
                         ?.let { WcagLevel.valueOf(it) } ?: WcagLevel.UNKNOWN
             }.let {
-                if(isStale)
+                if (isStale)
                     version.updateCriteria(it)
                 else it
             }

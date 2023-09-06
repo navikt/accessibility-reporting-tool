@@ -1,16 +1,12 @@
 package accessibility.reporting.tool.microfrontends
 
+import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.microfrontends.NavBarItem.*
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.Status
-import accessibility.reporting.tool.wcag.Status.NON_COMPLIANT
-import accessibility.reporting.tool.wcag.Status.NOT_TESTED
-import accessibility.reporting.tool.wcag.SuccessCriterion
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import io.ktor.server.application.*
 import io.ktor.server.html.*
 import kotlinx.html.*
-import kotlinx.html.stream.createHTML
 import java.time.LocalDateTime
 
 suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBarItem, contenbuilder: BODY.() -> Unit) {
@@ -35,7 +31,7 @@ suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBar
         }
 
         body {
-            navbar(navBarItem)
+            navbar(navBarItem, user)
             contenbuilder()
         }
 
@@ -43,7 +39,7 @@ suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBar
 }
 
 
-fun BODY.navbar(currentItem: NavBarItem) {
+fun BODY.navbar(currentItem: NavBarItem, user: User? = null) {
     nav {
         id = "hovedmeny"
         attributes["aria-label"] = "Hovedmeny"
@@ -51,6 +47,8 @@ fun BODY.navbar(currentItem: NavBarItem) {
             FORSIDE.li(currentItem, this)
             ORG_ENHETER.li(currentItem, this)
             BRUKER.li(currentItem, this)
+            if (user != null && Admins.isAdmin(user))
+                ADMIN.li(currentItem, this)
             LOGG_UT.li(currentItem, this)
         }
     }
@@ -61,6 +59,7 @@ enum class NavBarItem(val itemHref: String, val itemText: String) {
     ORG_ENHETER("/orgunit", "Organisasjonsenheter"),
     BRUKER("/user", "Dine erklæringer"),
     LOGG_UT("/oauth2/logout", "Logg ut"),
+    ADMIN("/admin", "Admin"),
     NONE("", "");
 
     fun li(navBarItem: NavBarItem, ul: UL) =

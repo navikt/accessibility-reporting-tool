@@ -41,7 +41,7 @@ fun Route.reports(repository: ReportRepository) {
 
                                     add(StatementMetadata("URL", report.url, hxUpdateName = "page-url"))
                                     add(StatementMetadata("Ansvarlig", report.user.email, null))
-                                    add(StatementMetadata("Status", report.status(), hxId = "metadata-status"))
+                                    add(StatementMetadata("Status", report.statusString(), hxId = "metadata-status"))
                                     add(
                                         StatementMetadata(
                                             label = "Sist oppdatert",

@@ -100,7 +100,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     }
 }
 
-fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
+fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>, detailedView:Boolean = true) {
     val generalCriteriaContent = successCriteria.first()
 
     div(classes = "criterion-status") {
@@ -109,6 +109,7 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>) {
             p { +"Ingen avvik registrert" }
         } else {
             p { +"${successCriteria.deviationCount()} avvik registrert" }
+            if(detailedView)
             ul {
                 successCriteria.filter { it.status == Status.NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
                     .map { it.breakingTheLaw }.let { criterionIssues("Det er innhold på siden som bryter kravet", it) }

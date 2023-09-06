@@ -3,11 +3,15 @@ package accessibility.reporting.tool.database
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Version
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Row
 import kotliquery.queryOf
 import org.postgresql.util.PGobject
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
 
 class ReportRepository(val database: Database) {
 
@@ -132,11 +136,7 @@ class ReportRepository(val database: Database) {
     }
 
     private fun report(row: Row) = Version.valueOf(row.string("version"))
-        .deserialize(
-            row.string("report_data"),
-            row.localDateTimeOrNull("created") ?: LocalDateTimeHelper.defaultCreatedDate,
-            row.localDateTimeOrNull("last_changed") ?: LocalDateTimeHelper.defaultCreatedDate
-        )
+        .deserialize(jacksonObjectMapper().readTree(row.string("report_data")))
 
     private fun organizationUnit(row: Row) = OrganizationUnit(
         id = row.string("organization_unit_id"),
@@ -149,7 +149,32 @@ class ReportRepository(val database: Database) {
 object LocalDateTimeHelper {
 
     fun nowAtUtc(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-    val defaultCreatedDate: LocalDateTime = LocalDateTime.parse("2023-07-28T08:00:00.00")
+    fun JsonNode.toLocalDateTime(): LocalDateTime? =
+        toList()
+            .map { it.asText() }
+            .let {
+                "${it.year}.${it.month}.${it.day} ${it.hour}:${it.minutes}:${it.seconds}".trim()
+            }
+            .let {
+                if (it.isNotBlank()) LocalDateTime.parse(it, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"))
+                else null
+            }
+
+    private fun String.padWithZero(charCount: Int = 2) = let { "0".repeat(charCount - it.length) + it }
+    private val List<String>.year: String
+        get() = this[0]
+    private val List<String>.month: String
+        get() = this[1].padWithZero(2)
+    private val List<String>.day: String
+        get() = this[2].padWithZero(2)
+    private val List<String>.hour: String
+        get() = this[3].padWithZero(2)
+    private val List<String>.minutes: String
+        get() = (if (this.size < 5) "" else this[4]).padWithZero(2)
+    private val List<String>.seconds: String
+        get() = (if (this.size < 6) "" else this[5]).padWithZero()
+
+
 }
 
 private fun String.jsonB() = PGobject().apply {

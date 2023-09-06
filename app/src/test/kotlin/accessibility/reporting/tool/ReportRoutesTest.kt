@@ -5,6 +5,7 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.ReportType
 import accessibility.reporting.tool.wcag.Version
 import assert
 import io.kotest.matchers.shouldBe
@@ -50,7 +51,8 @@ class ReportRoutesTest {
                 created = LocalDateTimeHelper.nowAtUtc(),
                 lastChanged = LocalDateTimeHelper.nowAtUtc(),
                 lastUpdatedBy = null,
-                descriptiveName = "Somename"
+                descriptiveName = "Somename",
+                reportType = ReportType.SINGLE
             )
         )
 
