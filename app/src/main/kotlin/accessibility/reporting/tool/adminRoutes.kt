@@ -23,29 +23,26 @@ fun Route.adminRoutes(reportRepository: ReportRepository) {
             }
         }
 
-        route("aggregated") {
+        get("new") {
+            val reports = reportRepository.getReports()
+            val organizationUnits = reportRepository.getAllOrganizationUnits()
 
-            get("new") {
-                val reports = reportRepository.getReports()
-                val organizationUnits = reportRepository.getAllOrganizationUnits()
-
-                call.respondHtmlContent("Generer rapport", NavBarItem.ADMIN) {
-                    h1 { +"Generer ny rapport" }
-                    form {
-                        fieldSet {
-                            legend { +"Organisasjonsenhet" }
-                            organizationUnits.forEach {
-                                input {
-                                    type = InputType.checkBox
-                                    value = it.id
-                                    text(it.name)
-                                }
+            call.respondHtmlContent("Generer rapport", NavBarItem.ADMIN) {
+                h1 { +"Generer ny rapport" }
+                form {
+                    fieldSet {
+                        legend { +"Organisasjonsenhet" }
+                        organizationUnits.forEach {
+                            input {
+                                type = InputType.checkBox
+                                value = it.id
+                                text(it.name)
                             }
                         }
+                    }
 
-                        div {
-                            id = "test"
-                        }
+                    div {
+                        id = "test"
                     }
                 }
             }
