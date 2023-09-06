@@ -67,7 +67,7 @@ fun updatedMetadataStatus(report: Report): String = """
     createHTML().dd {
         id = "metadata-status"
         hxOOB("true")
-        +"${report.statusString()}"
+        +report.statusString()
     }
 }    
     
