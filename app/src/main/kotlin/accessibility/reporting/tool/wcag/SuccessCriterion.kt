@@ -53,7 +53,9 @@ data class SuccessCriterion(
                             wcagUrl = template.wcagUrl,
                             helpUrl = template.helpUrl,
                             wcagVersion = template.wcagVersion
-                        )
+                        ).apply {
+                            wcagLevel = template.wcagLevel
+                        }
                     }
                 }
 

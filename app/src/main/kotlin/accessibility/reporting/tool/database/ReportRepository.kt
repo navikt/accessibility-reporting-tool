@@ -2,12 +2,14 @@ package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.ReportType
 import accessibility.reporting.tool.wcag.Version
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Row
 import kotliquery.queryOf
 import org.postgresql.util.PGobject
+import java.lang.StringBuilder
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -87,10 +89,16 @@ class ReportRepository(val database: Database) {
         ).map { row -> report(row) }.asList
     }
 
-    fun getReports(): List<Report> =
+    fun getReports(type: ReportType? = null): List<Report> =
         database.list {
             queryOf(
-                "select created, last_changed,report_data ->> 'version' as version, report_data from report"
+                StringBuilder("select created, last_changed,report_data ->> 'version' as version, report_data from report")
+                    .apply {
+                        if (type != null)
+                            append(" where report_data ->> 'reportType' = :type")
+                    }
+                    .toString(),
+                mapOf("type" to type?.name)
             ).map { row -> report(row) }.asList
         }
 

@@ -3,7 +3,6 @@ package accessibility.reporting.tool.wcag
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.wcag.ReportType.AGGREGATED
-import accessibility.reporting.tool.wcag.Status.*
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
@@ -30,26 +29,26 @@ class AggregatedReport(
     lastUpdatedBy = null,
     reportType = AGGREGATED
 ) {
-    var fromReports: List<FromReport>
-    var fromOrganizationUnits: List<FromOrganizationUnit>
+    var fromReports: List<ReportShortSummary>
+    var fromOrganizations: List<OrganizationUnitShortSummary>
 
 
     init {
-        fromReports = reports.map { FromReport(reportId, descriptiveName) }
-        fromOrganizationUnits = reports
-            .mapNotNull { it.organizationUnit?.let { org -> FromOrganizationUnit(org.id, org.name) } }
+        fromReports = reports.map { ReportShortSummary(reportId, descriptiveName) }
+        fromOrganizations = reports
+            .mapNotNull { it.organizationUnit?.let { org -> OrganizationUnitShortSummary(org.id, org.name) } }
     }
 
     companion object {
         fun deserialize(version: Version, jsonData: JsonNode) =
             (version.deserialize(jsonData) as AggregatedReport).apply {
                 fromReports = jsonData["fromReports"].toList()
-                    .map { FromReport(it["reportId"].asText(), it["descriptiveName"].asText()) }
-                fromOrganizationUnits = jsonData["fromOrganizationUnits"].toList()
-                    .map { FromOrganizationUnit(it["id"].asText(), it["name"].asText()) }
+                    .map { ReportShortSummary(it["reportId"].asText(), it["descriptiveName"].asText()) }
+                fromOrganizations = jsonData["fromOrganizationUnits"].toList()
+                    .map { OrganizationUnitShortSummary(it["id"].asText(), it["name"].asText()) }
             }
     }
 }
 
-data class FromReport(val reportId: String, val descriptiveName: String)
-data class FromOrganizationUnit(val id: String, val name: String)
+data class ReportShortSummary(val reportId: String, val descriptiveName: String)
+data class OrganizationUnitShortSummary(val id: String, val name: String)

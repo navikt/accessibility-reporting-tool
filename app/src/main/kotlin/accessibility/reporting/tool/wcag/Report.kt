@@ -83,7 +83,9 @@ open class Report(
     }
 
 
-    fun toJson(): String = objectMapper.writeValueAsString(this)
+    fun toJson(): String =
+        objectMapper.writeValueAsString(this)
+
     fun statusString(): String = when {
         successCriteria.any { it.status == NOT_TESTED } -> "Ikke ferdig"
         successCriteria.deviationCount() != 0 ->

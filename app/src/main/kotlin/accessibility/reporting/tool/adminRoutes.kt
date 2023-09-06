@@ -1,4 +1,4 @@
-package accessibility.reporting.tool.accessibility.reporting.tool
+package accessibility.reporting.tool
 
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
