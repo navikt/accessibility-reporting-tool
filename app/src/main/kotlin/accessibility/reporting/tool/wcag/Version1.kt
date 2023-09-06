@@ -33,7 +33,7 @@ import java.time.LocalDateTime
 val log = KotlinLogging.logger { }
 
 object Version1 {
-    val lastTextUpdate: LocalDateTime = LocalDateTime.parse("2023-08-01T17:24:00.00")
+    val lastTextUpdate: LocalDateTime = LocalDateTime.parse("2023-09-06T14:00:00.00")
 
     fun newReport(
         organizationUnit: OrganizationUnit?,
@@ -126,14 +126,13 @@ object Version1 {
         }.levelAA(),
         //1.3 Adaptable
         1.perceivable("1.3.1", "Informasjon og relasjoner") {
-            description = """Informasjon, struktur og relasjoner som formidles via presentasjonen, kan bestemmes 
-                             programmeringsmessig eller gjøres tilgjengelig(e) som tekst.""".trimMargin()
+            description = "Ting skal være kodet som det ser ut som."
             guideline = `1-3 Mulig å tilpasse`
             tools = "$devTools/headingsMap"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships"
         }.levelA(),
         1.perceivable("1.3.2", "Meningsbærende rekkefølge") {
-            description = "TODO"
+            description = "Presenter innhold i en meningsfull rekkefølge."
             guideline = `1-3 Mulig å tilpasse`
             tools = "disableHTML"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/meaningful-sequence"
@@ -152,7 +151,7 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/orientation"
         }.levelA(),
         1.perceivable("1.3.5", "Identifiser formål med inndata") {
-            description = "Sørg for at ledetekster og overskrifter er beskrivende."
+            description = "Skjemaelementer er kodet med inndataformål."
             guideline = `1-3 Mulig å tilpasse`
             contentGroup = skjema
             tools = devTools
@@ -166,7 +165,7 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/distinguishable"
         }.levelA(),
         1.perceivable("1.4.2", "Styring av lyd") {
-            description = "Mulighet til å stoppe eller pause lyd som starter automatisk."
+            description = "Gi brukeren mulighet til å stoppe eller pause lyd som starter automatisk."
             guideline = `1-4 Mulig å skille fra hverandre`
             contentGroup = lydVideoAnimasjoner
             tools = skjønn
@@ -215,7 +214,7 @@ object Version1 {
         }.levelAA(),
         1.perceivable("1.4.13", "Pekerfølsomt innhold eller innhold ved tastaturfokus.") {
             description =
-                "Uheldige og feilaktige input via mus eller berøringsskjerm skal lettere kunne forhindres."
+                "Brukeren skal ha mer kontroll over innholdet på nettsiden som får fokus med musepeker eller tastatur."
             guideline = `1-4 Mulig å skille fra hverandre`
             tools = skjønn
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus"
@@ -230,7 +229,7 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/keyboard"
         }.levelA(),
         2.operable("2.1.2", "Ingen tastaturfelle") {
-            description = "Unngå tastaturfeller"
+            description = "Unngå tastaturfeller."
             guideline = `2-1 Tilgjengelig med tastatur`
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/no-keyboard-trap"
@@ -279,7 +278,7 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/page-titled"
         }.levelA(),
         2.operable("2.4.3", "Fokusrekkefølge") {
-            description = "TODO"
+            description = "Presenter innholdet i en logisk rekkefølge."
             guideline = `2-4 Navigerbar`
             tools = tastatur
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/focus-order"
@@ -297,7 +296,7 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/multiple-ways"
         }.levelAA(),
         2.operable("2.4.6", "Overskrifter og ledetekster") {
-            description = "Brukere som bruker visuelle ledetekster skal også kunne bruke kodede ledetekster."
+            description = "Sørg for at ledetekster og overskrifter er beskrivende."
             guideline = `2-4 Navigerbar`
             tools = "Skjønn/headingsMap"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/headings-and-labels"
@@ -311,26 +310,26 @@ object Version1 {
         //2.5 Input Modalities
         2.operable("2.5.1", "Pekerbevegelser") {
             description =
-                "Funksjonalitet som kan betjenes med å bevege enheten eller ved brukerbevegelse skal også kunne betjenes med brukersnittkomponenter."
+                "Innhold på nettsiden skal kunne brukes med enkel pekerinput."
             guideline = `2-5 Inndatametode`
             tools = "Mus"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/pointer-gestures"
         }.levelA(),
         2.operable("2.5.2", "Pekeravbrytelse") {
-            description = "TODO"
+            description = "Uheldige og feilaktige input via mus eller berøringsskjerm skal lettere kunne forhindres."
             guideline = `2-5 Inndatametode`
             tools = "Mus"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/pointer-cancellation"
         }.levelA(),
         2.operable("2.5.3", "Ledetekst i navn") {
-            description = "TODO"
+            description = "Brukere som bruker visuelle ledetekster skal også kunne bruke kodede ledetekster."
             guideline = `2-5 Inndatametode`
             contentGroup = "Skjemaer"
             tools = devTools
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/label-in-name"
         }.levelA(),
         2.operable("2.5.4", "Bevegelsesaktivering") {
-            description = "TODO"
+            description = "Funksjonalitet som kan betjenes med å bevege enheten eller ved brukerbevegelse, skal også kunne betjenes med brukergrensesnittkomponenter."
             guideline = `2-5 Inndatametode`
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/motion-actuation"
@@ -422,7 +421,7 @@ object Version1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/name-role-value"
         }.levelA(),
         4.robust("4.1.3", "Statusbeskjeder") {
-            description = "Gjør brukeren oppmerksom på statusendringer."
+            description = "Brukeren skal få statusbeskjeder om viktige endringer på nettsiden uten at det gir kontekstendring."
             guideline = `4-1 Kompatibel`
             tools = "Skjermleser/$devTools"
             helpUrl = "https://aksel.nav.no/god-praksis/artikler/413-statusbeskjeder#hcdb4fcfaf29c"
