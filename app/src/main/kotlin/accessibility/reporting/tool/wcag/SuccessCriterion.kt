@@ -28,11 +28,57 @@ data class SuccessCriterion(
         fun List<SuccessCriterion>.disputedDeviationCount() =
             count { it.status == Status.NON_COMPLIANT && it.devationIsDesputed() }
 
+        private val criterionNumberComparator =
+            Comparator { o1: SuccessCriterion, o2: SuccessCriterion ->
+                val x = o1.number.split(".")
+                    .let { list -> list.sumOf { i -> i.toInt() } }
+                val y = o2.number.split(".")
+                    .let { list -> list.sumOf { i -> i.toInt() } }
+                return@Comparator x - y
+            }
+
+
         fun List<SuccessCriterion>.deviationCount() =
             count { it.status == Status.NON_COMPLIANT && !it.devationIsDesputed() }
 
+        fun List<SuccessCriterion>.aggregate(): List<SuccessCriterion> =
+            groupBy { it.number }
+                .map {
+                    first().let { template ->
+                        SuccessCriterion(
+                            name = template.name,
+                            description = template.description,
+                            principle = template.principle,
+                            guideline = template.guideline,
+                            tools = template.tools,
+                            number = template.number,
+                            breakingTheLaw = mapNotNull { it.breakingTheLaw.ifBlank { null } }.joinToString("\n"),
+                            lawDoesNotApply = mapNotNull { it.lawDoesNotApply.ifBlank { null } }.joinToString("\n"),
+                            tooHardToComply = mapNotNull { it.tooHardToComply.ifBlank { null } }.joinToString("\n"),
+                            contentGroup = template.contentGroup,
+                            status = resolveStatus(),
+                            wcagUrl = template.wcagUrl,
+                            helpUrl = template.helpUrl,
+                            wcagVersion = template.wcagVersion
+                        )
+                    }
+                }
+                .sortedBy { it. }
 
-        fun fromJson(rawJson: JsonNode, version: Version, isStale:Boolean): SuccessCriterion =
+        private fun List<SuccessCriterion>.resolveStatus(): Status =
+            when {
+                all { it.status == Status.NOT_TESTED } -> Status.NOT_TESTED
+                any { it.status == Status.NON_COMPLIANT } -> Status.NON_COMPLIANT
+                all { it.status == Status.NOT_APPLICABLE } -> Status.NOT_APPLICABLE
+                all { it.status == Status.COMPLIANT } -> Status.COMPLIANT
+                else -> {
+                    log.warn { "Could not resolve status for successcriterium ${first().number}" }
+                    Status.NOT_TESTED
+                }
+            }
+
+
+        fun fromJson(rawJson: JsonNode, version: Version, isStale: Boolean): SuccessCriterion =
             SuccessCriterion(
                 name = rawJson["name"].asText(),
                 description = rawJson["description"].asText(),
@@ -52,7 +98,7 @@ data class SuccessCriterion(
                     rawJson["wcagLevel"]?.takeIf { !it.isNull }?.asText()
                         ?.let { WcagLevel.valueOf(it) } ?: WcagLevel.UNKNOWN
             }.let {
-                if(isStale)
+                if (isStale)
                     version.updateCriteria(it)
                 else it
             }

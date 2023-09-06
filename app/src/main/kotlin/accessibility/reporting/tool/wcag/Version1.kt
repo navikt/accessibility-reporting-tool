@@ -52,7 +52,8 @@ object Version1 {
         created = LocalDateTimeHelper.nowAtUtc(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = null,
-        descriptiveName = descriptiveName
+        descriptiveName = descriptiveName,
+        reportType = ReportType.SINGLE
     )
 
     private object ContentGroups {

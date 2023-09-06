@@ -4,6 +4,7 @@ import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.ReportType
 import accessibility.reporting.tool.wcag.Version
 import assert
 import io.kotest.assertions.withClue
@@ -196,7 +197,8 @@ class ReportRepositoryTest {
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         created = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = null,
-        descriptiveName = "Dummyname"
+        descriptiveName = "Dummyname",
+        reportType = ReportType.SINGLE
     )
 }
 

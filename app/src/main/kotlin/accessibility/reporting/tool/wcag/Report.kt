@@ -28,7 +28,8 @@ open class Report(
     val created: LocalDateTime,
     val lastChanged: LocalDateTime,
     val contributers: MutableList<User> = mutableListOf(),
-    val lastUpdatedBy: User?
+    val lastUpdatedBy: User?,
+    val reportType: ReportType,
 ) {
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
@@ -55,6 +56,11 @@ open class Report(
                                 )
                             },
                         version = V1,
+                        reportType = ReportType.valueOf(jsonNode["reportType"].let {
+                            if (it == null)
+                                "SINGLE"
+                            else it.asText()
+                        }),
                         testData = jsonNode["testData"].takeIf { !it.isEmpty }?.let { testDataJson ->
                             TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
                         },
@@ -119,7 +125,8 @@ open class Report(
         created = created,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = updateBy,
-        descriptiveName = descriptiveName
+        descriptiveName = descriptiveName,
+        reportType = reportType
     ).apply { if (!userIsOwner(updateBy)) contributers.add(updateBy) }
 
     fun withUpdatedMetadata(title: String?, pageUrl: String?, organizationUnit: OrganizationUnit?, updateBy: User) =
@@ -135,7 +142,8 @@ open class Report(
             filters = filters,
             created = created,
             lastChanged = LocalDateTimeHelper.nowAtUtc(),
-            lastUpdatedBy = updateBy
+            lastUpdatedBy = updateBy,
+            reportType = reportType
         ).apply { if (!userIsOwner(updateBy)) contributers.add(updateBy) }
 
     fun userIsOwner(callUser: User): Boolean =
@@ -174,6 +182,9 @@ enum class Version(
     val updateCriteria: (SuccessCriterion) -> SuccessCriterion
 ) {
     V1(Report::fromJsonVersion1, Version1.criteriaTemplate, Version1::updateCriterion);
+}
 
+enum class ReportType {
+    AGGREGATED, SINGLE
 }
 
