@@ -10,34 +10,64 @@ class SuccessCriterionTest {
 
     @Test
     fun `aggregerer sukkesskriterer basert på nummer`() {
-        (testCriterion(number = "1.2.3", status = Status.NOT_TESTED) * 5)
-            .plus(testCriterion("1.1.1", status = Status.NOT_TESTED))
+        (testCriterion(number = "1.1.1", status = Status.COMPLIANT) * 5)
+            .plus(testCriterion("1.2.3", status = Status.NOT_TESTED))
             .aggregate()
             .assert {
                 size shouldBe 2
                 first().assert {
                     number shouldBe "1.1.1"
-                    name shouldBe  "Criterion 1.1.1"
-                    description  shouldBe  "description 1.1.1"
-                    principle shouldBe  "principle 1.1.1"
-                    guideline shouldBe  "guideline 1.1.1"
-                    tools shouldBe  "tools 1.1.1"
-                    number shouldBe  number
-                    breakingTheLaw shouldBe  breakingTheLaw
-                    lawDoesNotApply shouldBe  lawDoesNotApply
-                    tooHardToComply shouldBe  tooHardToComply
-                    contentGroup shouldBe  "contentgroup 1.1.1"
-                    status shouldBe  Status.COMPLIANT
-                    wcagUrl shouldBe  "wcagUrl 1.1.1"
-                    helpUrl shouldBe  "helpurl 1.1.1"
-                    wcagVersion shouldBe  "wcagversion 1.1.1"
+                    name shouldBe "Criterion 1.1.1"
+                    description shouldBe "description 1.1.1"
+                    principle shouldBe "principle 1.1.1"
+                    guideline shouldBe "guideline 1.1.1"
+                    tools shouldBe "tools 1.1.1"
+                    number shouldBe number
+                    breakingTheLaw shouldBe ""
+                    lawDoesNotApply shouldBe ""
+                    tooHardToComply shouldBe ""
+                    contentGroup shouldBe "contentgroup 1.1.1"
+                    status shouldBe Status.COMPLIANT
+                    wcagUrl shouldBe "wcagUrl 1.1.1"
+                    helpUrl shouldBe "helpurl 1.1.1"
+                    wcagVersion shouldBe "wcagversion 1.1.1"
                 }
-                get(2).number shouldBe "1.2.3"
-
+                get(1).assert {
+                    number shouldBe "1.2.3"
+                    status shouldBe Status.NOT_TESTED
+                }
             }
 
 
+    }
 
+    @Test
+    fun `resolver riktig status`() {
+        (testCriterion(status = Status.COMPLIANT) * 5)
+            .plus(testCriterion(status = Status.NOT_TESTED) * 5)
+            .aggregate()
+            .assert {
+                size shouldBe 1
+                first().status shouldBe Status.NOT_TESTED
+            }
+
+        (testCriterion(status = Status.COMPLIANT) * 5)
+            .plus(testCriterion(status = Status.NOT_TESTED) * 5)
+            .plus(testCriterion(status = Status.NON_COMPLIANT))
+            .plus(testCriterion(status = Status.NOT_APPLICABLE))
+            .aggregate()
+            .assert {
+                size shouldBe 1
+                first().status shouldBe Status.NON_COMPLIANT
+            }
+
+        listOf(testCriterion(status = Status.NOT_APPLICABLE), testCriterion(status = Status.COMPLIANT))
+            .aggregate()
+            .first().status shouldBe Status.COMPLIANT
+
+        (testCriterion(status = Status.NOT_APPLICABLE) * 5)
+            .aggregate()
+            .first().status shouldBe Status.NOT_APPLICABLE
     }
 
 
@@ -49,7 +79,7 @@ private operator fun SuccessCriterion.times(i: Int) = mutableListOf<SuccessCrite
 }
 
 private fun testCriterion(
-    number: String,
+    number: String = "1.1.1",
     status: Status,
     breakingTheLaw: String = "",
     lawDoesNotApply: String = "",
