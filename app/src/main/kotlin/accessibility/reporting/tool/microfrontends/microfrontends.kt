@@ -64,7 +64,7 @@ enum class NavBarItem(val itemHref: String, val itemText: String) {
 
     fun li(navBarItem: NavBarItem, ul: UL) =
         if (navBarItem == this@NavBarItem)
-            ul.li { +itemText }
+            ul.li { span { +itemText }}
         else
             ul.hrefListItem(itemHref, itemText)
 }

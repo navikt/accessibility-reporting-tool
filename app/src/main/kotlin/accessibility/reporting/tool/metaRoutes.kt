@@ -26,12 +26,13 @@ fun Route.landingPage(repository: ReportRepository) {
             img {
                 id="uu-katt"
                 src = "/static/UU-katt.svg"
-                role = "presentation"
+                alt = "A11y cat loves you!"
+                title = "A11y cat loves you!"
             }
 
             h1 { +"a11y rapporteringsverktøy for NAV" }
             p {
-                a {
+                a (classes = "cta") {
                     href = "/reports/new"
                     +"Lag ny erklæring"
                 }

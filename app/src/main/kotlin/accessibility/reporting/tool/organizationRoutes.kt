@@ -19,14 +19,14 @@ fun Route.organizationUnits(repository: ReportRepository) {
         get {
             call.respondHtmlContent("Organisasjonsenheter", NavBarItem.ORG_ENHETER) {
                 h1 { +"Organisasjonsenheter" }
+                a (classes = "cta") {
+                    href = "orgunit/new"
+                    +"Legg til organisajonsenhet"
+                }
                 ul {
                     repository.getAllOrganizationUnits().forEach { orgUnit ->
                         hrefListItem("orgunit/${orgUnit.id}", orgUnit.name)
                     }
-                }
-                a {
-                    href = "orgunit/new"
-                    +"Legg til organisajonsenhet"
                 }
             }
         }
@@ -110,15 +110,17 @@ fun Route.userRoute(repository: ReportRepository) {
         val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
         call.respondHtmlContent(call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
+            a (classes = "cta") {
+                href = "/reports/new"
+                +"Lag ny erklæring"
+            }
+
             if (reports.isNotEmpty())
                 ul(classes = "report-list") {
                     reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
                 }
             else p { +"Du har ingen tilgjengelighetserklæringer enda" }
-            a {
-                href = "/reports/new"
-                +"Lag ny erklæring"
-            }
+
         }
 
     }

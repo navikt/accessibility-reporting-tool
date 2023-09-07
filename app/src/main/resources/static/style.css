@@ -8,11 +8,46 @@ body {
     color: #333;
 
     max-width: 60rem;
-    margin: 1rem auto;
+    margin: 0 auto;
     padding: 0 1em;
 }
 
-/* Layout for report registration page */
+a {
+    color: #244F91;
+}
+
+
+.cta {
+    position: relative;
+}
+
+.cta::after {
+    content: " 🡪";
+    position: absolute;
+    right: -1.25em;
+    width: 1.25em;
+    text-align: right;
+}
+
+
+
+a:hover, a:hover:after {
+    background-color: #e7f4fb;
+}
+
+
+
+/* Front page stuff */
+
+#uu-katt {
+    width:400px;
+    margin-top: 45px;
+    float: right;
+}
+
+
+
+/* Main layout for report registration page */
 
 .report-header {
     grid-area: report-header;
@@ -37,7 +72,7 @@ body {
 
 @media screen and (min-width: 768px) {
     .report-container {
-        grid-template-columns: 2fr 5fr;
+        grid-template-columns: 3fr 5fr;
         grid-template-areas:
       "report-header  report-header"
       "sc-toc sc-list";
@@ -45,7 +80,28 @@ body {
 }
 
 
+/* Report registration page header */
+
+.report-header h1 span {
+    font-size: .5em;
+    display: block;
+}
+
+.report-header h1 a {
+
+}
+
+
+
+
+
 /* Report registration page Table of Contents */
+
+.sc-toc {
+    position: sticky;
+    top: 2em;
+    background: red;
+}
 
 .sc-toc ul {
     list-style: none;
@@ -144,7 +200,7 @@ label {
 
 
 #hovedmeny {
-    border-bottom: #335ea8 solid 3px;
+    border-bottom: #244F91 solid 4px;
 }
 
 #hovedmeny ul {
@@ -156,9 +212,29 @@ label {
     display: inline-block;
 }
 
-#hovedmeny li:not(:last-child) {
-    margin-right: 2em;
+#hovedmeny a, #hovedmeny span {
+    padding: .5em 1em;
+    display: inline-block;
+    text-decoration: none;
 }
+
+#hovedmeny span {
+    background-color: #244F91;
+    color: white;
+    font-weight: 600;
+}
+
+#hovedmeny a {
+    color: #244F91;
+}
+
+#hovedmeny a:hover {
+    text-decoration: underline;
+}
+
+
+
+
 
 
 button {
@@ -184,7 +260,3 @@ button {
     margin: 0;
 }
 
-#uu-katt {
-    width:400px;
-    margin-top: 45px;
-}
