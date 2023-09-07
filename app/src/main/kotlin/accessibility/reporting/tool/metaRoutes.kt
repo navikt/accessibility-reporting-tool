@@ -3,6 +3,7 @@ package accessibility.reporting.tool
 import accessibility.reporting.tool.microfrontends.NavBarItem.FORSIDE
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.respondHtmlContent
+import accessibility.reporting.tool.wcag.ReportShortSummary
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -21,7 +22,7 @@ fun Routing.meta() {
 
 fun Route.landingPage(repository: ReportRepository) {
     get {
-        val reports = repository.getReports()
+        val reports = repository.getReports<ReportShortSummary>()
         call.respondHtmlContent("a11y rapportering", FORSIDE) {
             img {
                 id="uu-katt"

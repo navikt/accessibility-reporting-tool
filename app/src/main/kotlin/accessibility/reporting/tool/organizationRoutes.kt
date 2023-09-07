@@ -5,6 +5,7 @@ import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.ReportContent
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -124,7 +125,7 @@ fun Route.userRoute(repository: ReportRepository) {
     }
 }
 
-fun UL.reportListItem(report: Report, allowDelete: Boolean = false) {
+fun UL.reportListItem(report: ReportContent, allowDelete: Boolean = false) {
     li {
         a {
             href = "/reports/${report.reportId}"

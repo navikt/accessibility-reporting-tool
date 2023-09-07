@@ -14,11 +14,17 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import kotlin.IllegalArgumentException
 
+interface ReportContent {
+    val reportId: String
+    val descriptiveName: String?
+    val url:String
+}
+
 
 open class Report(
-    val reportId: String,
-    val url: String,
-    val descriptiveName: String?,
+    override val reportId: String,
+    override val url: String,
+    override val descriptiveName: String?,
     val organizationUnit: OrganizationUnit?,
     val version: Version,
     val testData: TestData?,
@@ -30,7 +36,7 @@ open class Report(
     val contributers: MutableList<User> = mutableListOf(),
     val lastUpdatedBy: User?,
     val reportType: ReportType,
-) {
+) : ReportContent {
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
             registerModule(JavaTimeModule())
@@ -151,6 +157,7 @@ open class Report(
     fun userIsOwner(callUser: User): Boolean =
         user.oid == callUser.oid || user.email == callUser.oid//TODO: fjern sammenligning av oid på email
 
+
 }
 
 private val Int.punkter: String
@@ -189,4 +196,3 @@ enum class Version(
 enum class ReportType {
     AGGREGATED, SINGLE
 }
-

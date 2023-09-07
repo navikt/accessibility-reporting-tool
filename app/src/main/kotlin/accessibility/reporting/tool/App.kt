@@ -64,4 +64,16 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             preCompressed(CompressedFileType.GZIP)
         }
     }
+
+    val allRoutes = allRoutes(plugin(Routing))
+    val allRoutesWithMethod = allRoutes.filter { it.selector is HttpMethodRouteSelector }
+    allRoutesWithMethod.forEach {
+        println("route: $it")
+    }
+}
+
+
+
+fun allRoutes(root: Route): List<Route> {
+    return listOf(root) + root.children.flatMap { allRoutes(it) }
 }

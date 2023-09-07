@@ -54,21 +54,24 @@ class ReportRepositoryTest {
         val testReport = dummyReportV1()
         val aggregatedTestReport = dummyAggregatedReportV1(orgUnit = testOrg)
         repository.upsertReport(testReport)
-        repository.getReport(testReport.reportId).assert {
+        repository.getReport<Report>(testReport.reportId).assert {
             require(this != null)
-            this.successCriteria.size shouldBe 49
-            this.reportType shouldBe ReportType.SINGLE
+            successCriteria.size shouldBe 49
+            reportType shouldBe ReportType.SINGLE
         }
         repository.upsertReport(aggregatedTestReport)
-        repository.getReport(aggregatedTestReport.reportId).assert {
+        repository.getReport<AggregatedReport>(aggregatedTestReport.reportId).assert {
             require(this != null)
-            this.successCriteria.size shouldBe 49
-            this.reportType shouldBe ReportType.AGGREGATED
+            successCriteria.size shouldBe 49
+            reportType shouldBe ReportType.AGGREGATED
+            fromReports.size shouldBe 2
+            fromOrganizations.size shouldBe 1
+
         }
 
         repository.upsertReport(testReport)
         repository.upsertReport(testReport)
-        repository.getReport(testReport.reportId).assert { require(this != null) }
+        repository.getReport<Report>(testReport.reportId).assert { require(this != null) }
         database.list {
             queryOf(
                 "SELECT * from changelog where report_id=:id",
@@ -120,7 +123,6 @@ class ReportRepositoryTest {
         }
     }
 
-
     @Test
     fun `get reports by type`() {
         val testReport = dummyReportV1()
@@ -129,10 +131,24 @@ class ReportRepositoryTest {
         repository.upsertReport(aggregatedTestReport)
         repository.upsertReport(dummyAggregatedReportV1(orgUnit = testOrg))
 
-        repository.getReports().size shouldBe 3
-        repository.getReports(ReportType.SINGLE).size shouldBe 1
-        repository.getReports(ReportType.AGGREGATED).size shouldBe 2
+        repository.getReports<Report>().size shouldBe 3
+        repository.getReports<Report>(ReportType.SINGLE).size shouldBe 1
+        repository.getReports<AggregatedReport>(ReportType.AGGREGATED).size shouldBe 2
+        repository.getReports<ReportShortSummary>().size shouldBe 3
     }
+
+    @Test
+    fun `get reports by id`() {
+        val testReport = dummyReportV1()
+        val aggregatedTestReport = dummyAggregatedReportV1(orgUnit = testOrg)
+        repository.upsertReport(testReport)
+        repository.upsertReport(aggregatedTestReport)
+        repository.upsertReport(dummyAggregatedReportV1(orgUnit = testOrg))
+
+        repository.getReports<Report>(ids = listOf(aggregatedTestReport.reportId, testReport.reportId)).size shouldBe 2
+        repository.getReports<AggregatedReport>(ids = listOf(aggregatedTestReport.reportId)).size shouldBe 1
+    }
+
 
 
     @Test

@@ -10,7 +10,7 @@ class SuccessCriterionTest {
 
     @Test
     fun `aggregerer sukkesskriterer basert på nummer`() {
-        (testCriterion(number = "1.1.1", status = Status.COMPLIANT) * 5)
+        (testCriterion(number = "1.1.1", status = Status.COMPLIANT, breakingTheLaw = "nei", lawDoesNotApply = "law", tooHardToComply = "too hard") * 5)
             .plus(testCriterion("1.2.3", status = Status.NOT_TESTED))
             .aggregate()
             .assert {
@@ -23,9 +23,9 @@ class SuccessCriterionTest {
                     guideline shouldBe "guideline 1.1.1"
                     tools shouldBe "tools 1.1.1"
                     number shouldBe number
-                    breakingTheLaw shouldBe ""
-                    lawDoesNotApply shouldBe ""
-                    tooHardToComply shouldBe ""
+                    breakingTheLaw shouldBe "nei\nnei\nnei\nnei\nnei"
+                    lawDoesNotApply shouldBe "law\nlaw\nlaw\nlaw\nlaw"
+                    tooHardToComply shouldBe "too hard\ntoo hard\ntoo hard\ntoo hard\ntoo hard"
                     contentGroup shouldBe "contentgroup 1.1.1"
                     status shouldBe Status.COMPLIANT
                     wcagUrl shouldBe "wcagUrl 1.1.1"
@@ -73,8 +73,8 @@ class SuccessCriterionTest {
 
 }
 
-private operator fun SuccessCriterion.times(i: Int) = mutableListOf<SuccessCriterion>().apply {
-    for (i in 1..i)
+private operator fun SuccessCriterion.times(amount: Int) = mutableListOf<SuccessCriterion>().apply {
+    for (i in 1..amount)
         add(this@times)
 }
 
@@ -100,4 +100,6 @@ private fun testCriterion(
         wcagUrl = "wcagUrl $number",
         helpUrl = "helpurl $number",
         wcagVersion = "wcagversion $number"
-    )
+    ).apply {
+        wcagLevel = WcagLevel.A
+    }

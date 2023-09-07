@@ -13,6 +13,10 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import java.util.UUID
 
+private const val updateCriterionPath = "/submit"
+private const val updateMetadataPath = "/metadata"
+private const val updateOrganizationUnitPath = "/organizations"
+
 
 fun Route.reports(repository: ReportRepository) {
 
@@ -21,74 +25,17 @@ fun Route.reports(repository: ReportRepository) {
         get("{id}") {
 
             val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
-            val report = repository.getReport(reportId) ?: throw IllegalArgumentException()
+            val report = repository.getReport<Report>(reportId) ?: throw IllegalArgumentException()
             val organizations = repository.getAllOrganizationUnits()
 
             call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
-                main(classes = "report-container") {
-                    header(classes = "report-header") {
-                        h1 { +"Tilgjengelighetserklæring (enkeltside)" }
-                        div(classes = "statement-metadata") {
-                            statementMetadataDl(report.reportId,
-                                mutableListOf<StatementMetadata>().apply {
-                                    add(
-                                        StatementMetadata(
-                                            "Tittel",
-                                            report.descriptiveName ?: report.url,
-                                            hxUpdateName = "report-title"
-                                        )
-                                    )
-
-                                    add(StatementMetadata("URL", report.url, hxUpdateName = "page-url"))
-                                    add(StatementMetadata("Ansvarlig", report.user.email, null))
-                                    add(StatementMetadata("Status", report.statusString(), hxId = "metadata-status"))
-                                    add(
-                                        StatementMetadata(
-                                            label = "Sist oppdatert",
-                                            value = report.lastChanged.displayFormat(),
-                                            hxId = "metadata-oppdatert"
-                                        )
-                                    )
-                                    StatementMetadata(
-                                        label = "Sist oppdatert av",
-                                        value = (report.lastUpdatedBy ?: report.user).email,
-                                        hxId = "metadata-oppdatert-av"
-                                    )
-
-                                    report.contributers.let {
-                                        if (it.isNotEmpty())
-                                            StatementMetadata("Bidragsytere", it.joinToString { "," })
-                                    }
-                                    add(StatementMetadata(label = "Organisasjonsenhet", value = null, ddProducer = {
-                                        dd {
-                                            select {
-                                                orgSelector(organizations, report)
-                                            }
-                                        }
-                                    }))
-
-                                }
-
-                            )
-
-
-                        }
-                    }
-
-                    nav(classes = "sc-toc") {
-                        attributes["aria-label"] = "Status"
-                        summaryLinks(report)
-                    }
-
-                    div(classes = "sc-list") {
-                        report.successCriteria.map { a11yForm(it, reportId) }
-                    }
-
-                    a(classes = "to-top") {
-                        href = "#sc1.1.1"
-                        +"Til toppen"
-                    }
-                }
+                reportContainer(
+                    report = report,
+                    organizations = organizations,
+                    organizationUpdateUrl = updateOrganizationUnitPath,
+                    reportCriterionUrl = updateCriterionPath,
+                    updateMetadataUrl = updateMetadataPath
+                )
             }
         }
 
@@ -102,68 +49,13 @@ fun Route.reports(repository: ReportRepository) {
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 
-        post("/submit/{id}") {
-            val id = call.parameters["id"] ?: throw IllegalArgumentException()
-            val formParameters = call.receiveParameters()
-            val status = formParameters["status"].toString()
-            val criterionNumber = formParameters["index"].toString()
-            val breakingTheLaw = formParameters["breaking-the-law"]
-            val lawDoesNotApply = formParameters["law-does-not-apply"]
-            val tooHardToComply = formParameters["too-hard-to-comply"]
-            val oldReport: Report = repository.getReport(id) ?: throw IllegalArgumentException()
-            val criterion: SuccessCriterion = oldReport.updateCriterion(
-                criterionNumber = criterionNumber,
-                statusString = status,
-                breakingTheLaw = breakingTheLaw,
-                lawDoesNotApply = lawDoesNotApply,
-                tooHardToComply = tooHardToComply
-            )
-            val report = repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
-
-            fun response(): String = updatedMetadataStatus(report) + summaryLinksString(report) + createHTML().div {
-                a11yForm(
-                    report.findCriterion(criterionNumber), id
-                )
-            }
-
-            call.respondText(
-                contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response
-            )
-        }
-
-        post("/metadata/{id}") {
-            val formParameters = call.receiveParameters()
-            repository.getReport(call.parameters["id"] ?: throw IllegalArgumentException())
-                ?.withUpdatedMetadata(
-                    title = formParameters["report-title"],
-                    pageUrl = formParameters["page-url"],
-                    organizationUnit = null, //TODO
-                    updateBy = call.user
-                )
-                ?.let { repository.upsertReport(it) }
-
-            call.respond(HttpStatusCode.OK)
-        }
-
-        post("/organization/{id}") {
-            val formParameters = call.receiveParameters()
-            val organizations = repository.getAllOrganizationUnits()
-            val report =
-                repository.getReport(call.parameters["id"] ?: throw IllegalArgumentException("Rapport-id mangler"))
-                    ?.withUpdatedMetadata(
-                        title = null,
-                        pageUrl = null,
-                        organizationUnit = organizations.find { it.id == formParameters["org-selector"] },
-                        updateBy = call.user
-                    )
-                    ?.let { repository.upsertReport(it) }
-
-
-            fun response() = createHTML().select {
-                orgSelector(organizations, report!!)
-            }
-            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
-        }
+        updateCriterionRoute(getUser = { this.user }, repository = repository, routingPath = updateCriterionPath)
+        updateMetdataRoute(getUser = { this.user }, repository = repository, routingPath = updateMetadataPath)
+        updateOrganizationUnitRoute(
+            getUser = { this.user },
+            repository = repository,
+            routingPath = updateOrganizationUnitPath
+        )
 
         route("new") {
 

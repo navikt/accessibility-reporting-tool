@@ -52,11 +52,12 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value: String, status: Status, di
     }
 }
 
-fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
+fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String, updatePath: String) {
+    if (!updatePath.startsWith("/")) throw IllegalArgumentException("updatePath for successcriterion må starte med '/'")
     successCriterionInformation(sc)
     form(classes = sc.cssClass()) {
         hxTrigger("change")
-        hxPost("/reports/submit/${reportId}")
+        hxPost("/reports$updatePath/${reportId}")
         hxTarget(".${sc.cssClass()}")
         hxSelect("form")
         hxSwapOuter()
@@ -100,7 +101,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String) {
     }
 }
 
-fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>, detailedView:Boolean = true) {
+fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>, detailedView: Boolean = true) {
     val generalCriteriaContent = successCriteria.first()
 
     div(classes = "criterion-status") {
@@ -109,23 +110,24 @@ fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>, detailedView:B
             p { +"Ingen avvik registrert" }
         } else {
             p { +"${successCriteria.deviationCount()} avvik registrert" }
-            if(detailedView)
-            ul {
-                successCriteria.filter { it.status == Status.NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
-                    .map { it.breakingTheLaw }.let { criterionIssues("Det er innhold på siden som bryter kravet", it) }
+            if (detailedView)
+                ul {
+                    successCriteria.filter { it.status == Status.NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
+                        .map { it.breakingTheLaw }
+                        .let { criterionIssues("Det er innhold på siden som bryter kravet", it) }
 
-                successCriteria.filter { it.status == Status.NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
-                    .map { it.lawDoesNotApply }
-                    .let { criterionIssues("Det er innhold i på siden som ikke er underlagt kravet", it) }
+                    successCriteria.filter { it.status == Status.NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
+                        .map { it.lawDoesNotApply }
+                        .let { criterionIssues("Det er innhold i på siden som ikke er underlagt kravet", it) }
 
 
-                successCriteria.filter { it.status == Status.NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
-                    .map { it.tooHardToComply }.let {
-                        criterionIssues(
-                            "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.", it
-                        )
-                    }
-            }
+                    successCriteria.filter { it.status == Status.NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
+                        .map { it.tooHardToComply }.let {
+                            criterionIssues(
+                                "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.", it
+                            )
+                        }
+                }
         }
     }
 }
