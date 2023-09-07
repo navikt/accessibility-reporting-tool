@@ -127,6 +127,7 @@ a:hover, a:hover:after {
     border-radius: 50%;
     height: 1em;
     width: 1em;
+    padding: 1px;
     position: absolute;
     top: .125em;
     left: -1.5em;
@@ -141,7 +142,7 @@ a:hover, a:hover:after {
     background: #2b883a;
 }
 
-.too-hard-icon {
+.not-applicable-icon {
     background: #595959;
 }
 
