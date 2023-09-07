@@ -97,12 +97,6 @@ a:hover, a:hover:after {
 
 /* Report registration page Table of Contents */
 
-.sc-toc {
-    position: sticky;
-    top: 2em;
-    background: red;
-}
-
 .sc-toc ul {
     list-style: none;
     margin: 0;
