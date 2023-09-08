@@ -8,7 +8,8 @@ fun BODY.reportContainer(
     report: Report,
     organizations: List<OrganizationUnit>,
     updateCriterionUrl: String,
-    updateMetadataUrl: String
+    updateMetadataUrl: String,
+    metadaProducer: MutableList<StatementMetadata>.()->Unit={}
 ) {
     main(classes = "report-container") {
         header(classes = "report-header") {
@@ -51,7 +52,7 @@ fun BODY.reportContainer(
                                 }
                             }
                         }))
-
+                        metadaProducer()
                     }
 
                 )

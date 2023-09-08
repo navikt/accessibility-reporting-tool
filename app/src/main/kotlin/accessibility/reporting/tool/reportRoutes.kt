@@ -15,8 +15,6 @@ import java.util.UUID
 
 private const val updateCriterionPath = "/reports/submit"
 private const val updateMetadataPath = "/metadata"
-private const val updateOrganizationUnitPath = "/organizations"
-
 
 fun Route.reports(repository: ReportRepository) {
 

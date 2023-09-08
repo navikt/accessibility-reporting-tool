@@ -48,11 +48,8 @@ fun Route.updateCriterionRoute(
                     routingPath
                 )
             }
-
         }
-
     }
-
 }
 
 fun Route.updateMetdataRoute(

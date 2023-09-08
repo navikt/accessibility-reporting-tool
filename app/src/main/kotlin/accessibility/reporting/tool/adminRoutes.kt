@@ -53,7 +53,17 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     organizations = organizations,
                     updateCriterionUrl = updateCriterionEndpoint,
                     updateMetadataUrl = updateMetadataPath
-                )
+                ) {
+                    add(StatementMetadata(label = "Kilder", null, ddProducer = {
+                        dd {
+                            ul {
+                                report.fromReports.map { from ->
+                                   reportListItem(from, false)
+                                }
+                            }
+                        }
+                    }))
+                }
             }
         }
 
@@ -156,9 +166,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                 ).let {
                     repository.upsertReportReturning<AggregatedReport>(it)
                 }.apply {
-                    call.respondHtmlContent("Admin – Generer rapport", NavBarItem.ADMIN) {
-                        h1 { }
-                    }
+                    call.respondRedirect("/reports/collection/$reportId")
                 }
             }
         }
