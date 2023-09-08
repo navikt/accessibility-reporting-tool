@@ -9,7 +9,12 @@ import io.ktor.server.html.*
 import kotlinx.html.*
 import java.time.LocalDateTime
 
-suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBarItem, contenbuilder: BODY.() -> Unit) {
+suspend fun ApplicationCall.respondHtmlContent(
+    title: String,
+    navBarItem: NavBarItem,
+    classes: String = "default-body-class",
+    contentbuilder: BODY.() -> Unit
+) {
     respondHtml {
         lang = "no"
         head {
@@ -30,9 +35,9 @@ suspend fun ApplicationCall.respondHtmlContent(title: String, navBarItem: NavBar
             }
         }
 
-        body {
+        body(classes) {
             navbar(navBarItem, user)
-            contenbuilder()
+            contentbuilder()
         }
 
     }
@@ -64,7 +69,7 @@ enum class NavBarItem(val itemHref: String, val itemText: String) {
 
     fun li(navBarItem: NavBarItem, ul: UL) =
         if (navBarItem == this@NavBarItem)
-            ul.li { span { +itemText }}
+            ul.li { span { +itemText } }
         else
             ul.hrefListItem(itemHref, itemText)
 }

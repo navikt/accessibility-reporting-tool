@@ -102,7 +102,7 @@ class ReportShortSummary(
     companion object {
         fun fromJson(jsonNode: JsonNode) = ReportShortSummary(
             jsonNode["reportId"].asText(),
-            jsonNode["descriptiveName"].asText("Ikke tilgjengelig"),
+            jsonNode["descriptiveName"].asText("Ikke tilgjengelig") ?: jsonNode["url"].asText(),
             jsonNode["url"].asText(),
             ReportType.valueFromJson(jsonNode)
 
