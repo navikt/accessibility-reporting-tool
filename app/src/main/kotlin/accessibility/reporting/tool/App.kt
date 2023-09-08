@@ -1,6 +1,5 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.accessibility.reporting.tool.adminRoutes
 import accessibility.reporting.tool.authenitcation.AzureAuthContext
 import accessibility.reporting.tool.authenitcation.installAuthentication
 import accessibility.reporting.tool.database.Environment
@@ -65,4 +64,14 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             preCompressed(CompressedFileType.GZIP)
         }
     }
+
+    allRoutes(plugin(Routing))
+        .filter { it.selector is HttpMethodRouteSelector }
+  .forEach {println("route: $it") }
+}
+
+
+
+fun allRoutes(root: Route): List<Route> {
+    return listOf(root) + root.children.flatMap { allRoutes(it) }
 }

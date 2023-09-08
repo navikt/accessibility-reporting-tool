@@ -14,11 +14,17 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import kotlin.IllegalArgumentException
 
+interface ReportContent {
+    val reportId: String
+    val descriptiveName: String?
+    val url: String
+}
+
 
 open class Report(
-    val reportId: String,
-    val url: String,
-    val descriptiveName: String?,
+    override val reportId: String,
+    override val url: String,
+    override val descriptiveName: String?,
     val organizationUnit: OrganizationUnit?,
     val version: Version,
     val testData: TestData?,
@@ -30,7 +36,7 @@ open class Report(
     val contributers: MutableList<User> = mutableListOf(),
     val lastUpdatedBy: User?,
     val reportType: ReportType,
-) {
+) : ReportContent {
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
             registerModule(JavaTimeModule())
@@ -56,11 +62,7 @@ open class Report(
                                 )
                             },
                         version = V1,
-                        reportType = ReportType.valueOf(jsonNode["reportType"].let {
-                            if (it == null)
-                                "SINGLE"
-                            else it.asText()
-                        }),
+                        reportType = ReportType.valueFromJson(jsonNode),
                         testData = jsonNode["testData"].takeIf { !it.isEmpty }?.let { testDataJson ->
                             TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
                         },
@@ -83,7 +85,9 @@ open class Report(
     }
 
 
-    fun toJson(): String = objectMapper.writeValueAsString(this)
+    fun toJson(): String =
+        objectMapper.writeValueAsString(this)
+
     fun statusString(): String = when {
         successCriteria.any { it.status == NOT_TESTED } -> "Ikke ferdig"
         successCriteria.deviationCount() != 0 ->
@@ -114,7 +118,7 @@ open class Report(
         successCriteria.find { it.number == criterionNumber }
             ?: throw IllegalArgumentException("Criteria with number $criterionNumber does not exists")
 
-    fun withUpdatedCriterion(criterion: SuccessCriterion, updateBy: User): Report = Report(
+    open fun withUpdatedCriterion(criterion: SuccessCriterion, updateBy: User): Report = Report(
         organizationUnit = organizationUnit,
         reportId = reportId,
         successCriteria = successCriteria.map { if (it.number == criterion.number) criterion else it },
@@ -127,9 +131,11 @@ open class Report(
         lastUpdatedBy = updateBy,
         descriptiveName = descriptiveName,
         reportType = reportType
-    ).apply { if (!userIsOwner(updateBy)) contributers.add(updateBy) }
+    ).apply {
+        if (!userIsOwner(updateBy)) contributers.add(updateBy)
+    }
 
-    fun withUpdatedMetadata(title: String?, pageUrl: String?, organizationUnit: OrganizationUnit?, updateBy: User) =
+    open fun withUpdatedMetadata(title: String?, pageUrl: String?, organizationUnit: OrganizationUnit?, updateBy: User) =
         Report(
             reportId = reportId,
             url = pageUrl ?: url,
@@ -148,6 +154,11 @@ open class Report(
 
     fun userIsOwner(callUser: User): Boolean =
         user.oid == callUser.oid || user.email == callUser.oid//TODO: fjern sammenligning av oid på email
+
+    fun h1() = when(reportType){
+        ReportType.AGGREGATED -> "Tilgjengelighetserklæring (Samlerapport)"
+        ReportType.SINGLE -> "Tilgjengelighetserklæring"
+    }
 
 }
 
@@ -185,6 +196,15 @@ enum class Version(
 }
 
 enum class ReportType {
-    AGGREGATED, SINGLE
-}
+    AGGREGATED, SINGLE;
 
+    companion object {
+        fun valueFromJson(jsonNode: JsonNode): ReportType =
+            valueOf(jsonNode["reportType"].let {
+                if (it == null)
+                    "SINGLE"
+                else it.asText()
+            })
+
+    }
+}

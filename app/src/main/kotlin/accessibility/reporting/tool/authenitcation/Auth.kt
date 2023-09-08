@@ -1,6 +1,7 @@
 package accessibility.reporting.tool.authenitcation
 
 
+import accessibility.reporting.tool.database.Admins
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -30,6 +31,9 @@ import java.util.concurrent.TimeUnit
 
 val ApplicationCall.user: User
     get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Princial ikke satt")
+
+val ApplicationCall.adminUser: User
+    get() = user.also { if (!Admins.isAdmin(it)) throw NotAdminException() }
 
 fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
 
@@ -120,3 +124,4 @@ internal data class OauthServerConfigurationMetadata(
     @JsonProperty("authorization_endpoint") val authorizationEndpoint: String
 )
 
+internal class NotAdminException : Exception()

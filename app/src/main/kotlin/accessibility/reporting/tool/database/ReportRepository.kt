@@ -1,13 +1,13 @@
 package accessibility.reporting.tool.database
 
-import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.Version
+import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import kotliquery.Parameter
 import kotliquery.Row
 import kotliquery.queryOf
 import org.postgresql.util.PGobject
+import java.lang.StringBuilder
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -15,7 +15,8 @@ import java.time.format.DateTimeFormatter
 
 class ReportRepository(val database: Database) {
 
-    fun upsertReport(report: Report): Report {
+    fun upsertReport(report: Report) = upsertReportReturning<Report>(report)
+    inline fun <reified T : Report> upsertReportReturning(report: T): T {
         val reports = database.query {
             queryOf(
                 """insert into report (report_id,report_data,created, last_changed) 
@@ -30,7 +31,7 @@ class ReportRepository(val database: Database) {
                     "lastChanged" to report.lastChanged
                 )
             ).map { row ->
-                Pair(report(row), row.stringOrNull("old_data"))
+                Pair(report<T>(row), row.stringOrNull("old_data"))
             }.asSingle
         }
         val newReport = reports!!.first
@@ -49,12 +50,12 @@ class ReportRepository(val database: Database) {
         return reports.first
     }
 
-    fun getReport(reportId: String): Report? =
+    inline fun <reified T : ReportContent> getReport(reportId: String): T? =
         database.query {
             queryOf(
                 "select created, last_changed, report_data ->> 'version' as version, report_data from report where report_id=:reportid",
                 mapOf("reportid" to reportId)
-            ).map { row -> report(row) }.asSingle
+            ).map { row -> report<T>(row) }.asSingle
         }
 
     fun getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<Report>> =
@@ -70,7 +71,7 @@ class ReportRepository(val database: Database) {
                     |from report
                     |where report_data -> 'organizationUnit' ->> 'id' = :id """.trimMargin(),
                     mapOf("id" to id)
-                ).map { row -> report(row) }.asList
+                ).map { row -> report<Report>(row) }.asList
             }
 
             Pair(orgUnit, reports)
@@ -84,14 +85,38 @@ class ReportRepository(val database: Database) {
             mapOf(
                 "oid" to oid
             )
-        ).map { row -> report(row) }.asList
+        ).map { row -> report<Report>(row) }.asList
     }
 
-    fun getReports(): List<Report> =
-        database.list {
-            queryOf(
-                "select created, last_changed,report_data ->> 'version' as version, report_data from report"
-            ).map { row -> report(row) }.asList
+    inline fun <reified T> getReports(type: ReportType? = null, ids: List<String>? = null): List<T> =
+        try {
+            database.list {
+                queryOf(
+                    StringBuilder("select created, last_changed,report_data ->> 'version' as version, report_data from report")
+                        .apply {
+                            if (type != null)
+                                append(" where report_data ->> 'reportType' = :type")
+                            if (ids != null)
+                                append(" where report_id IN ${ids.sqlList()}")
+                        }
+                        .toString(),
+                    mapOf(
+                        "type" to type?.name
+                    )
+                ).map { row -> report<T>(row) }.asList
+            }
+        } catch (e: Exception) {
+            log.error {
+                StringBuilder("select created, last_changed,report_data ->> 'version' as version, report_data from report")
+                    .apply {
+                        if (type != null)
+                            append(" where report_data ->> 'reportType' = :type")
+                        if (ids != null)
+                            append(" where report_data ->> 'reportid' IN ${ids.joinToString(",", "(", ")")}")
+                    }
+                    .toString()
+            }
+            throw e
         }
 
     fun deleteReport(reportId: String) =
@@ -135,8 +160,17 @@ class ReportRepository(val database: Database) {
             .asList
     }
 
-    private fun report(row: Row) = Version.valueOf(row.string("version"))
-        .deserialize(jacksonObjectMapper().readTree(row.string("report_data")))
+    inline fun <reified T> report(row: Row): T {
+        val rapportData = jacksonObjectMapper().readTree(row.string("report_data"))
+        return when (val name = T::class.simpleName) {
+            "AggregatedReport" -> AggregatedReport.deserialize(Version.valueOf(row.string("version")), rapportData)
+            "Report" -> Version.valueOf(row.string("version"))
+                .deserialize(rapportData)
+
+            "ReportShortSummary" -> ReportShortSummary.fromJson(rapportData)
+            else -> throw IllegalArgumentException("Kan ikke transformere rapport-data til $name")
+        } as T
+    }
 
     private fun organizationUnit(row: Row) = OrganizationUnit(
         id = row.string("organization_unit_id"),
@@ -145,6 +179,8 @@ class ReportRepository(val database: Database) {
     )
 
 }
+
+fun List<String>.sqlList(): String = joinToString(",", "(", ")") { "'$it'" }
 
 object LocalDateTimeHelper {
 
@@ -177,7 +213,7 @@ object LocalDateTimeHelper {
 
 }
 
-private fun String.jsonB() = PGobject().apply {
+fun String.jsonB() = PGobject().apply {
     type = "jsonb"
     value = this@jsonB
 }

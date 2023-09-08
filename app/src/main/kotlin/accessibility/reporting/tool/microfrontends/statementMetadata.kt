@@ -11,16 +11,24 @@ class StatementMetadata(
     val value: String?,
     private val ddProducer: (DL.(String) -> Unit)? = null,
     val hxId: String? = null,
-    val hxUpdateName: String? = null
+    val hxUpdateName: String? = null,
+    private val updatePath: String? = null
 ) {
+
     fun definitionItem(dl: DL, reportId: String) = when {
         ddProducer != null -> ddProducer.let { dl.it(reportId) }
-        hxUpdateName != null -> dl.definitionInput(
-            text = value!!,
-            hxUpdateName = hxUpdateName,
-            reportId = reportId,
-            hxId = hxId
-        )
+        hxUpdateName != null -> {
+            require(updatePath != null) { "updatepath må være satt for inputelement $hxUpdateName" }
+            require(value != null) { "updatepath må være satt for inputelement $hxUpdateName" }
+            dl.definitionInput(
+                text = value,
+                hxUpdateName = hxUpdateName,
+                reportId = reportId,
+                hxId = hxId,
+                updatePath = updatePath
+            )
+
+        }
 
         else -> dl.definitionItem(value!!, hxId)
     }
@@ -36,7 +44,7 @@ fun DIV.statementMetadataDl(reportId: String, statuses: List<StatementMetadata>)
     }
 }
 
-fun DL.definitionInput(text: String, hxUpdateName: String, reportId: String, hxId: String?) {
+fun DL.definitionInput(text: String, hxUpdateName: String, reportId: String, hxId: String?, updatePath: String) {
     dd(classes = "editable-definition") {
         hxId?.let { hxId ->
             id = hxId
@@ -44,7 +52,7 @@ fun DL.definitionInput(text: String, hxUpdateName: String, reportId: String, hxI
         }
         input {
             hxTrigger("change")
-            hxPost("/reports/metadata/$reportId")
+            hxPost("$updatePath/${reportId}")
             type = InputType.text
             name = hxUpdateName
             value = text
@@ -87,10 +95,10 @@ fun updatedMetadataStatus(report: Report): String = """
     }
 }""".trimMargin()
 
-fun SELECT.orgSelector(organizations: List<OrganizationUnit>, report: Report) {
+fun SELECT.orgSelector(organizations: List<OrganizationUnit>, report: Report, updateUrl: String) {
     name = "org-selector"
     hxTrigger("change")
-    hxPost("/reports/organization/${report.reportId}")
+    hxPost("$updateUrl/${report.reportId}")
     hxSwapOuter()
     organizations
         .filter { it.id != report.organizationUnit?.id }

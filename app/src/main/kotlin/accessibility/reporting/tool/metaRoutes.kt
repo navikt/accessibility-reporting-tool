@@ -3,6 +3,8 @@ package accessibility.reporting.tool
 import accessibility.reporting.tool.microfrontends.NavBarItem.FORSIDE
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.respondHtmlContent
+import accessibility.reporting.tool.wcag.ReportShortSummary
+import accessibility.reporting.tool.wcag.ReportType
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -21,10 +23,10 @@ fun Routing.meta() {
 
 fun Route.landingPage(repository: ReportRepository) {
     get {
-        val reports = repository.getReports()
+        val reports = repository.getReports<ReportShortSummary>()
         call.respondHtmlContent("a11y rapportering", FORSIDE) {
             img {
-                id="uu-katt"
+                id = "uu-katt"
                 src = "/static/UU-katt.svg"
                 alt = "A11y cat loves you!"
                 title = "A11y cat loves you!"
@@ -37,8 +39,14 @@ fun Route.landingPage(repository: ReportRepository) {
                     +"Lag ny erklæring"
                 }
             }
-            h2 { +"Rapporter" }
-            ul { reports.forEach { report -> reportListItem(report) } }
+            h2 { +"Rapporter for enkeltsider" }
+            ul { reports.filter { it.reportType == ReportType.SINGLE }.forEach { report -> reportListItem(report) } }
+
+            h2 { +"Samlerapporter" }
+            //TODO: readonly versjon
+            ul {
+                reports.filter { it.reportType == ReportType.AGGREGATED }.forEach { report -> reportListItem(report) }
+            }
 
         }
     }

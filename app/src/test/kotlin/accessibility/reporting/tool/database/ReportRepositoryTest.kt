@@ -2,10 +2,7 @@ package accessibility.reporting.tool.database
 
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.ReportType
-import accessibility.reporting.tool.wcag.Version
+import accessibility.reporting.tool.wcag.*
 import assert
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -55,14 +52,26 @@ class ReportRepositoryTest {
     @Test
     fun upsertReport() {
         val testReport = dummyReportV1()
+        val aggregatedTestReport = dummyAggregatedReportV1(orgUnit = testOrg)
         repository.upsertReport(testReport)
-        repository.getReport(testReport.reportId).assert {
+        repository.getReport<Report>(testReport.reportId).assert {
             require(this != null)
-            this.successCriteria.size shouldBe 49
+            successCriteria.size shouldBe 49
+            reportType shouldBe ReportType.SINGLE
         }
+        repository.upsertReport(aggregatedTestReport)
+        repository.getReport<AggregatedReport>(aggregatedTestReport.reportId).assert {
+            require(this != null)
+            successCriteria.size shouldBe 49
+            reportType shouldBe ReportType.AGGREGATED
+            fromReports.size shouldBe 2
+            fromOrganizations.size shouldBe 1
+
+        }
+
         repository.upsertReport(testReport)
         repository.upsertReport(testReport)
-        repository.getReport(testReport.reportId).assert { require(this != null) }
+        repository.getReport<Report>(testReport.reportId).assert { require(this != null) }
         database.list {
             queryOf(
                 "SELECT * from changelog where report_id=:id",
@@ -113,6 +122,33 @@ class ReportRepositoryTest {
             )
         }
     }
+
+    @Test
+    fun `get reports by type`() {
+        val testReport = dummyReportV1()
+        val aggregatedTestReport = dummyAggregatedReportV1(orgUnit = testOrg)
+        repository.upsertReport(testReport)
+        repository.upsertReport(aggregatedTestReport)
+        repository.upsertReport(dummyAggregatedReportV1(orgUnit = testOrg))
+
+        repository.getReports<Report>().size shouldBe 3
+        repository.getReports<Report>(ReportType.SINGLE).size shouldBe 1
+        repository.getReports<AggregatedReport>(ReportType.AGGREGATED).size shouldBe 2
+        repository.getReports<ReportShortSummary>().size shouldBe 3
+    }
+
+    @Test
+    fun `get reports by id`() {
+        val testReport = dummyReportV1()
+        val aggregatedTestReport = dummyAggregatedReportV1(orgUnit = testOrg)
+        repository.upsertReport(testReport)
+        repository.upsertReport(aggregatedTestReport)
+        repository.upsertReport(dummyAggregatedReportV1(orgUnit = testOrg))
+
+        repository.getReports<Report>(ids = listOf(aggregatedTestReport.reportId, testReport.reportId)).size shouldBe 2
+        repository.getReports<AggregatedReport>(ids = listOf(aggregatedTestReport.reportId)).size shouldBe 1
+    }
+
 
 
     @Test
@@ -184,7 +220,8 @@ class ReportRepositoryTest {
     private fun dummyReportV1(
         url: String = "http://dummyurl.test",
         orgUnit: OrganizationUnit? = null,
-        user: User = User(email = testUserEmail, name = testUserName, oid = testUserOid)
+        user: User = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+        reportType: ReportType = ReportType.SINGLE
     ) = Report(
         reportId = UUID.randomUUID().toString(),
         url = url,
@@ -198,7 +235,22 @@ class ReportRepositoryTest {
         created = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = null,
         descriptiveName = "Dummyname",
-        reportType = ReportType.SINGLE
+        reportType = reportType
     )
+
+    private fun dummyAggregatedReportV1(
+        orgUnit: OrganizationUnit? = null,
+    ) =
+        AggregatedReport(
+            url = "https://aggregated.test",
+            descriptiveName = "Aggregated dummy report",
+            user = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+            organizationUnit = orgUnit,
+            reports = listOf(
+                dummyReportV1(),
+                dummyReportV1(orgUnit = OrganizationUnit("something", "something", "something", "something"))
+            )
+        )
+
 }
 
