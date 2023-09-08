@@ -57,7 +57,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String, updatePath: Str
     successCriterionInformation(sc)
     form(classes = sc.cssClass()) {
         hxTrigger("change")
-        hxPost("/reports$updatePath/${reportId}")
+        hxPost("$updatePath/${reportId}")
         hxTarget(".${sc.cssClass()}")
         hxSelect("form")
         hxSwapOuter()

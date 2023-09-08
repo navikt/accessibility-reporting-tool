@@ -15,7 +15,8 @@ import java.time.format.DateTimeFormatter
 
 class ReportRepository(val database: Database) {
 
-    fun upsertReport(report: Report): Report {
+    fun upsertReport(report: Report) = upsertReportReturning<Report>(report)
+    inline fun <reified T : Report> upsertReportReturning(report: T): T {
         val reports = database.query {
             queryOf(
                 """insert into report (report_id,report_data,created, last_changed) 
@@ -30,7 +31,7 @@ class ReportRepository(val database: Database) {
                     "lastChanged" to report.lastChanged
                 )
             ).map { row ->
-                Pair(report<Report>(row), row.stringOrNull("old_data"))
+                Pair(report<T>(row), row.stringOrNull("old_data"))
             }.asSingle
         }
         val newReport = reports!!.first
@@ -212,7 +213,7 @@ object LocalDateTimeHelper {
 
 }
 
-private fun String.jsonB() = PGobject().apply {
+fun String.jsonB() = PGobject().apply {
     type = "jsonb"
     value = this@jsonB
 }

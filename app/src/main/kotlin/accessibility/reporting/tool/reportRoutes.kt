@@ -13,7 +13,7 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import java.util.UUID
 
-private const val updateCriterionPath = "/submit"
+private const val updateCriterionPath = "/reports/submit"
 private const val updateMetadataPath = "/metadata"
 private const val updateOrganizationUnitPath = "/organizations"
 
@@ -21,24 +21,24 @@ private const val updateOrganizationUnitPath = "/organizations"
 fun Route.reports(repository: ReportRepository) {
 
     route("/reports") {
-
         get("{id}") {
-
             val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
             val report = repository.getReport<Report>(reportId) ?: throw IllegalArgumentException()
+            if (report.reportType == ReportType.AGGREGATED) {
+                call.unahtorizedIfNotAdmin("/reports/collection/$reportId")
+            }
+
             val organizations = repository.getAllOrganizationUnits()
 
             call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
                 reportContainer(
                     report = report,
                     organizations = organizations,
-                    organizationUpdateUrl = updateOrganizationUnitPath,
-                    reportCriterionUrl = updateCriterionPath,
+                    updateCriterionUrl = updateCriterionPath,
                     updateMetadataUrl = updateMetadataPath
                 )
             }
         }
-
         delete("/{id}") {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             repository.deleteReport(id)
@@ -48,15 +48,6 @@ fun Route.reports(repository: ReportRepository) {
             }
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
-
-        updateCriterionRoute(getUser = { this.user }, repository = repository, routingPath = updateCriterionPath)
-        updateMetdataRoute(getUser = { this.user }, repository = repository, routingPath = updateMetadataPath)
-        updateOrganizationUnitRoute(
-            getUser = { this.user },
-            repository = repository,
-            routingPath = updateOrganizationUnitPath
-        )
-
         route("new") {
 
             post {
@@ -133,4 +124,18 @@ fun Route.reports(repository: ReportRepository) {
             }
         }
     }
+
+    updateCriterionRoute(updateCriterionPath,){ parameters->
+        val oldReport = repository.getReport<Report>(call.id) ?: throw IllegalArgumentException()
+        val criterion: SuccessCriterion = oldReport.updateCriterion(
+            criterionNumber = parameters.criterionNumber,
+            statusString = parameters.status,
+            breakingTheLaw = parameters.breakingTheLaw,
+            lawDoesNotApply = parameters.lawDoesNotApply,
+            tooHardToComply = parameters.tooHardToComply
+        )
+        repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
+    }
+    updateMetdataRoute( repository = repository, routingPath = updateMetadataPath)
+
 }

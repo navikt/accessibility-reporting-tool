@@ -4,7 +4,6 @@ import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.ReportContent
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -38,7 +37,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 val (org, reports) = repository.getReportForOrganizationUnit(unitId)
 
                 org?.let { orgUnit ->
-                    call.respondHtmlContent(orgUnit.name, NavBarItem.BRUKER) {
+                    call.respondHtmlContent(orgUnit.name, NavBarItem.ORG_ENHETER) {
                         h1 { +orgUnit.name }
                         p {
                             +"epost: ${orgUnit.email}"
@@ -125,15 +124,15 @@ fun Route.userRoute(repository: ReportRepository) {
     }
 }
 
-fun UL.reportListItem(report: ReportContent, allowDelete: Boolean = false) {
+fun UL.reportListItem(report: ReportContent, allowDelete: Boolean = false, rootPath:String="/reports") {
     li {
         a {
-            href = "/reports/${report.reportId}"
+            href = "$rootPath/${report.reportId}"
             +(report.descriptiveName ?: report.url)
         }
         if (allowDelete)
             button {
-                hxDelete("/reports/${report.reportId}")
+                hxDelete("$rootPath/${report.reportId}")
                 hxSwapOuter()
                 hxConfirm("Er du sikker på at du vill slette denne erklæringen?")
                 hxTarget(".report-list")

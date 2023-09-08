@@ -52,7 +52,7 @@ fun DL.definitionInput(text: String, hxUpdateName: String, reportId: String, hxI
         }
         input {
             hxTrigger("change")
-            hxPost("/reports/$reportId$updatePath")
+            hxPost("$updatePath/${reportId}")
             type = InputType.text
             name = hxUpdateName
             value = text
@@ -98,7 +98,7 @@ fun updatedMetadataStatus(report: Report): String = """
 fun SELECT.orgSelector(organizations: List<OrganizationUnit>, report: Report, updateUrl: String) {
     name = "org-selector"
     hxTrigger("change")
-    hxPost("/reports/${report.reportId}$updateUrl")
+    hxPost("$updateUrl/${report.reportId}")
     hxSwapOuter()
     organizations
         .filter { it.id != report.organizationUnit?.id }

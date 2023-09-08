@@ -2,6 +2,7 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.adminUser
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
@@ -11,25 +12,60 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
+import kotlinx.html.stream.createHTML
+
+private const val updateCriterionEndpoint = "/collection/submit"
+private const val updateMetadataPath = "/collection/metadata"
 
 fun Route.adminRoutes(repository: ReportRepository) {
     route("admin") {
         get {
+            call.unahtorizedIfNotAdmin()
             call.respondHtmlContent("Admin", NavBarItem.NONE) {
                 h1 { +"Admin" }
                 h2 { +"Genererte rapporter" }
                 repository.getReports<ReportShortSummary>(ReportType.AGGREGATED).let { reports ->
                     if (reports.isNotEmpty()) {
-                        ul { reports.map { reportListItem(it) } }
+                        ul(classes = "report-list") { reports.map { reportListItem(it, true, "/reports/collection") } }
                     } else {
                         p { +"Fant ingen aggregrete rapport" }
                     }
                 }
                 a {
-                    href = "admin/new"
+                    href = "reports/collection/new"
                     +"Generer ny erklæring"
                 }
             }
+        }
+    }
+
+    route("/reports/collection/") {
+
+        get("{id}") {
+            call.unahtorizedIfNotAdmin()
+            val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
+            val report = repository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException()
+            val organizations = repository.getAllOrganizationUnits()
+
+            call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
+                reportContainer(
+                    report = report,
+                    organizations = organizations,
+                    updateCriterionUrl = updateCriterionEndpoint,
+                    updateMetadataUrl = updateMetadataPath
+                )
+            }
+        }
+
+        delete("/{id}") {
+            call.unahtorizedIfNotAdmin()
+            val id = call.parameters["id"] ?: throw IllegalArgumentException()
+            repository.deleteReport(id)
+            val reports = repository.getReports<ReportShortSummary>(ReportType.AGGREGATED)
+            fun response() = createHTML().ul(classes = "report-list") {
+                reports.map { report -> reportListItem(report, true, "/reports/collection") }
+            }
+            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 
         route("new") {
@@ -117,12 +153,48 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     },
                     user = call.adminUser,
                     reports = repository.getReports<Report>(ids = formParameters.getAll("report"))
-                )
-                call.respondHtmlContent("Admin – Generer rapport", NavBarItem.ADMIN) {
-
+                ).let {
+                    repository.upsertReportReturning<AggregatedReport>(it)
+                }.apply {
+                    call.respondHtmlContent("Admin – Generer rapport", NavBarItem.ADMIN) {
+                        h1 { }
+                    }
                 }
             }
         }
+    }
+
+
+    updateCriterionRoute(updateCriterionEndpoint) { parameters ->
+        val oldReport = repository.getReport<AggregatedReport>(call.id) ?: throw IllegalArgumentException()
+        val criterion: SuccessCriterion = oldReport.updateCriterion(
+            criterionNumber = parameters.criterionNumber,
+            statusString = parameters.status,
+            breakingTheLaw = parameters.breakingTheLaw,
+            lawDoesNotApply = parameters.lawDoesNotApply,
+            tooHardToComply = parameters.tooHardToComply
+        )
+        repository.upsertReportReturning<AggregatedReport>(oldReport.withUpdatedCriterion(criterion, call.user))
+    }
+
+
+    updateMetdataRoute(
+        repository = repository,
+        routingPath = updateMetadataPath,
+        upsertReportFunction = { report -> upsertReportReturning<Report>(report) },
+        getReportFunction = { id -> getReport<AggregatedReport>(id) },
+        validateAccess = ApplicationCall::unahtorizedIfNotAdmin
+    )
+}
+
+suspend fun ApplicationCall.unahtorizedIfNotAdmin(redirectToAdmin: String? = null) {
+    when {
+        !Admins.isAdmin(user) -> respond(
+            HttpStatusCode.Unauthorized,
+            "Du har ikke tilgang til denne siden"
+        )
+
+        redirectToAdmin != null -> respondRedirect(redirectToAdmin)
     }
 }
 

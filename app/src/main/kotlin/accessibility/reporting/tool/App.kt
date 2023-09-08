@@ -65,11 +65,9 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
         }
     }
 
-    val allRoutes = allRoutes(plugin(Routing))
-    val allRoutesWithMethod = allRoutes.filter { it.selector is HttpMethodRouteSelector }
-    allRoutesWithMethod.forEach {
-        println("route: $it")
-    }
+    allRoutes(plugin(Routing))
+        .filter { it.selector is HttpMethodRouteSelector }
+  .forEach {println("route: $it") }
 }
 
 

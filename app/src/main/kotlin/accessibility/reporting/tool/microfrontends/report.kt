@@ -7,13 +7,12 @@ import kotlinx.html.*
 fun BODY.reportContainer(
     report: Report,
     organizations: List<OrganizationUnit>,
-    organizationUpdateUrl: String,
-    reportCriterionUrl: String,
+    updateCriterionUrl: String,
     updateMetadataUrl: String
 ) {
     main(classes = "report-container") {
         header(classes = "report-header") {
-            h1 { +"Tilgjengelighetserklæring (enkeltside)" }
+            h1 { +report.h1() }
             div(classes = "statement-metadata") {
                 statementMetadataDl(report.reportId,
                     mutableListOf<StatementMetadata>().apply {
@@ -48,7 +47,7 @@ fun BODY.reportContainer(
                         add(StatementMetadata(label = "Organisasjonsenhet", value = null, ddProducer = {
                             dd {
                                 select {
-                                    orgSelector(organizations, report, organizationUpdateUrl)
+                                    orgSelector(organizations, report, updateMetadataUrl)
                                 }
                             }
                         }))
@@ -67,7 +66,7 @@ fun BODY.reportContainer(
         }
 
         div(classes = "sc-list") {
-            report.successCriteria.map { a11yForm(it, report.reportId, reportCriterionUrl) }
+            report.successCriteria.map { a11yForm(it, report.reportId, updateCriterionUrl) }
         }
 
         a(classes = "to-top") {

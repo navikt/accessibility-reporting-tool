@@ -34,7 +34,7 @@ class AggregatedReport : Report {
         lastUpdatedBy = null,
         reportType = AGGREGATED
     ) {
-        fromReports = reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url) }
+        fromReports = reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url, it.reportType) }
         fromOrganizations = reports
             .mapNotNull { it.organizationUnit?.let { org -> OrganizationUnitShortSummary(org.id, org.name) } }
     }
@@ -63,6 +63,21 @@ class AggregatedReport : Report {
         this.fromOrganizations = fromOrganizations
     }
 
+    override fun withUpdatedCriterion(criterion: SuccessCriterion, updateBy: User): AggregatedReport =
+        AggregatedReport(super.withUpdatedCriterion(criterion, updateBy), fromReports, fromOrganizations)
+
+    override fun withUpdatedMetadata(
+        title: String?,
+        pageUrl: String?,
+        organizationUnit: OrganizationUnit?,
+        updateBy: User
+    ): AggregatedReport =
+        AggregatedReport(
+            super.withUpdatedMetadata(title, pageUrl, organizationUnit, updateBy),
+            fromReports,
+            fromOrganizations
+        )
+
 
     companion object {
         fun deserialize(version: Version, jsonData: JsonNode) =
@@ -81,14 +96,16 @@ class AggregatedReport : Report {
 class ReportShortSummary(
     override val reportId: String,
     override val descriptiveName: String?,
-    override val url: String
-) : ReportContent
-{
+    override val url: String,
+    val reportType: ReportType
+) : ReportContent {
     companion object {
-        fun fromJson(jsonNode:JsonNode) = ReportShortSummary(
-        jsonNode["reportId"].asText(),
-        jsonNode["descriptiveName"].asText(),
-        jsonNode["url"].asText()
+        fun fromJson(jsonNode: JsonNode) = ReportShortSummary(
+            jsonNode["reportId"].asText(),
+            jsonNode["descriptiveName"].asText(),
+            jsonNode["url"].asText(),
+            ReportType.valueFromJson(jsonNode)
+
         )
     }
 }
