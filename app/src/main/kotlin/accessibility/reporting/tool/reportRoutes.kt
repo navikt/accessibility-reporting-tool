@@ -38,14 +38,23 @@ fun Route.reports(repository: ReportRepository) {
             }
         }
         delete("/{id}") {
-            val id = call.parameters["id"] ?: throw IllegalArgumentException()
-            repository.deleteReport(id)
+            repository.deleteReport(call.id)
             val reports = repository.getReportsForUser(call.user.oid!!) //TODO fjern
             fun response() = createHTML().ul(classes = "report-list") {
                 reports.map { report -> reportListItem(report, true) }
             }
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
+        delete("/single/{id}") {
+            repository.deleteReport(call.id)
+            val reports = repository.getReports<ReportShortSummary>(ReportType.SINGLE) //TODO fjern
+            fun response() = createHTML().ul(classes = "report-list") {
+                reports.map { report -> reportListItem(report, true, deletePath = "/reports/single") }
+            }
+            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
+        }
+
+
         route("new") {
 
             post {

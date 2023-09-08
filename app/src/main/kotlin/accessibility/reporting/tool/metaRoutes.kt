@@ -1,5 +1,7 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.microfrontends.NavBarItem.FORSIDE
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.respondHtmlContent
@@ -34,13 +36,16 @@ fun Route.landingPage(repository: ReportRepository) {
 
             h1 { +"a11y rapporteringsverktøy for NAV" }
             p {
-                a (classes = "cta") {
+                a(classes = "cta") {
                     href = "/reports/new"
                     +"Lag ny erklæring"
                 }
             }
             h2 { +"Rapporter for enkeltsider" }
-            ul { reports.filter { it.reportType == ReportType.SINGLE }.forEach { report -> reportListItem(report) } }
+            ul("report-list") {
+                reports.filter { it.reportType == ReportType.SINGLE }
+                    .forEach { report -> reportListItem(report) }
+            }
 
             h2 { +"Samlerapporter" }
             //TODO: readonly versjon

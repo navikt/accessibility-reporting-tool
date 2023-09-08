@@ -26,11 +26,26 @@ fun Route.adminRoutes(repository: ReportRepository) {
                 h2 { +"Genererte rapporter" }
                 repository.getReports<ReportShortSummary>(ReportType.AGGREGATED).let { reports ->
                     if (reports.isNotEmpty()) {
-                        ul(classes = "report-list") { reports.map { reportListItem(it, true, "/reports/collection") } }
+                        ul { reports.map { reportListItem(it, true, "/reports/collection") } }
                     } else {
                         p { +"Fant ingen aggregrete rapport" }
                     }
                 }
+
+                repository.getReports<ReportShortSummary>(ReportType.SINGLE).let { reports ->
+                    h2 { +"Rapporter for enkeltsider" }
+                    ul("report-list") {
+                        reports.filter { it.reportType == ReportType.SINGLE }
+                            .forEach { report ->
+                                reportListItem(
+                                    report,
+                                    Admins.isAdmin(call.user),
+                                    deletePath = "/reports/single"
+                                )
+                            }
+                    }
+                }
+
                 a {
                     href = "reports/collection/new"
                     +"Generer ny erklæring"
@@ -58,7 +73,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                         dd {
                             ul {
                                 report.fromReports.map { from ->
-                                   reportListItem(from, false)
+                                    reportListItem(from, false)
                                 }
                             }
                         }

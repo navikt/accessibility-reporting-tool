@@ -19,7 +19,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
         get {
             call.respondHtmlContent("Organisasjonsenheter", NavBarItem.ORG_ENHETER) {
                 h1 { +"Organisasjonsenheter" }
-                a (classes = "cta") {
+                a(classes = "cta") {
                     href = "orgunit/new"
                     +"Legg til organisajonsenhet"
                 }
@@ -110,7 +110,7 @@ fun Route.userRoute(repository: ReportRepository) {
         val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
         call.respondHtmlContent(call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
-            a (classes = "cta") {
+            a(classes = "cta") {
                 href = "/reports/new"
                 +"Lag ny erklæring"
             }
@@ -126,7 +126,12 @@ fun Route.userRoute(repository: ReportRepository) {
     }
 }
 
-fun UL.reportListItem(report: ReportContent, allowDelete: Boolean = false, rootPath:String="/reports") {
+fun UL.reportListItem(
+    report: ReportContent,
+    allowDelete: Boolean = false,
+    rootPath: String = "/reports",
+    deletePath: String? = null
+) {
     li {
         a {
             href = "$rootPath/${report.reportId}"
@@ -134,7 +139,7 @@ fun UL.reportListItem(report: ReportContent, allowDelete: Boolean = false, rootP
         }
         if (allowDelete)
             button {
-                hxDelete("$rootPath/${report.reportId}")
+                hxDelete("${deletePath ?: rootPath}/${report.reportId}")
                 hxSwapOuter()
                 hxConfirm("Er du sikker på at du vill slette denne erklæringen?")
                 hxTarget(".report-list")
