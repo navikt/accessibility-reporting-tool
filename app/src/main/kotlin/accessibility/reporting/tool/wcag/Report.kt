@@ -135,7 +135,12 @@ open class Report(
         if (!userIsOwner(updateBy)) contributers.add(updateBy)
     }
 
-    open fun withUpdatedMetadata(title: String?, pageUrl: String?, organizationUnit: OrganizationUnit?, updateBy: User) =
+    open fun withUpdatedMetadata(
+        title: String?,
+        pageUrl: String?,
+        organizationUnit: OrganizationUnit?,
+        updateBy: User
+    ) =
         Report(
             reportId = reportId,
             url = pageUrl ?: url,
@@ -155,7 +160,7 @@ open class Report(
     fun userIsOwner(callUser: User): Boolean =
         user.oid == callUser.oid || user.email == callUser.oid//TODO: fjern sammenligning av oid på email
 
-    fun h1() = when(reportType){
+    fun h1() = when (reportType) {
         ReportType.AGGREGATED -> "Tilgjengelighetserklæring (Samlerapport)"
         ReportType.SINGLE -> "Tilgjengelighetserklæring"
     }
@@ -200,11 +205,11 @@ enum class ReportType {
 
     companion object {
         fun valueFromJson(jsonNode: JsonNode): ReportType =
-            valueOf(jsonNode["reportType"].let {
-                if (it == null)
-                    "SINGLE"
-                else it.asText()
-            })
-
+            jsonNode["reportType"].let {
+                when (it) {
+                    null -> SINGLE
+                    else -> valueOf(it.asText("SINGLE"))
+                }
+            }
     }
 }
