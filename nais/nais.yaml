@@ -19,7 +19,7 @@ spec:
     max: 2
     cpuThresholdPercentage: 100
   ingresses:
-    - "https://a11y-statement.intern.nav.no"
+    - "https://a11y-statement.nav.no"
   azure:
     application:
       enabled: true
