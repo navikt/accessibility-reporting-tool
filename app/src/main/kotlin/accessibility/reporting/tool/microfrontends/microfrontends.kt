@@ -33,6 +33,11 @@ suspend fun ApplicationCall.respondHtmlContent(
                 href = "/static/style.css"
 
             }
+            link {
+                rel="icon"
+                type="image/x-icon"
+                href="/static/a11y-cat-round.png"
+            }
         }
 
         body(classes) {
