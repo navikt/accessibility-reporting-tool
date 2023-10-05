@@ -131,7 +131,6 @@ class ReportRepository(val database: Database) {
         }
 
     fun upsertOrganizationUnit(organizationUnit: OrganizationUnit) {
-        //TODO returner oppdatert organisasjon
         database.update {
             queryOf(
                 """INSERT INTO organization_unit (organization_unit_id, name, email) 

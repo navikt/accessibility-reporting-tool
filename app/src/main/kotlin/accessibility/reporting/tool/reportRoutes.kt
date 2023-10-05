@@ -21,10 +21,10 @@ fun Route.reports(repository: ReportRepository) {
 
     route("/reports") {
         get("{id}") {
-            val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
+            val reportId = call.parameters["id"] ?: throw IllegalArgumentException("mangler rapportid")
             val report = repository.getReport<Report>(reportId) ?: throw IllegalArgumentException()
             if (report.reportType == ReportType.AGGREGATED) {
-                call.unahtorizedIfNotAdmin("/reports/collection/$reportId")
+                call.respondRedirect("/reports/collection/$reportId")
             }
             val organizations = repository.getAllOrganizationUnits()
             val readOnly: Boolean = when {

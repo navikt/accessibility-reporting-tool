@@ -57,7 +57,6 @@ fun Route.adminRoutes(repository: ReportRepository) {
     route("/reports/collection/") {
 
         get("{id}") {
-            call.unahtorizedIfNotAdmin()
             val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
             val report = repository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException()
             val organizations = repository.getAllOrganizationUnits()
@@ -68,7 +67,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     organizations = organizations,
                     updateCriterionUrl = updateCriterionEndpoint,
                     updateMetadataUrl = updateMetadataPath,
-                    readOnly = false
+                    readOnly = !Admins.isAdmin(call.user)
                 ) {
                     add(StatementMetadata(label = "Kilder", null, ddProducer = {
                         dd {
@@ -200,8 +199,6 @@ fun Route.adminRoutes(repository: ReportRepository) {
         )
         repository.upsertReportReturning<AggregatedReport>(oldReport.withUpdatedCriterion(criterion, call.user))
     }
-
-
     updateMetdataRoute(
         repository = repository,
         routingPath = updateMetadataPath,
@@ -217,7 +214,6 @@ suspend fun ApplicationCall.unahtorizedIfNotAdmin(redirectToAdmin: String? = nul
             HttpStatusCode.Unauthorized,
             "Du har ikke tilgang til denne siden"
         )
-
         redirectToAdmin != null -> respondRedirect(redirectToAdmin)
     }
 }
@@ -232,21 +228,3 @@ private fun FORM.organizationUnitSelect(organizationUnit: OrganizationUnit, chec
         hxGet("admin/aggregated/")
     }
 }
-
-
-/*
-* get {
-            val reports = reportRepository.getReports()
-            val groupedCriteria = reports.map { it.successCriteria }
-                .flatten()
-                .groupBy { it.number }
-                .map { it.value }
-
-            call.respondHtmlContent("Status for hele NAV") {
-                h1 { +"Status for hele NAV" }
-                groupedCriteria.forEach { criterionStatus(it) }
-            }
-        }
-*
-*
-* */
