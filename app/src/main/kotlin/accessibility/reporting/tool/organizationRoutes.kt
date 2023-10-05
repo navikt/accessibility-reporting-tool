@@ -6,6 +6,7 @@ import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -59,23 +60,46 @@ fun Route.organizationUnits(repository: ReportRepository) {
             }
         }
 
-        post("member") {
-            val formParameters = call.receiveParameters()
-            val orgUnit = repository
-                .getOrganizationUnit(
-                    formParameters["orgunit"] ?: throw IllegalArgumentException("organisasjonsenhet-id mangler")
-                )
-                ?.also { organizationUnit ->
-                    organizationUnit.members.add(formParameters["member"].toString())
-                    repository.upsertOrganizationUnit(organizationUnit)
-                }
-                ?: throw IllegalArgumentException("organisasjonsenhet finnes ikke")
+        route("member") {
+            post() {
+                val formParameters = call.receiveParameters()
+                val orgUnit = repository
+                    .getOrganizationUnit(
+                        formParameters["orgunit"] ?: throw IllegalArgumentException("organisasjonsenhet-id mangler")
+                    )
+                    ?.also { organizationUnit ->
+                        organizationUnit.members.add(formParameters["member"].toString())
+                        repository.upsertOrganizationUnit(organizationUnit)
+                    }
+                    ?: throw IllegalArgumentException("organisasjonsenhet finnes ikke")
 
-            call.respondText(
-                contentType = ContentType.Text.Html,
-                status = HttpStatusCode.OK
-            ) { createHTML().div { orgUnitMembersSection(orgUnit) } }
+                call.respondText(
+                    contentType = ContentType.Text.Html,
+                    status = HttpStatusCode.OK
+                ) { createHTML().div { orgUnitMembersSection(orgUnit) } }
+            }
+            delete {
+                val organizationUnit = repository.getOrganizationUnit(
+                    call.parameters["orgunit"] ?: throw IllegalArgumentException("Mangler organisasjonsenhet-id")
+                )
+                    ?.apply {
+                        members.remove(
+                            call.parameters["email"] ?: throw IllegalArgumentException("Mangler brukers email")
+                        )
+                    }
+                    ?.also {
+                        repository.upsertOrganizationUnit(it)
+                    }
+                    ?: throw IllegalArgumentException("Fant ikke organisasjon")
+
+                call.respondText(status = HttpStatusCode.OK, contentType = ContentType.Text.Html) {
+                    createHTML().div {
+                        orgUnitMembersSection(organizationUnit)
+                    }
+                }
+            }
         }
+
 
         route("new") {
             get {
@@ -131,11 +155,20 @@ fun Route.organizationUnits(repository: ReportRepository) {
 }
 
 private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
-    id = "member-list"
+    id = "member-list-container"
     if (orgUnit.members.isNotEmpty()) {
         ul {
+            id = "member-list"
             orgUnit.members.forEach {
-                li { +it }
+                li {
+                    +it
+                    button {
+                        hxTarget("#member-list-container")
+                        hxDelete("/orgunit/member?email=$it&orgunit=${orgUnit.id}")
+                        hxTrigger("click")
+                        +"Fjern fra organisasjon"
+                    }
+                }
             }
         }
     } else {
@@ -145,7 +178,7 @@ private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
     }
     form {
         hxPost("/orgunit/member")
-        hxTarget("#member-list")
+        hxTarget("#member-list-container")
         label {
             htmlFor = "new-member-input"
             +"Legg til medlem"
