@@ -2,6 +2,7 @@ package accessibility.reporting.tool.microfrontends
 
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.ReportContent
 import kotlinx.html.*
 
 fun BODY.reportContainer(
@@ -74,5 +75,27 @@ fun BODY.reportContainer(
             href = "#sc1.1.1"
             +"Til toppen"
         }
+    }
+}
+
+fun UL.reportListItem(
+    report: ReportContent,
+    allowDelete: Boolean = false,
+    rootPath: String = "/reports",
+    deletePath: String? = null
+) {
+    li {
+        a {
+            href = "$rootPath/${report.reportId}"
+            +(report.descriptiveName ?: report.url)
+        }
+        if (allowDelete)
+            button {
+                hxDelete("${deletePath ?: rootPath}/${report.reportId}")
+                hxSwapOuter()
+                hxConfirm("Er du sikker på at du vill slette denne erklæringen?")
+                hxTarget(".report-list")
+                +"Slett"
+            }
     }
 }

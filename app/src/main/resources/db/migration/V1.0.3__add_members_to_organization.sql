@@ -1,0 +1,1 @@
+ALTER table organization_unit ADD column member varchar

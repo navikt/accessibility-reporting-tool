@@ -4,13 +4,13 @@ import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.ReportContent
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
+import kotlinx.html.stream.createHTML
 
 
 fun Route.organizationUnits(repository: ReportRepository) {
@@ -42,6 +42,14 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         p {
                             +"epost: ${orgUnit.email}"
                         }
+
+                        h2 { +"Medlemmer" }
+                        div {
+                            orgUnitMembersSection(orgUnit)
+                        }
+
+
+
                         if (reports.isNotEmpty()) {
                             h2 { +"Tilgjengelighetserklæringer" }
                             ul { reports.forEach { report -> reportListItem(report) } }
@@ -49,6 +57,24 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     }
                 } ?: run { call.respond(HttpStatusCode.NotFound) }
             }
+        }
+
+        post("member") {
+            val formParameters = call.receiveParameters()
+            val orgUnit = repository
+                .getOrganizationUnit(
+                    formParameters["orgunit"] ?: throw IllegalArgumentException("organisasjonsenhet-id mangler")
+                )
+                ?.also { organizationUnit ->
+                    organizationUnit.members.add(formParameters["member"].toString())
+                    repository.upsertOrganizationUnit(organizationUnit)
+                }
+                ?: throw IllegalArgumentException("organisasjonsenhet finnes ikke")
+
+            call.respondText(
+                contentType = ContentType.Text.Html,
+                status = HttpStatusCode.OK
+            ) { createHTML().div { orgUnitMembersSection(orgUnit) } }
         }
 
         route("new") {
@@ -90,7 +116,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 val email = params["unit-email"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha en email")
                 val name = params["unit-name"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha ett navn")
 
-                repository.insertOrganizationUnit(
+                repository.upsertOrganizationUnit(
                     OrganizationUnit.createNew(
                         name = name,
                         email = email
@@ -104,46 +130,43 @@ fun Route.organizationUnits(repository: ReportRepository) {
     }
 }
 
-fun Route.userRoute(repository: ReportRepository) {
-    get("user") {
-
-        val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
-        call.respondHtmlContent(call.user.email, NavBarItem.BRUKER) {
-            h1 { +"Dine tilgjengelighetserklæringer" }
-            a(classes = "cta") {
-                href = "/reports/new"
-                +"Lag ny erklæring"
+private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
+    id = "member-list"
+    if (orgUnit.members.isNotEmpty()) {
+        ul {
+            orgUnit.members.forEach {
+                li { +it }
             }
-
-            if (reports.isNotEmpty())
-                ul(classes = "report-list") {
-                    reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
-                }
-            else p { +"Du har ingen tilgjengelighetserklæringer enda" }
-
+        }
+    } else {
+        p {
+            +"Denne enheten har ingen medlemmer"
+        }
+    }
+    form {
+        hxPost("/orgunit/member")
+        hxTarget("#member-list")
+        label {
+            htmlFor = "new-member-input"
+            +"Legg til medlem"
+        }
+        input {
+            id = "new-member-input"
+            name = "member"
+            type = InputType.email
+            placeholder = "xxxx@nav.no"
+            required = true
+        }
+        input {
+            type = InputType.hidden
+            name = "orgunit"
+            value = orgUnit.id
         }
 
+        button {
+            type = ButtonType.submit
+            +"Legg til medlem"
+        }
     }
 }
 
-fun UL.reportListItem(
-    report: ReportContent,
-    allowDelete: Boolean = false,
-    rootPath: String = "/reports",
-    deletePath: String? = null
-) {
-    li {
-        a {
-            href = "$rootPath/${report.reportId}"
-            +(report.descriptiveName ?: report.url)
-        }
-        if (allowDelete)
-            button {
-                hxDelete("${deletePath ?: rootPath}/${report.reportId}")
-                hxSwapOuter()
-                hxConfirm("Er du sikker på at du vill slette denne erklæringen?")
-                hxTarget(".report-list")
-                +"Slett"
-            }
-    }
-}

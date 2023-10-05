@@ -19,7 +19,12 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReportRepositoryTest {
 
-    private val testOrg = OrganizationUnit(id = UUID.randomUUID().toString(), name = "DummyOrg", email = "test@nav.no")
+    private val testOrg = OrganizationUnit(
+        id = UUID.randomUUID().toString(),
+        name = "DummyOrg",
+        email = "test@nav.no",
+        members = mutableSetOf()
+    )
     private val database = LocalPostgresDatabase.cleanDb()
     private val repository = ReportRepository(database)
     private val testUserEmail = "tadda@test.tadda"
@@ -94,13 +99,13 @@ class ReportRepositoryTest {
         val grandchildTestOrg =
             OrganizationUnit("some-id-thats-this", "Grandchild unit", "something@nav.no")
 
-        repository.insertOrganizationUnit(testOrg1)
-        repository.insertOrganizationUnit(testOrg1)
-        repository.insertOrganizationUnit(childTestOrg)
+        repository.upsertOrganizationUnit(testOrg1)
+        repository.upsertOrganizationUnit(testOrg1)
+        repository.upsertOrganizationUnit(childTestOrg)
         //Ønsket oppførsel om navn ikke er unikt, kaste expception?
 
-        repository.insertOrganizationUnit(testOrg2)
-        repository.insertOrganizationUnit(grandchildTestOrg)
+        repository.upsertOrganizationUnit(testOrg2)
+        repository.upsertOrganizationUnit(grandchildTestOrg)
 
         database.list {
             queryOf(
@@ -148,7 +153,6 @@ class ReportRepositoryTest {
         repository.getReports<Report>(ids = listOf(aggregatedTestReport.reportId, testReport.reportId)).size shouldBe 2
         repository.getReports<AggregatedReport>(ids = listOf(aggregatedTestReport.reportId)).size shouldBe 1
     }
-
 
 
     @Test

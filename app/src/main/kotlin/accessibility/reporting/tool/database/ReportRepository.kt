@@ -3,7 +3,6 @@ package accessibility.reporting.tool.database
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotliquery.Parameter
 import kotliquery.Row
 import kotliquery.queryOf
 import org.postgresql.util.PGobject
@@ -131,16 +130,18 @@ class ReportRepository(val database: Database) {
             )
         }
 
-    fun insertOrganizationUnit(organizationUnit: OrganizationUnit) {
+    fun upsertOrganizationUnit(organizationUnit: OrganizationUnit) {
+        //TODO returner oppdatert organisasjon
         database.update {
             queryOf(
                 """INSERT INTO organization_unit (organization_unit_id, name, email) 
-                    VALUES (:id,:name,:email) on conflict do nothing 
+                    VALUES (:id,:name,:email) on conflict (organization_unit_id) do update set member=:members
                 """.trimMargin(),
                 mapOf(
                     "id" to organizationUnit.id,
                     "name" to organizationUnit.name,
-                    "email" to organizationUnit.email
+                    "email" to organizationUnit.email,
+                    "members" to organizationUnit.members.joinToString(",")
                 )
             )
         }
@@ -175,7 +176,8 @@ class ReportRepository(val database: Database) {
     private fun organizationUnit(row: Row) = OrganizationUnit(
         id = row.string("organization_unit_id"),
         name = row.string("name"),
-        email = row.string("email")
+        email = row.string("email"),
+        members = row.stringOrNull("member")?.split(",")?.toMutableSet() ?: mutableSetOf()
     )
 
 }

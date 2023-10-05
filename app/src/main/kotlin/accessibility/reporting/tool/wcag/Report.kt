@@ -55,11 +55,7 @@ open class Report(
                         descriptiveName = jsonNode["descriptiveName"]?.takeIf { !it.isNull }?.asText(),
                         organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }
                             ?.let { organizationJson ->
-                                OrganizationUnit(
-                                    id = organizationJson["id"].asText(),
-                                    name = organizationJson["name"].asText(),
-                                    email = organizationJson["email"].asText()
-                                )
+                                OrganizationUnit.fromJson(organizationJson)
                             },
                         version = V1,
                         reportType = ReportType.valueFromJson(jsonNode),
@@ -174,7 +170,11 @@ private val Int.punkter: String
 
 class TestData(val ident: String, val url: String)
 class OrganizationUnit(
-    val id: String, val name: String, val email: String, val shortName: String? = null
+    val id: String,
+    val name: String,
+    val email: String,
+    val shortName: String? = null,
+    val members: MutableSet<String> = mutableSetOf()
 ) {
 
     companion object {
@@ -182,12 +182,21 @@ class OrganizationUnit(
             id = shortName?.toOrgUnitId() ?: name.toOrgUnitId(),
             name = name,
             email = email,
-            shortName = shortName
+            shortName = shortName,
+            members = mutableSetOf()
         )
 
         private fun String.toOrgUnitId() = trimMargin()
             .lowercase()
             .replace(" ", "-")
+
+        fun fromJson(organizationJson: JsonNode): OrganizationUnit = OrganizationUnit(
+            id = organizationJson["id"].asText(),
+            name = organizationJson["name"].asText(),
+            email = organizationJson["email"].asText(),
+            members = organizationJson["members"].takeIf { it!=null }?.toList()?.map { it.asText() }?.toMutableSet()
+                ?: mutableSetOf()
+        )
     }
 }
 
