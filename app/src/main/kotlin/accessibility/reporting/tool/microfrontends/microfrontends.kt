@@ -41,6 +41,7 @@ suspend fun ApplicationCall.respondHtmlContent(
         }
 
         body(classes) {
+            p { +"innlogget som ${user.email}" }
             navbar(navBarItem, user)
             contentbuilder()
         }

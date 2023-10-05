@@ -10,13 +10,16 @@ fun BODY.reportContainer(
     organizations: List<OrganizationUnit>,
     updateCriterionUrl: String,
     updateMetadataUrl: String,
-    metadaProducer: MutableList<StatementMetadata>.()->Unit={}
+    readOnly: Boolean,
+    metadataProducer: MutableList<StatementMetadata>.() -> Unit = {}
 ) {
     main(classes = "report-container") {
         header(classes = "report-header") {
             h1 { +report.h1() }
             div(classes = "statement-metadata") {
-                statementMetadataDl(report.reportId,
+                statementMetadataDl(
+                    readOnly = readOnly,
+                    reportId = report.reportId,
                     mutableListOf<StatementMetadata>().apply {
                         add(
                             StatementMetadata(
@@ -26,7 +29,14 @@ fun BODY.reportContainer(
                                 updatePath = updateMetadataUrl
                             )
                         )
-                        add(StatementMetadata("URL", report.url, hxUpdateName = "page-url", updatePath = updateMetadataUrl))
+                        add(
+                            StatementMetadata(
+                                "URL",
+                                report.url,
+                                hxUpdateName = "page-url",
+                                updatePath = updateMetadataUrl
+                            )
+                        )
                         add(StatementMetadata("Ansvarlig", report.user.email, null))
                         add(StatementMetadata("Status", report.statusString(), hxId = "metadata-status"))
                         add(
@@ -53,12 +63,9 @@ fun BODY.reportContainer(
                                 }
                             }
                         }))
-                        metadaProducer()
+                        metadataProducer()
                     }
-
                 )
-
-
             }
         }
 
@@ -68,7 +75,7 @@ fun BODY.reportContainer(
         }
 
         div(classes = "sc-list") {
-            report.successCriteria.map { a11yForm(it, report.reportId, updateCriterionUrl) }
+            report.successCriteria.map { a11yForm(it, report.reportId, updateCriterionUrl, readOnly) }
         }
 
         a(classes = "to-top") {

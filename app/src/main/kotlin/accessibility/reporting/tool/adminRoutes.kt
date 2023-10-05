@@ -67,7 +67,8 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     report = report,
                     organizations = organizations,
                     updateCriterionUrl = updateCriterionEndpoint,
-                    updateMetadataUrl = updateMetadataPath
+                    updateMetadataUrl = updateMetadataPath,
+                    readOnly = false
                 ) {
                     add(StatementMetadata(label = "Kilder", null, ddProducer = {
                         dd {

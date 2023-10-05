@@ -25,7 +25,7 @@ fun Route.userRoute(repository: ReportRepository) {
 
             if (reports.isNotEmpty())
                 ul(classes = "report-list") {
-                    reports.map { report -> reportListItem(report, report.userIsOwner(call.user)) }
+                    reports.map { report -> reportListItem(report, report.isOwner(call.user)) }
                 }
             else p { +"Du har ingen tilgjengelighetserklæringer enda" }
 

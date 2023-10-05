@@ -8,7 +8,13 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 
 fun FlowContent.disclosureArea(
-    sc: SuccessCriterion, reportId: String, text: String, summary: String, description: String, dataName: String
+    readOnly: Boolean,
+    sc: SuccessCriterion,
+    reportId: String,
+    text: String,
+    summary: String,
+    description: String,
+    dataName: String
 ) {
     details {
         open = text.isNotEmpty()
@@ -21,6 +27,7 @@ fun FlowContent.disclosureArea(
                 +description
             }
             textArea {
+                disabled = readOnly
                 id = "${sc.successCriterionNumber}-${dataName}"
                 hxTrigger("keyup changed delay:1500ms")
                 hxPost("/reports/submit/${reportId}")
@@ -34,9 +41,10 @@ fun FlowContent.disclosureArea(
     }
 }
 
-fun FIELDSET.statusRadio(sc: SuccessCriterion, value: String, status: Status, display: String) {
+fun FIELDSET.statusRadio(sc: SuccessCriterion, value: String, status: Status, display: String, readOnly: Boolean) {
     div(classes = "radio-with-label") {
         input {
+            disabled = readOnly
             id = "${sc.number}-${value}"
             type = InputType.radio
             if (sc.status == status) {
@@ -52,7 +60,7 @@ fun FIELDSET.statusRadio(sc: SuccessCriterion, value: String, status: Status, di
     }
 }
 
-fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String, updatePath: String) {
+fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String, updatePath: String, readOnly: Boolean = false) {
     if (!updatePath.startsWith("/")) throw IllegalArgumentException("updatePath for successcriterion må starte med '/'")
     successCriterionInformation(sc)
     form(classes = sc.cssClass()) {
@@ -67,15 +75,16 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String, updatePath: Str
                 attributes["name"] = "status"
 
                 legend { +"Oppfyller alt innhold på siden kravet?" }
-                statusRadio(sc, "compliant", Status.COMPLIANT, "Ja")
-                statusRadio(sc, "non-compliant", Status.NON_COMPLIANT, "Nei")
-                statusRadio(sc, "not-tested", Status.NOT_TESTED, "Ikke testet")
-                statusRadio(sc, "not-applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen innhold")
+                statusRadio(sc, "compliant", Status.COMPLIANT, "Ja", readOnly)
+                statusRadio(sc, "non-compliant", Status.NON_COMPLIANT, "Nei", readOnly)
+                statusRadio(sc, "not-tested", Status.NOT_TESTED, "Ikke testet", readOnly)
+                statusRadio(sc, "not-applicable", Status.NOT_APPLICABLE, "Vi har ikke denne typen innhold", readOnly)
             }
         }
         if (sc.status == Status.NON_COMPLIANT) {
             div {
                 disclosureArea(
+                    readOnly,
                     sc,
                     reportId,
                     sc.breakingTheLaw,
@@ -84,11 +93,17 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String, updatePath: Str
                     "breaking-the-law"
                 )
                 disclosureArea(
-                    sc, reportId, sc.lawDoesNotApply, "Det er innhold i på siden som ikke er underlagt kravet.",
+                    readOnly,
+                    sc,
+                    reportId,
+                    sc.lawDoesNotApply,
+                    "Det er innhold i på siden som ikke er underlagt kravet.",
 
-                    "Hvilket innhold er ikke underlagt kravet?", "law-does-not-apply"
+                    "Hvilket innhold er ikke underlagt kravet?",
+                    "law-does-not-apply"
                 )
                 disclosureArea(
+                    readOnly,
                     sc,
                     reportId,
                     sc.tooHardToComply,
@@ -97,46 +112,6 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String, updatePath: Str
                     "too-hard-to-comply"
                 )
             }
-        }
-    }
-}
-
-fun BODY.criterionStatus(successCriteria: List<SuccessCriterion>, detailedView: Boolean = true) {
-    val generalCriteriaContent = successCriteria.first()
-
-    div(classes = "criterion-status") {
-        h2 { +"${generalCriteriaContent.number}:${generalCriteriaContent.name} (${generalCriteriaContent.wcagLevel})" }
-        if (successCriteria.deviationCount() == 0) {
-            p { +"Ingen avvik registrert" }
-        } else {
-            p { +"${successCriteria.deviationCount()} avvik registrert" }
-            if (detailedView)
-                ul {
-                    successCriteria.filter { it.status == Status.NON_COMPLIANT && it.breakingTheLaw.isNotEmpty() }
-                        .map { it.breakingTheLaw }
-                        .let { criterionIssues("Det er innhold på siden som bryter kravet", it) }
-
-                    successCriteria.filter { it.status == Status.NON_COMPLIANT && it.lawDoesNotApply.isNotEmpty() }
-                        .map { it.lawDoesNotApply }
-                        .let { criterionIssues("Det er innhold i på siden som ikke er underlagt kravet", it) }
-
-
-                    successCriteria.filter { it.status == Status.NON_COMPLIANT && it.tooHardToComply.isNotEmpty() }
-                        .map { it.tooHardToComply }.let {
-                            criterionIssues(
-                                "Innholdet er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet.", it
-                            )
-                        }
-                }
-        }
-    }
-}
-
-fun UL.criterionIssues(heading: String, issueList: List<String>) {
-    if (issueList.isNotEmpty()) {
-        li { +heading }
-        ul {
-            issueList.forEach { li { +it } }
         }
     }
 }

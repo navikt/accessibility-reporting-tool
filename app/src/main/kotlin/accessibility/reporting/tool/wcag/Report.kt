@@ -120,7 +120,7 @@ open class Report(
         successCriteria = successCriteria.map { if (it.number == criterion.number) criterion else it },
         testData = testData,
         url = url,
-        user = if (userIsOwner(updateBy)) updateBy else user,
+        user = if (isOwner(updateBy)) updateBy else user,
         version = version,
         created = created,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
@@ -128,7 +128,7 @@ open class Report(
         descriptiveName = descriptiveName,
         reportType = reportType
     ).apply {
-        if (!userIsOwner(updateBy)) contributers.add(updateBy)
+        if (!isOwner(updateBy)) contributers.add(updateBy)
     }
 
     open fun withUpdatedMetadata(
@@ -151,9 +151,9 @@ open class Report(
             lastChanged = LocalDateTimeHelper.nowAtUtc(),
             lastUpdatedBy = updateBy,
             reportType = reportType
-        ).apply { if (!userIsOwner(updateBy)) contributers.add(updateBy) }
+        ).apply { if (!isOwner(updateBy)) contributers.add(updateBy) }
 
-    fun userIsOwner(callUser: User): Boolean =
+    fun isOwner(callUser: User): Boolean =
         user.oid == callUser.oid || user.email == callUser.oid//TODO: fjern sammenligning av oid på email
 
     fun h1() = when (reportType) {
@@ -176,6 +176,7 @@ class OrganizationUnit(
     val shortName: String? = null,
     val members: MutableSet<String> = mutableSetOf()
 ) {
+    fun isMember(user: User) = members.any { it == user.email }
 
     companion object {
         fun createNew(name: String, email: String, shortName: String? = null) = OrganizationUnit(
@@ -194,7 +195,7 @@ class OrganizationUnit(
             id = organizationJson["id"].asText(),
             name = organizationJson["name"].asText(),
             email = organizationJson["email"].asText(),
-            members = organizationJson["members"].takeIf { it!=null }?.toList()?.map { it.asText() }?.toMutableSet()
+            members = organizationJson["members"].takeIf { it != null }?.toList()?.map { it.asText() }?.toMutableSet()
                 ?: mutableSetOf()
         )
     }

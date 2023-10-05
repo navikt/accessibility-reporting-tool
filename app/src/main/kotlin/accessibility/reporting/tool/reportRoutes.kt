@@ -1,6 +1,7 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
@@ -25,15 +26,24 @@ fun Route.reports(repository: ReportRepository) {
             if (report.reportType == ReportType.AGGREGATED) {
                 call.unahtorizedIfNotAdmin("/reports/collection/$reportId")
             }
-
             val organizations = repository.getAllOrganizationUnits()
+            val readOnly: Boolean = when {
+                report.isOwner(call.user) -> false
+                Admins.isAdmin(call.user) -> false
+                report.organizationUnit != null -> {
+                    organizations.find { it.id == report.organizationUnit.id }
+                        ?.let { reportOrg -> reportOrg.members.none { it == call.user.email } }
+                }
+                else -> true
+            } ?: true
 
             call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
                 reportContainer(
                     report = report,
                     organizations = organizations,
                     updateCriterionUrl = updateCriterionPath,
-                    updateMetadataUrl = updateMetadataPath
+                    updateMetadataUrl = updateMetadataPath,
+                    readOnly = readOnly
                 )
             }
         }
@@ -132,7 +142,7 @@ fun Route.reports(repository: ReportRepository) {
         }
     }
 
-    updateCriterionRoute(updateCriterionPath,){ parameters->
+    updateCriterionRoute(updateCriterionPath) { parameters ->
         val oldReport = repository.getReport<Report>(call.id) ?: throw IllegalArgumentException()
         val criterion: SuccessCriterion = oldReport.updateCriterion(
             criterionNumber = parameters.criterionNumber,
@@ -143,6 +153,6 @@ fun Route.reports(repository: ReportRepository) {
         )
         repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
     }
-    updateMetdataRoute( repository = repository, routingPath = updateMetadataPath)
+    updateMetdataRoute(repository = repository, routingPath = updateMetadataPath)
 
 }

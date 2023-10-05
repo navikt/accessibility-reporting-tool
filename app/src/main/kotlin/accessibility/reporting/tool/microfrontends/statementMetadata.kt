@@ -35,14 +35,30 @@ class StatementMetadata(
 }
 
 
-fun DIV.statementMetadataDl(reportId: String, statuses: List<StatementMetadata>) {
+fun DIV.statementMetadataDl(readOnly: Boolean,reportId: String, metadata: List<StatementMetadata>) {
+    if (readOnly) readOnlyMetadata(metadata)
+    else
+        dl {
+            metadata.forEach { metadata ->
+                dt { +metadata.label }
+                metadata.definitionItem(this, reportId)
+            }
+        }
+}
+
+fun DIV.readOnlyMetadata(metadata: List<StatementMetadata>) {
     dl {
-        statuses.forEach { metadata ->
-            dt { +metadata.label }
-            metadata.definitionItem(this, reportId)
+        metadata.forEach { metadata ->
+            if (metadata.value != null) {
+                dt { +metadata.label }
+                dl { +metadata.value }
+            }
+
+
         }
     }
 }
+
 
 fun DL.definitionInput(text: String, hxUpdateName: String, reportId: String, hxId: String?, updatePath: String) {
     dd(classes = "editable-definition") {
