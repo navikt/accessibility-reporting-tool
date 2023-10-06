@@ -1,12 +1,10 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -49,8 +47,6 @@ fun Route.organizationUnits(repository: ReportRepository) {
                             orgUnitMembersSection(orgUnit)
                         }
 
-
-
                         if (reports.isNotEmpty()) {
                             h2 { +"Tilgjengelighetserklæringer" }
                             ul { reports.forEach { report -> reportListItem(report) } }
@@ -67,9 +63,9 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     .getOrganizationUnit(
                         formParameters["orgunit"] ?: throw IllegalArgumentException("organisasjonsenhet-id mangler")
                     )
-                    ?.also { organizationUnit ->
-                        organizationUnit.members.add(formParameters["member"].toString())
-                        repository.upsertOrganizationUnit(organizationUnit)
+                    ?.apply {
+                        addMember(formParameters["member"].toString())
+                        repository.upsertOrganizationUnit(this)
                     }
                     ?: throw IllegalArgumentException("organisasjonsenhet finnes ikke")
 
@@ -83,12 +79,10 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     call.parameters["orgunit"] ?: throw IllegalArgumentException("Mangler organisasjonsenhet-id")
                 )
                     ?.apply {
-                        members.remove(
+                        removeMember(
                             call.parameters["email"] ?: throw IllegalArgumentException("Mangler brukers email")
                         )
-                    }
-                    ?.also {
-                        repository.upsertOrganizationUnit(it)
+                        repository.upsertOrganizationUnit(this)
                     }
                     ?: throw IllegalArgumentException("Fant ikke organisasjon")
 

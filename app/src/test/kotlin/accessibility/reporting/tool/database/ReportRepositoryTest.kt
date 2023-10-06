@@ -87,20 +87,35 @@ class ReportRepositoryTest {
     }
 
     @Test
-    fun `insert org units`() {
+    fun `upsert org units`() {
         val testOrg1 = OrganizationUnit("some-id", "Some unit", "tadda@nav.no")
-        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no", "shorty")
+        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no" )
         val testOrg2 = OrganizationUnit(
             "some-other-two",
             "Child unit",
             "jaha@nav.no",
-            "shorty short"
         )
         val grandchildTestOrg =
             OrganizationUnit("some-id-thats-this", "Grandchild unit", "something@nav.no")
 
         repository.upsertOrganizationUnit(testOrg1)
+        repository.upsertReport(dummyReportV1(orgUnit = testOrg1))
+        testOrg1.addMember("testMember@test.ko")
         repository.upsertOrganizationUnit(testOrg1)
+
+        repository.getReportForOrganizationUnit(testOrg1.id).apply {
+            first.assert {
+                require(this!=null)
+                members.size shouldBe 1
+            }
+            second.size shouldBe 1
+            second.first().assert {
+                require(organizationUnit!=null)
+                organizationUnit!!.id shouldBe testOrg1.id
+                organizationUnit!!.members.size shouldBe 1
+            }
+        }
+
         repository.upsertOrganizationUnit(childTestOrg)
         //Ønsket oppførsel om navn ikke er unikt, kaste expception?
 
@@ -252,7 +267,7 @@ class ReportRepositoryTest {
             organizationUnit = orgUnit,
             reports = listOf(
                 dummyReportV1(),
-                dummyReportV1(orgUnit = OrganizationUnit("something", "something", "something", "something"))
+                dummyReportV1(orgUnit = OrganizationUnit("something", "something", "something"))
             )
         )
 

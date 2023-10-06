@@ -28,9 +28,9 @@ services:
                   "requestParam": "grant_type",
                   "claims": {
                     "aud": ["a11y"],
-                    "email" : "carl@good.morning",
-                    "name": "Carl Good Morning",
-                    "oid": "tadda-i-fixed-it"
+                    "email" : "Rannveig@good.Morning",
+                    "name": "Rannveig Good Morning",
+                    "oid": "tadda-rannveig-fixed-it"
                   }
                 }
               ]

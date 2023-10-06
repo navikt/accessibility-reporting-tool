@@ -1,5 +1,6 @@
 package accessibility.reporting.tool.microfrontends
 
+import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.ReportContent
@@ -10,9 +11,10 @@ fun BODY.reportContainer(
     organizations: List<OrganizationUnit>,
     updateCriterionUrl: String,
     updateMetadataUrl: String,
-    readOnly: Boolean,
+    user: User,
     metadataProducer: MutableList<StatementMetadata>.() -> Unit = {}
 ) {
+    val readOnly = !report.hasAccess(user)
     main(classes = "report-container") {
         header(classes = "report-header") {
             h1 { +report.h1() }

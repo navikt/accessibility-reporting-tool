@@ -1,6 +1,7 @@
 package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
 import accessibility.reporting.tool.wcag.Status.*
@@ -132,8 +133,8 @@ open class Report(
     }
 
     open fun withUpdatedMetadata(
-        title: String?,
-        pageUrl: String?,
+        title: String? = null,
+        pageUrl: String? = null,
         organizationUnit: OrganizationUnit?,
         updateBy: User
     ) =
@@ -161,6 +162,13 @@ open class Report(
         ReportType.SINGLE -> "Tilgjengelighetserklæring"
     }
 
+    fun hasAccess(user: User): Boolean = when {
+        Admins.isAdmin(user) -> true
+        isOwner(user) -> true
+        organizationUnit?.isMember(user) == true -> true
+        else -> false
+    }
+
 }
 
 private val Int.punkter: String
@@ -173,17 +181,17 @@ class OrganizationUnit(
     val id: String,
     val name: String,
     val email: String,
-    val shortName: String? = null,
     val members: MutableSet<String> = mutableSetOf()
 ) {
     fun isMember(user: User) = members.any { it == user.email }
+    fun addMember(userEmail: String) = members.add(userEmail.comparable())
+    fun removeMember(userEmail: String) = members.removeIf { userEmail.comparable() == it.comparable() }
 
     companion object {
         fun createNew(name: String, email: String, shortName: String? = null) = OrganizationUnit(
             id = shortName?.toOrgUnitId() ?: name.toOrgUnitId(),
             name = name,
             email = email,
-            shortName = shortName,
             members = mutableSetOf()
         )
 
@@ -199,6 +207,8 @@ class OrganizationUnit(
                 ?: mutableSetOf()
         )
     }
+
+    private fun String.comparable(): String = trimIndent().lowercase()
 }
 
 

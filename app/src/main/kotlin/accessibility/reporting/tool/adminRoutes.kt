@@ -67,7 +67,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     organizations = organizations,
                     updateCriterionUrl = updateCriterionEndpoint,
                     updateMetadataUrl = updateMetadataPath,
-                    readOnly = !Admins.isAdmin(call.user)
+                    user = call.user
                 ) {
                     add(StatementMetadata(label = "Kilder", null, ddProducer = {
                         dd {
@@ -218,7 +218,7 @@ suspend fun ApplicationCall.unahtorizedIfNotAdmin(redirectToAdmin: String? = nul
     }
 }
 
-private fun FORM.organizationUnitSelect(organizationUnit: OrganizationUnit, checked: Boolean) {
+private fun FORM.organizationUnitSelect(organizationUnit: OrganizationUnit) {
     input {
         type = InputType.checkBox
         value = organizationUnit.id

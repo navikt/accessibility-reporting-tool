@@ -27,23 +27,13 @@ fun Route.reports(repository: ReportRepository) {
                 call.respondRedirect("/reports/collection/$reportId")
             }
             val organizations = repository.getAllOrganizationUnits()
-            val readOnly: Boolean = when {
-                report.isOwner(call.user) -> false
-                Admins.isAdmin(call.user) -> false
-                report.organizationUnit != null -> {
-                    organizations.find { it.id == report.organizationUnit.id }
-                        ?.let { reportOrg -> reportOrg.members.none { it == call.user.email } }
-                }
-                else -> true
-            } ?: true
-
             call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
                 reportContainer(
                     report = report,
                     organizations = organizations,
                     updateCriterionUrl = updateCriterionPath,
                     updateMetadataUrl = updateMetadataPath,
-                    readOnly = readOnly
+                    user = call.user
                 )
             }
         }

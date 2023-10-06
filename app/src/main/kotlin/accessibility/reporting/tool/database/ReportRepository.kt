@@ -1,5 +1,6 @@
 package accessibility.reporting.tool.database
 
+import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -143,6 +144,21 @@ class ReportRepository(val database: Database) {
                     "members" to organizationUnit.members.joinToString(",")
                 )
             )
+        }
+
+        getReportForOrganizationUnit(organizationUnit.id).second.forEach { report ->
+            if (report.reportType == ReportType.SINGLE)
+                upsertReport(
+                    report.withUpdatedMetadata(
+                        organizationUnit = organizationUnit,
+                        updateBy = User(
+                            email = organizationUnit.email,
+                            name = organizationUnit.name,
+                            oid = "organizationUnit"
+                        )
+                    )
+                )
+
         }
     }
 
