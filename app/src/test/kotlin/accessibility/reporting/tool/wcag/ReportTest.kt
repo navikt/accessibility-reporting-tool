@@ -1,11 +1,13 @@
 package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.database.Admins
 import assert
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.date.shouldBeAfter
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.mockkStatic
 import org.junit.jupiter.api.Test
 
 import java.util.UUID
@@ -76,5 +78,34 @@ class ReportTest {
             user shouldBe testUser
             lastUpdatedBy shouldBe contributor
         }
+    }
+
+    @Test
+    fun tilgangsjekk() {
+        mockkStatic(Admins::class)
+
+        val memberUser = User(email = "member@member.test", name = "Member Membersen", oid = "member-oid")
+
+        val testReport = Version1.newReport(
+            organizationUnit = testOrg,
+            reportId = UUID.randomUUID().toString(),
+            url = "https://test.nav.no",
+            user = testUser,
+            descriptiveName = "Some name"
+        )
+        testReport.writeAccess(testUser) shouldBe true
+        testReport.writeAccess(memberUser) shouldBe false
+
+        testOrg.addMember(memberUser.email)
+        val updatedReport = testReport.withUpdatedMetadata(organizationUnit = testOrg, updateBy = memberUser)
+        updatedReport.writeAccess(memberUser) shouldBe true
+
+        updatedReport.writeAccess(
+            User(
+                email = "Member@Member.test",
+                name = "Member Membersen",
+                oid = "member-oid"
+            )
+        ) shouldBe true
     }
 }

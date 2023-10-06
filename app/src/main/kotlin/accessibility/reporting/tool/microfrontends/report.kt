@@ -14,7 +14,7 @@ fun BODY.reportContainer(
     user: User,
     metadataProducer: MutableList<StatementMetadata>.() -> Unit = {}
 ) {
-    val readOnly = !report.hasAccess(user)
+    val readOnly = !report.writeAccess(user)
     main(classes = "report-container") {
         header(classes = "report-header") {
             h1 { +report.h1() }
@@ -58,7 +58,7 @@ fun BODY.reportContainer(
                             if (it.isNotEmpty())
                                 StatementMetadata("Bidragsytere", it.joinToString { "," })
                         }
-                        add(StatementMetadata(label = "Organisasjonsenhet", value = null, ddProducer = {
+                        add(StatementMetadata(label = "Organisasjonsenhet", value = report.organizationUnit?.name, ddProducer = {
                             dd {
                                 select {
                                     orgSelector(organizations, report, updateMetadataUrl)

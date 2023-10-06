@@ -49,12 +49,8 @@ fun DIV.statementMetadataDl(readOnly: Boolean,reportId: String, metadata: List<S
 fun DIV.readOnlyMetadata(metadata: List<StatementMetadata>) {
     dl {
         metadata.forEach { metadata ->
-            if (metadata.value != null) {
                 dt { +metadata.label }
-                dl { +metadata.value }
-            }
-
-
+                dl { +(metadata.value?:"Ikke satt") }
         }
     }
 }

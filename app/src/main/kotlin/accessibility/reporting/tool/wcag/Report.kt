@@ -162,7 +162,7 @@ open class Report(
         ReportType.SINGLE -> "Tilgjengelighetserklæring"
     }
 
-    fun hasAccess(user: User): Boolean = when {
+    fun writeAccess(user: User): Boolean = when {
         Admins.isAdmin(user) -> true
         isOwner(user) -> true
         organizationUnit?.isMember(user) == true -> true
@@ -183,7 +183,7 @@ class OrganizationUnit(
     val email: String,
     val members: MutableSet<String> = mutableSetOf()
 ) {
-    fun isMember(user: User) = members.any { it == user.email }
+    fun isMember(user: User) = members.any { it == user.email.comparable() }
     fun addMember(userEmail: String) = members.add(userEmail.comparable())
     fun removeMember(userEmail: String) = members.removeIf { userEmail.comparable() == it.comparable() }
 
