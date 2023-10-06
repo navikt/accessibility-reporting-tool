@@ -2,9 +2,11 @@ package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
+import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
 import accessibility.reporting.tool.wcag.ReportType.AGGREGATED
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDateTime
 import java.util.UUID
 
 class AggregatedReport : Report {
@@ -34,7 +36,8 @@ class AggregatedReport : Report {
         lastUpdatedBy = null,
         reportType = AGGREGATED
     ) {
-        fromReports = reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url, it.reportType) }
+        fromReports =
+            reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url, it.reportType, it.lastChanged) }
         fromOrganizations = reports
             .mapNotNull { it.organizationUnit?.let { org -> OrganizationUnitShortSummary(org.id, org.name) } }
     }
@@ -78,6 +81,29 @@ class AggregatedReport : Report {
             fromOrganizations
         )
 
+    fun updateWithDataFromSource(srcReport: Report?): AggregatedReport {
+        if (srcReport == null) throw IllegalArgumentException("Kilderapport finnes ikke")
+        val updatedFromReports = fromReports
+            .filter { it.reportId != srcReport.reportId }
+            .toMutableList()
+            .apply {
+                add(
+                    ReportShortSummary(
+                        reportId = srcReport.reportId,
+                        descriptiveName = srcReport.descriptiveName,
+                        url = srcReport.url,
+                        reportType = srcReport.reportType,
+                        lastChanged = srcReport.lastChanged
+                    )
+                )
+            }
+        return AggregatedReport(
+            copy(successCriteria = (successCriteria + srcReport.successCriteria).aggregate()),
+            updatedFromReports,
+            fromOrganizations
+        )
+    }
+
 
     companion object {
         fun deserialize(version: Version, jsonData: JsonNode) =
@@ -97,16 +123,22 @@ class ReportShortSummary(
     override val reportId: String,
     override val descriptiveName: String?,
     override val url: String,
-    val reportType: ReportType
+    val reportType: ReportType,
+    val lastChanged: LocalDateTime
 ) : ReportContent {
+    fun hasUpdates(srcReports: List<ReportShortSummary>): Boolean =
+        srcReports.any { srcReport -> srcReport.reportId == this.reportId && srcReport.lastChanged.isAfter(this.lastChanged) }
+
     companion object {
         fun fromJson(jsonNode: JsonNode) = ReportShortSummary(
             jsonNode["reportId"].asText(),
             jsonNode["descriptiveName"].asText("Ikke tilgjengelig") ?: jsonNode["url"].asText(),
             jsonNode["url"].asText(),
-            ReportType.valueFromJson(jsonNode)
+            ReportType.valueFromJson(jsonNode),
+            jsonNode["lastChanged"].takeIf { it != null }?.toLocalDateTime() ?: LocalDateTimeHelper.nowAtUtc()
+                .minusDays(30),
 
-        )
+            )
     }
 }
 

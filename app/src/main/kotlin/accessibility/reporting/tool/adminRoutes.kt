@@ -58,10 +58,12 @@ fun Route.adminRoutes(repository: ReportRepository) {
 
         get("{id}") {
             val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
-            val report = repository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException()
+            val report =
+                repository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException("Ukjent rapport")
+            val srcReports = repository.getReports<ReportShortSummary>(null, report.fromReports.map { it.reportId })
             val organizations = repository.getAllOrganizationUnits()
 
-            call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
+            call.respondHtmlContent("Tilgjengelighetserklæring", NavBarItem.NONE) {
                 reportContainer(
                     report = report,
                     organizations = organizations,
@@ -73,7 +75,19 @@ fun Route.adminRoutes(repository: ReportRepository) {
                         dd {
                             ul {
                                 report.fromReports.map { from ->
-                                    reportListItem(from, false)
+                                    li {
+                                        a {
+                                            href = "/reports/${from.reportId}"
+                                            +(from.descriptiveName ?: from.url)
+                                        }
+
+                                        if (from.hasUpdates(srcReports))
+                                            button {
+                                                hxTrigger("click")
+                                                hxPost("${report.reportId}/update?srcReport=${from.reportId}")
+                                                +"Hent nytt innhold"
+                                            }
+                                    }
                                 }
                             }
                         }
@@ -91,6 +105,20 @@ fun Route.adminRoutes(repository: ReportRepository) {
                 reports.map { report -> reportListItem(report, true, "/reports/collection") }
             }
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
+        }
+
+        post("/{id}/update") {
+            call.unahtorizedIfNotAdmin()
+            val id = call.parameters["id"] ?: throw IllegalArgumentException("id for rapport mangler")
+            val srcReport = repository.getReport<Report>(call.parameters["srcReport"] ?: throw IllegalArgumentException("srcReportId må være satt"))
+            repository
+                .getReport<AggregatedReport>(id)
+                ?.updateWithDataFromSource(srcReport)
+                ?.also {
+                    repository.upsertReportReturning<AggregatedReport>(it)
+                }
+                ?: throw IllegalArgumentException("Ukjent samlerapport")
+            call.respond("OK")
         }
 
         route("new") {
@@ -214,6 +242,7 @@ suspend fun ApplicationCall.unahtorizedIfNotAdmin(redirectToAdmin: String? = nul
             HttpStatusCode.Unauthorized,
             "Du har ikke tilgang til denne siden"
         )
+
         redirectToAdmin != null -> respondRedirect(redirectToAdmin)
     }
 }

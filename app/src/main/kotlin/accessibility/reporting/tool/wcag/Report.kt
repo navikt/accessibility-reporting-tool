@@ -80,7 +80,36 @@ open class Report(
                     )
                 }
     }
-
+    fun copy(
+        reportId: String? = null,
+        url: String? = null,
+        descriptiveName: String? = null,
+        organizationUnit: OrganizationUnit? = null,
+        version: Version? = null,
+        user: User? = null,
+        successCriteria: List<SuccessCriterion>? = null,
+        filters: MutableList<String>? = null,
+        created: LocalDateTime? = null,
+        lastChanged: LocalDateTime? = null,
+        contributers: MutableList<User>? = null,
+        lastUpdatedBy: User? = null,
+        reportType: ReportType? = null,
+    ) = Report(
+        reportId = reportId ?: this.reportId,
+        url = url ?: this.url,
+        descriptiveName = descriptiveName ?: this.descriptiveName,
+        organizationUnit = organizationUnit ?: this.organizationUnit,
+        version = version ?: this.version,
+        testData = null,
+        user = user ?: this.user,
+        successCriteria = successCriteria ?: this.successCriteria,
+        filters = filters ?: this.filters,
+        created = created ?: this.created,
+        lastChanged = lastChanged ?: this.lastChanged,
+        contributers = contributers ?: this.contributers,
+        lastUpdatedBy = lastUpdatedBy ?: this.lastUpdatedBy,
+        reportType = reportType ?: this.reportType
+    )
 
     fun toJson(): String =
         objectMapper.writeValueAsString(this)
@@ -115,19 +144,10 @@ open class Report(
         successCriteria.find { it.number == criterionNumber }
             ?: throw IllegalArgumentException("Criteria with number $criterionNumber does not exists")
 
-    open fun withUpdatedCriterion(criterion: SuccessCriterion, updateBy: User): Report = Report(
-        organizationUnit = organizationUnit,
-        reportId = reportId,
+    open fun withUpdatedCriterion(criterion: SuccessCriterion, updateBy: User): Report = copy(
         successCriteria = successCriteria.map { if (it.number == criterion.number) criterion else it },
-        testData = testData,
-        url = url,
-        user = if (isOwner(updateBy)) updateBy else user,
-        version = version,
-        created = created,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
-        lastUpdatedBy = updateBy,
-        descriptiveName = descriptiveName,
-        reportType = reportType
+        lastUpdatedBy = updateBy
     ).apply {
         if (!isOwner(updateBy)) contributers.add(updateBy)
     }
@@ -137,22 +157,13 @@ open class Report(
         pageUrl: String? = null,
         organizationUnit: OrganizationUnit?,
         updateBy: User
-    ) =
-        Report(
-            reportId = reportId,
-            url = pageUrl ?: url,
-            descriptiveName = title ?: descriptiveName,
-            organizationUnit = organizationUnit ?: this.organizationUnit,
-            version = version,
-            testData = testData,
-            user = user,
-            successCriteria = successCriteria,
-            filters = filters,
-            created = created,
-            lastChanged = LocalDateTimeHelper.nowAtUtc(),
-            lastUpdatedBy = updateBy,
-            reportType = reportType
-        ).apply { if (!isOwner(updateBy)) contributers.add(updateBy) }
+    ) = copy(
+        url = pageUrl ?: url,
+        descriptiveName = title ?: descriptiveName,
+        organizationUnit = organizationUnit ?: this.organizationUnit,
+        lastChanged = LocalDateTimeHelper.nowAtUtc(),
+        lastUpdatedBy = updateBy,
+    ).apply { if (!isOwner(updateBy)) contributers.add(updateBy) }
 
     fun isOwner(callUser: User): Boolean =
         user.oid == callUser.oid || user.email == callUser.oid//TODO: fjern sammenligning av oid på email
