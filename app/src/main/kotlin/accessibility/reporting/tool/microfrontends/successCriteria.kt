@@ -3,7 +3,6 @@ package accessibility.reporting.tool.microfrontends
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.SuccessCriterion
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 
@@ -142,6 +141,7 @@ private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
 
 fun SuccessCriterion.cssClass() = "f" + this.successCriterionNumber.replace(".", "-")
 
+/*
 fun FlowContent.summaryLinks(report: Report) = ul(classes = "summary") {
     hxOOB("outerHTML:.summary")
     report.successCriteria.forEach {
@@ -153,17 +153,48 @@ fun FlowContent.summaryLinks(report: Report) = ul(classes = "summary") {
             }
         }
     }
+}*/
+
+fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
+    hxOOB("outerHTML:.summary")
+    val sortedCriteria = report.successCriteria.groupBy { it.status }
+
+    h3 { +"Ikke testet" }
+    sortedSummaryLinks(sortedCriteria[Status.NOT_TESTED])
+    h3 { +"Avvik" }
+    sortedSummaryLinks(sortedCriteria[Status.NON_COMPLIANT])
+    h3 { +"Ikke aktuelt" }
+    sortedSummaryLinks(sortedCriteria[Status.NOT_APPLICABLE])
+    h3 { +"OK" }
+    sortedSummaryLinks(sortedCriteria[Status.COMPLIANT])
 }
 
-fun summaryLinksString(report: Report) = createHTML().ul(classes = "summary") {
-    hxOOB("outerHTML:.summary")
-    report.successCriteria.forEach {
-        li {
-            a {
-                href = "#sc${it.number}"
-                unsafe { +toIcon(it) }
-                +"${it.number} ${it.name}"
+
+private fun DIV.sortedSummaryLinks(sortedCriteria: List<SuccessCriterion>?) {
+    sortedCriteria?.apply {
+        ul {
+            forEach {
+                li {
+                    a {
+                        href = "#sc${it.number}"
+                        unsafe { +toIcon(it) }
+                        +"${it.number} ${it.name}"
+                    }
+                }
             }
         }
     }
+}
+
+fun summaryLinksString(report: Report) = createHTML().div(classes = "summary") {
+    hxOOB("outerHTML:.summary")
+    val sortedCriteria = report.successCriteria.groupBy { it.status }
+    h3 { +"Ikke testet" }
+    sortedSummaryLinks(sortedCriteria[Status.NOT_TESTED])
+    h3 { +"Avvik" }
+    sortedSummaryLinks(sortedCriteria[Status.NON_COMPLIANT])
+    h3 { +"Ikke aktuelt" }
+    sortedSummaryLinks(sortedCriteria[Status.NOT_APPLICABLE])
+    h3 { +"OK" }
+    sortedSummaryLinks(sortedCriteria[Status.COMPLIANT])
 }
