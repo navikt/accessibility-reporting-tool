@@ -6,6 +6,9 @@ import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
 import accessibility.reporting.tool.wcag.ReportType.AGGREGATED
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -98,14 +101,24 @@ class AggregatedReport : Report {
                 )
             }
         return AggregatedReport(
-            copy(successCriteria = (successCriteria + srcReport.successCriteria).aggregate()),
+            this.copy(reportId = reportId, successCriteria = (successCriteria + srcReport.successCriteria).aggregate()),
             updatedFromReports,
             fromOrganizations
         )
     }
 
+    override fun toJson(): String =
+        objectMapper.writeValueAsString(this).also {
+            require(objectMapper.readTree(it)["fromReports"] != null)
+            require(objectMapper.readTree(it)["fromOrganizations"] != null)
+        }
 
     companion object {
+        private val objectMapper = jacksonObjectMapper().apply {
+            registerModule(JavaTimeModule())
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
+        }
+
         fun deserialize(version: Version, jsonData: JsonNode) =
             AggregatedReport(
                 report = version.deserialize(jsonData)
@@ -126,8 +139,11 @@ class ReportShortSummary(
     val reportType: ReportType,
     val lastChanged: LocalDateTime
 ) : ReportContent {
+    val title = descriptiveName?:url
     fun hasUpdates(srcReports: List<ReportShortSummary>): Boolean =
+        !wasDeleted(srcReports) &&
         srcReports.any { srcReport -> srcReport.reportId == this.reportId && srcReport.lastChanged.isAfter(this.lastChanged) }
+    fun wasDeleted(srcReports: List<ReportShortSummary>) = srcReports.none { it.reportId == this.reportId }
 
     companion object {
         fun fromJson(jsonNode: JsonNode) = ReportShortSummary(

@@ -111,7 +111,7 @@ open class Report(
         reportType = reportType ?: this.reportType
     )
 
-    fun toJson(): String =
+    open fun toJson(): String =
         objectMapper.writeValueAsString(this)
 
     fun statusString(): String = when {

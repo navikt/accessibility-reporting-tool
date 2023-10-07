@@ -76,17 +76,20 @@ fun Route.adminRoutes(repository: ReportRepository) {
                             ul {
                                 report.fromReports.map { from ->
                                     li {
-                                        a {
-                                            href = "/reports/${from.reportId}"
-                                            +(from.descriptiveName ?: from.url)
-                                        }
-
-                                        if (from.hasUpdates(srcReports))
-                                            button {
-                                                hxTrigger("click")
-                                                hxPost("${report.reportId}/update?srcReport=${from.reportId}")
-                                                +"Hent nytt innhold"
+                                        if (from.wasDeleted(srcReports))
+                                            +"${from.title} (slettet)"
+                                        else {
+                                            a {
+                                                href = "/reports/${from.reportId}"
+                                                +from.title
                                             }
+                                            if (from.hasUpdates(srcReports))
+                                                button {
+                                                    hxTrigger("click")
+                                                    hxPost("${report.reportId}/update?srcReport=${from.reportId}")
+                                                    +"Hent nytt innhold"
+                                                }
+                                        }
                                     }
                                 }
                             }
@@ -110,7 +113,9 @@ fun Route.adminRoutes(repository: ReportRepository) {
         post("/{id}/update") {
             call.unahtorizedIfNotAdmin()
             val id = call.parameters["id"] ?: throw IllegalArgumentException("id for rapport mangler")
-            val srcReport = repository.getReport<Report>(call.parameters["srcReport"] ?: throw IllegalArgumentException("srcReportId må være satt"))
+            val srcReport = repository.getReport<Report>(
+                call.parameters["srcReport"] ?: throw IllegalArgumentException("srcReportId må være satt")
+            )
             repository
                 .getReport<AggregatedReport>(id)
                 ?.updateWithDataFromSource(srcReport)
@@ -118,7 +123,8 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     repository.upsertReportReturning<AggregatedReport>(it)
                 }
                 ?: throw IllegalArgumentException("Ukjent samlerapport")
-            call.respond("OK")
+            call.response.header("HX-Refresh", "true")
+            call.respond(HttpStatusCode.OK)
         }
 
         route("new") {
@@ -214,8 +220,6 @@ fun Route.adminRoutes(repository: ReportRepository) {
             }
         }
     }
-
-
     updateCriterionRoute(updateCriterionEndpoint) { parameters ->
         val oldReport = repository.getReport<AggregatedReport>(call.id) ?: throw IllegalArgumentException()
         val criterion: SuccessCriterion = oldReport.updateCriterion(
