@@ -117,7 +117,7 @@ fun FlowContent.a11yForm(sc: SuccessCriterion, reportId: String, updatePath: Str
 
 private fun FlowContent.successCriterionInformation(sc: SuccessCriterion) {
     div(classes = "report-info") {
-        h2 {
+        h3 {
             id = "sc${sc.number}"
             +"${sc.number} ${sc.name}"
         }

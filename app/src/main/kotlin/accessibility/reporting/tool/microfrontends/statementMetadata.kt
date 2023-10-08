@@ -84,13 +84,12 @@ fun DL.definitionItem(text: String, hxId: String?) {
 
 fun updatedMetadataStatus(report: Report): String = """
     ${
-    createHTML().dd {
+    createHTML().span {
         id = "metadata-status"
         hxOOB("true")
         +report.statusString()
     }
-}    
-    
+}   
     ${
     createHTML().dd {
         id = "metadata-oppdatert"

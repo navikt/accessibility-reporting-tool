@@ -6,7 +6,6 @@ import accessibility.reporting.tool.wcag.SuccessCriterion
 
 fun compliant(title: String, id: String) = """<svg width="24" 
   role="img" 
-  aria-hidden="false"
   aria-labelledby="sc${id}" 
   focusable="false"
 class="compliant-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,7 +15,6 @@ fill="#ffffff"></path>
 
 fun nonCompliant(title: String, id: String) =  """<svg width="24" 
   role="img" 
-  aria-hidden="false"
   aria-labelledby="sc${id}" 
   focusable="false"
 class="non-compliant-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -27,7 +25,6 @@ fill="#ffffff"></path>
 
 fun notTested(title:String, id: String) ="""<svg width="24" 
   role="img" 
-  aria-hidden="false"
   aria-labelledby="sc${id}" 
   focusable="false"
   class="not-tested-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -37,10 +34,8 @@ fill="#ffffff"></path>
 </svg>"""
 
 fun notApplicable(title:String, id:String) = """<svg width="24" 
-   role="img" 
-  aria-hidden="false"
-  aria-labelledby="sc${id}" 
-  aria-labelledby="title-id" 
+  role="img" 
+  aria-labelledby="sc${id}"
   focusable="false"
   class="not-applicable-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <title id="sc${id}">${title}</title>

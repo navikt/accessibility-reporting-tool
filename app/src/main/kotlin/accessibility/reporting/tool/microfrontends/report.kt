@@ -40,7 +40,7 @@ fun BODY.reportContainer(
                             )
                         )
                         add(StatementMetadata("Ansvarlig", report.user.email, null))
-                        add(StatementMetadata("Status", report.statusString(), hxId = "metadata-status"))
+
                         add(
                             StatementMetadata(
                                 label = "Sist oppdatert",
@@ -73,10 +73,27 @@ fun BODY.reportContainer(
 
         nav(classes = "sc-toc") {
             attributes["aria-label"] = "Status"
+            h2 {
+                span {
+                    +"Status: "
+                }
+
+                span {
+                    id = "metadata-status"
+                    hxOOB("true")
+                    +report.statusString()
+                }
+
+
+            }
+
             summaryLinks(report)
         }
 
         div(classes = "sc-list") {
+            h2 {
+                +"Registrer funn"
+            }
             report.successCriteria.map { a11yForm(it, report.reportId, updateCriterionUrl, readOnly) }
         }
 
