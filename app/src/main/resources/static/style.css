@@ -83,14 +83,20 @@ a:hover, a:hover:after {
 /* Report registration page header */
 
 .report-header h1 span {
-    font-size: .5em;
     display: block;
 }
 
-.report-header h1 a {
-
+.report-header h1 span:first-child {
+    font-size: .5em;
 }
 
+.statement-metadata dt {
+    font-weight: bold;
+}
+
+.statement-metadata dd {
+    margin: 0 0 .75em 0;
+}
 
 
 
@@ -99,7 +105,7 @@ a:hover, a:hover:after {
 
 .sc-toc ul {
     list-style: none;
-    margin: 0;
+    margin: 0 0 1.5em;
     padding: 0 0 0 1.5em;
 }
 
@@ -151,7 +157,7 @@ a:hover, a:hover:after {
 }
 
 
-.sc-list h2 {
+.sc-list h3, .sc-toc h3 {
     margin: 0;
 }
 

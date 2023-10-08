@@ -16,58 +16,82 @@ fun BODY.reportContainer(
 ) {
     val readOnly = !report.writeAccess(user)
     main(classes = "report-container") {
+
         header(classes = "report-header") {
-            h1 { +report.h1() }
-            div(classes = "statement-metadata") {
-                statementMetadataDl(
-                    readOnly = readOnly,
-                    reportId = report.reportId,
-                    mutableListOf<StatementMetadata>().apply {
-                        add(
-                            StatementMetadata(
-                                "Tittel",
-                                report.descriptiveName ?: report.url,
-                                hxUpdateName = "report-title",
-                                updatePath = updateMetadataUrl
-                            )
-                        )
-                        add(
-                            StatementMetadata(
-                                "URL",
-                                report.url,
-                                hxUpdateName = "page-url",
-                                updatePath = updateMetadataUrl
-                            )
-                        )
-                        add(StatementMetadata("Ansvarlig", report.user.email, null))
+            h1 {
 
-                        add(
-                            StatementMetadata(
-                                label = "Sist oppdatert",
-                                value = report.lastChanged.displayFormat(),
-                                hxId = "metadata-oppdatert"
-                            )
-                        )
-                        StatementMetadata(
-                            label = "Sist oppdatert av",
-                            value = (report.lastUpdatedBy ?: report.user).email,
-                            hxId = "metadata-oppdatert-av"
-                        )
+                span {
+                    +report.h1()
+                    +" for "
+                }
 
-                        report.contributers.let {
-                            if (it.isNotEmpty())
-                                StatementMetadata("Bidragsytere", it.joinToString { "," })
-                        }
-                        add(StatementMetadata(label = "Organisasjonsenhet", value = report.organizationUnit?.name, ddProducer = {
-                            dd {
-                                select {
-                                    orgSelector(organizations, report, updateMetadataUrl)
-                                }
+                span {
+                    id = "report-titles"
+                    hxOOB("true")
+                    +(report.descriptiveName ?: report.url)
+                }
+            }
+
+            details {
+                summary {
+                    +"Vis/rediger metadata"
+                }
+                div(classes = "statement-metadata") {
+                    statementMetadataDl(
+                        readOnly = readOnly,
+                        reportId = report.reportId,
+                        mutableListOf<StatementMetadata>().apply {
+                            add(
+                                StatementMetadata(
+                                    "Tittel",
+                                    report.descriptiveName ?: report.url,
+                                    hxUpdateName = "report-title",
+                                    updatePath = updateMetadataUrl
+                                )
+                            )
+                            add(
+                                StatementMetadata(
+                                    "URL",
+                                    report.url,
+                                    hxUpdateName = "page-url",
+                                    updatePath = updateMetadataUrl
+                                )
+                            )
+                            add(StatementMetadata("Ansvarlig", report.user.email, null))
+
+                            add(
+                                StatementMetadata(
+                                    label = "Sist oppdatert",
+                                    value = report.lastChanged.displayFormat(),
+                                    hxId = "metadata-oppdatert"
+                                )
+                            )
+                            StatementMetadata(
+                                label = "Sist oppdatert av",
+                                value = (report.lastUpdatedBy ?: report.user).email,
+                                hxId = "metadata-oppdatert-av"
+                            )
+
+                            report.contributers.let {
+                                if (it.isNotEmpty())
+                                    StatementMetadata("Bidragsytere", it.joinToString { "," })
                             }
-                        }))
-                        metadataProducer()
-                    }
-                )
+                            add(
+                                StatementMetadata(
+                                    label = "Organisasjonsenhet",
+                                    value = report.organizationUnit?.name,
+                                    ddProducer = {
+                                        dd {
+                                            select {
+                                                orgSelector(organizations, report, updateMetadataUrl)
+                                            }
+                                        }
+                                    })
+                            )
+                            metadataProducer()
+                        }
+                    )
+                }
             }
         }
 
