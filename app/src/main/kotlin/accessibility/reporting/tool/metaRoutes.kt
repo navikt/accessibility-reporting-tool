@@ -43,6 +43,9 @@ fun Route.landingPage(repository: ReportRepository) {
                 }
             }
             h2 { +"Rapporter for enkeltsider" }
+            if (reports.filter { it.reportType == ReportType.SINGLE }.isNullOrEmpty()) {
+                p {+"Ingen rapporter"}
+            } else
             ul("report-list") {
                 reports.filter { it.reportType == ReportType.SINGLE }
                     .forEach { report -> reportListItem(report) }
@@ -50,6 +53,9 @@ fun Route.landingPage(repository: ReportRepository) {
 
             h2 { +"Samlerapporter" }
             //TODO: readonly versjon
+            if (    reports.filter { it.reportType == ReportType.AGGREGATED }.isNullOrEmpty()) {
+                p {+"Ingen samlerapporter"}
+            } else
             ul {
                 reports.filter { it.reportType == ReportType.AGGREGATED }.forEach { report -> reportListItem(report) }
             }

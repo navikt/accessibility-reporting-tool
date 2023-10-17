@@ -28,7 +28,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     if (reports.isNotEmpty()) {
                         ul { reports.map { reportListItem(it, true, "/reports/collection") } }
                     } else {
-                        p { +"Fant ingen aggregrete rapport" }
+                        p { +"Fant ingen samlerapporter" }
                     }
                 }
 

@@ -158,7 +158,6 @@ fun FlowContent.summaryLinks(report: Report) = div(classes = "summary") {
     sortedSummaryLinks(sortedCriteria[Status.COMPLIANT])
 }
 
-
 private fun DIV.sortedSummaryLinks(sortedCriteria: List<SuccessCriterion>?) {
     if (sortedCriteria.isNullOrEmpty()) {
         p { +"Ingen kriterier" }
