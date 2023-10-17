@@ -32,7 +32,7 @@ fun FlowContent.disclosureArea(
                 hxPost("/reports/submit/${reportId}")
                 hxVals("""{"index": "${sc.successCriterionNumber}"}""")
                 name = dataName
-                cols = "80"
+                cols = "60"
                 rows = "10"
                 +text
             }
