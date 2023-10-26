@@ -1,10 +1,13 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -23,8 +26,21 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     +"Legg til organisajonsenhet"
                 }
                 ul {
+                    id="orgunit-list"
                     repository.getAllOrganizationUnits().forEach { orgUnit ->
-                        hrefListItem("orgunit/${orgUnit.id}", orgUnit.name)
+                        li {
+                            a {
+                                href = "orgunit/${orgUnit.id}"
+                                +orgUnit.name
+                            }
+                            if(Admins.isAdmin(call.user))
+                            button {
+                                hxDelete("orgunit/${orgUnit.id}")
+                                hxTarget("#orgunit-list")
+                                hxSwapOuter()
+                                +"Slett organisasjonsenhet"
+                            }
+                        }
                     }
                 }
             }
@@ -54,6 +70,30 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     }
                 } ?: run { call.respond(HttpStatusCode.NotFound) }
             }
+        }
+
+        delete("{id}") {
+            val newOrgList = repository.deleteOrgUnit(call.parameters["id"]?:throw IllegalArgumentException("orgid mangler"))
+
+            fun response() = createHTML().ul {
+                id="orgunit-list"
+                newOrgList.forEach { orgUnit ->
+                    li {
+                        a {
+                            href = "orgunit/${orgUnit.id}"
+                            +orgUnit.name
+                        }
+                        if(Admins.isAdmin(call.user))
+                        button {
+                            hxDelete("orgunit/${orgUnit.id}")
+                            hxTarget("#orgunit-list")
+                            hxSwapOuter()
+                            +"Slett organisasjonsenhet"
+                        }
+                    }
+                }
+            }
+            call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 
         route("member") {

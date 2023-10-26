@@ -10,9 +10,18 @@ class SuccessCriterionTest {
 
     @Test
     fun `aggregerer sukkesskriterer basert på nummer`() {
-        (testCriterion(number = "1.1.1", status = Status.COMPLIANT, breakingTheLaw = "nei", lawDoesNotApply = "law", tooHardToComply = "too hard") * 5)
+
+        val testcriteria = (testCriterion(
+            number = "1.1.1",
+            status = Status.NON_COMPLIANT,
+            breakingTheLaw = "nei",
+            lawDoesNotApply = "law",
+            tooHardToComply = "too hard"
+        ) * 5)
             .plus(testCriterion("1.2.3", status = Status.NOT_TESTED))
-            .aggregate()
+
+        testcriteria.
+            aggregate()
             .assert {
                 size shouldBe 2
                 first().assert {
@@ -27,7 +36,7 @@ class SuccessCriterionTest {
                     lawDoesNotApply shouldBe "law\nlaw\nlaw\nlaw\nlaw"
                     tooHardToComply shouldBe "too hard\ntoo hard\ntoo hard\ntoo hard\ntoo hard"
                     contentGroup shouldBe "contentgroup 1.1.1"
-                    status shouldBe Status.COMPLIANT
+                    status shouldBe Status.NON_COMPLIANT
                     wcagUrl shouldBe "wcagUrl 1.1.1"
                     helpUrl shouldBe "helpurl 1.1.1"
                     wcagVersion shouldBe "wcagversion 1.1.1"

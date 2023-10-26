@@ -87,7 +87,7 @@ class ReportRepositoryTest {
     }
 
     @Test
-    fun `upsert org units`() {
+    fun `alter org units`() {
         val testOrg1 = OrganizationUnit("some-id", "Some unit", "tadda@nav.no")
         val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no" )
         val testOrg2 = OrganizationUnit(
@@ -141,6 +141,7 @@ class ReportRepositoryTest {
                 testOrg.name
             )
         }
+        repository.deleteOrgUnit(orgUnitId=testOrg1.id).size shouldBe 4
     }
 
     @Test

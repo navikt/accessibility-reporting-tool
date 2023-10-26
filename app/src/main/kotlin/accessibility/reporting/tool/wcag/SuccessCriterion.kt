@@ -1,6 +1,17 @@
 package accessibility.reporting.tool.wcag
 
+import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
 import com.fasterxml.jackson.databind.JsonNode
+
+fun List<SuccessCriterion>.aggregateBreakingTheLaw(): String =
+    filter { it.status == Status.NON_COMPLIANT && it.breakingTheLaw.isNotBlank() }.joinToString("\n") { it.breakingTheLaw }
+
+private fun List<SuccessCriterion>.aggregateLawDoesNotApply(): String =
+    filter { it.status == Status.NON_COMPLIANT && it.lawDoesNotApply.isNotBlank() }.joinToString("\n"){ it.lawDoesNotApply }
+
+private fun List<SuccessCriterion>.aggregateTooHardToComply(): String =
+    filter { it.status == Status.NON_COMPLIANT && it.tooHardToComply.isNotBlank() }.joinToString("\n"){ it.tooHardToComply }
+
 
 data class SuccessCriterion(
     val name: String,
@@ -43,11 +54,9 @@ data class SuccessCriterion(
                             guideline = template.guideline,
                             tools = template.tools,
                             number = template.number,
-                            breakingTheLaw = list.mapNotNull { it.breakingTheLaw.ifBlank { null } }.joinToString("\n"),
-                            lawDoesNotApply = list.mapNotNull { it.lawDoesNotApply.ifBlank { null } }
-                                .joinToString("\n"),
-                            tooHardToComply = list.mapNotNull { it.tooHardToComply.ifBlank { null } }
-                                .joinToString("\n"),
+                            breakingTheLaw = list.aggregateBreakingTheLaw(),
+                            lawDoesNotApply = list.aggregateLawDoesNotApply(),
+                            tooHardToComply = list.aggregateTooHardToComply(),
                             contentGroup = template.contentGroup,
                             status = list.resolveStatus(),
                             wcagUrl = template.wcagUrl,

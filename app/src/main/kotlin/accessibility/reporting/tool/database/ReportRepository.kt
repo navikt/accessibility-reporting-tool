@@ -195,6 +195,15 @@ class ReportRepository(val database: Database) {
         members = row.stringOrNull("member")?.split(",")?.toMutableSet() ?: mutableSetOf()
     )
 
+    fun deleteOrgUnit(orgUnitId: String): List<OrganizationUnit> {
+        database.update {
+            queryOf(
+                "delete from organization_unit where organization_unit_id=:id",
+                mapOf("id" to orgUnitId)
+            )
+        }
+        return getAllOrganizationUnits()
+    }
 }
 
 fun List<String>.sqlList(): String = joinToString(",", "(", ")") { "'$it'" }
