@@ -38,6 +38,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                                 hxDelete("orgunit/${orgUnit.id}")
                                 hxTarget("#orgunit-list")
                                 hxSwapOuter()
+                                hxConfirm("Vil du slette ${orgUnit.name}?")
                                 +"Slett organisasjonsenhet"
                             }
                         }
@@ -88,6 +89,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                             hxDelete("orgunit/${orgUnit.id}")
                             hxTarget("#orgunit-list")
                             hxSwapOuter()
+                            hxConfirm("Vil du slette ${orgUnit.name}?")
                             +"Slett organisasjonsenhet"
                         }
                     }
