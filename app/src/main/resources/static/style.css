@@ -1,6 +1,4 @@
 /* Theme */
-
-
 body {
     font-family: "Source Sans Pro", Arial, sans-serif;
     line-height: 1.333;
@@ -16,7 +14,6 @@ a {
     color: #244F91;
 }
 
-
 .cta {
     position: relative;
 }
@@ -29,26 +26,18 @@ a {
     text-align: right;
 }
 
-
-
 a:hover, a:hover:after {
     background-color: #e7f4fb;
 }
 
-
-
 /* Front page stuff */
-
 #uu-katt {
     width:400px;
     margin-top: 45px;
     float: right;
 }
 
-
-
 /* Main layout for report registration page */
-
 .report-header {
     grid-area: report-header;
 }
@@ -79,9 +68,7 @@ a:hover, a:hover:after {
     }
 }
 
-
 /* Report registration page header */
-
 .report-header h1 span {
     display: block;
 }
@@ -98,17 +85,12 @@ a:hover, a:hover:after {
     margin: 0 0 .75em 0;
 }
 
-
-
-
 /* Report registration page Table of Contents */
-
 .sc-toc ul {
     list-style: none;
     margin: 0 0 1.5em;
     padding: 0 0 0 1.5em;
 }
-
 
 .sc-toc li {
     margin-bottom: .25em;
@@ -119,7 +101,6 @@ a:hover, a:hover:after {
     position: relative;
 }
 
-
 .sc-toc li:hover {
     background-color: #e7f4fb;
 }
@@ -127,7 +108,6 @@ a:hover, a:hover:after {
 .sc-toc a:hover {
     text-decoration: underline;
 }
-
 
 .icon {
     border-radius: 50%;
@@ -189,7 +169,6 @@ a:hover, a:hover:after {
     padding: .25em;
 }
 
-
 label {
     display: block;
 }
@@ -198,7 +177,6 @@ label {
 .radio-with-label label {
     display: inline;
 }
-
 
 #hovedmeny {
     border-bottom: #244F91 solid 4px;
@@ -233,11 +211,6 @@ label {
     text-decoration: underline;
 }
 
-
-
-
-
-
 button {
     margin-left: 1.5em;
 }
@@ -260,4 +233,3 @@ button {
 .criterion-status ul {
     margin: 0;
 }
-
