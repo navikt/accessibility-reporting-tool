@@ -6,6 +6,7 @@ import accessibility.reporting.tool.wcag.SuccessCriterion
 
 fun compliant(id: String) = """<svg width="24" 
   role="img" 
+  aria-hidden="true"
   aria-labelledby="svg-sc${id}" 
   focusable="false"
 class="compliant-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,6 +17,7 @@ fill="#ffffff"></path>
 
 fun nonCompliant(id: String) =  """<svg width="24" 
   role="img" 
+  aria-hidden="true"
   aria-labelledby="svg-sc${id}" 
   focusable="false"
 class="non-compliant-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -26,6 +28,7 @@ fill="#ffffff"></path>
 
 fun notTested(id: String) ="""<svg width="24" 
   role="img" 
+  aria-hidden="true"
   aria-labelledby="svg-sc${id}" 
   focusable="false"
   class="not-tested-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -36,6 +39,7 @@ fill="#ffffff"></path>
 
 fun notApplicable(id: String) = """<svg width="24" 
   role="img" 
+  aria-hidden="true"
   aria-labelledby="svg-sc${id}"
   focusable="false"
   class="not-applicable-icon icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
