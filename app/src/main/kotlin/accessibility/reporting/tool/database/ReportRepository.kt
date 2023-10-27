@@ -235,8 +235,6 @@ object LocalDateTimeHelper {
         get() = (if (this.size < 5) "" else this[4]).padWithZero(2)
     private val List<String>.seconds: String
         get() = (if (this.size < 6) "" else this[5]).padWithZero()
-
-
 }
 
 fun String.jsonB() = PGobject().apply {
