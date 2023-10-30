@@ -25,7 +25,8 @@ class StatementMetadata(
                 hxUpdateName = hxUpdateName,
                 reportId = reportId,
                 hxId = hxId,
-                updatePath = updatePath
+                updatePath = updatePath,
+                label = label
             )
 
         }
@@ -56,13 +57,14 @@ fun DIV.readOnlyMetadata(metadata: List<StatementMetadata>) {
 }
 
 
-fun DL.definitionInput(text: String, hxUpdateName: String, reportId: String, hxId: String?, updatePath: String) {
+fun DL.definitionInput(text: String, hxUpdateName: String, reportId: String, hxId: String?, updatePath: String, label: String) {
     dd(classes = "editable-definition") {
         hxId?.let { hxId ->
             id = hxId
             hxOOB("true")
         }
         input {
+            attributes["aria-label"] = label
             hxTrigger("change")
             hxPost("$updatePath/${reportId}")
             type = InputType.text
