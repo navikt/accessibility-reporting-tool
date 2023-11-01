@@ -54,4 +54,4 @@ spec:
     - name: PORT
       value: "8080"
     - name: ADMINS
-      value: "Rannveig.Alette.Skjerve@nav.no,Morten.Tollefsen@nav.no,Kari.Anne.Reitan.Andersen@nav.no,Carl.Hedgren@nav.no,Eilif.Johansen@nav.no"
+      value: "Rannveig.Alette.Skjerve@nav.no,Kari.Anne.Reitan.Andersen@nav.no,Carl.Hedgren@nav.no,Eilif.Johansen@nav.no"
