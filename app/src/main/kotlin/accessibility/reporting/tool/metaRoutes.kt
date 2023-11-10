@@ -1,7 +1,5 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.user
-import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.microfrontends.NavBarItem.FORSIDE
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.reportListItem

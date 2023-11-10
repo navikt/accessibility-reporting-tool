@@ -6,6 +6,7 @@ import accessibility.reporting.tool.database.Environment
 import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.microfrontends.faqRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -58,6 +59,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             reports(repository)
             landingPage(repository)
             adminRoutes(repository)
+            faqRoute()
         }
         meta()
         staticResources("/static", "static") {
@@ -69,7 +71,6 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
         .filter { it.selector is HttpMethodRouteSelector }
   .forEach {println("route: $it") }
 }
-
 
 
 fun allRoutes(root: Route): List<Route> {

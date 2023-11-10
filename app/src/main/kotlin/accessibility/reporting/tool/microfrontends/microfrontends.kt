@@ -6,6 +6,7 @@ import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.microfrontends.NavBarItem.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
+import io.ktor.server.routing.*
 import kotlinx.html.*
 import java.time.LocalDateTime
 
@@ -34,9 +35,9 @@ suspend fun ApplicationCall.respondHtmlContent(
 
             }
             link {
-                rel="icon"
-                type="image/x-icon"
-                href="/static/a11y-cat-round.png"
+                rel = "icon"
+                type = "image/x-icon"
+                href = "/static/a11y-cat-round.png"
             }
         }
 
@@ -60,6 +61,7 @@ fun BODY.navbar(currentItem: NavBarItem, user: User? = null) {
             BRUKER.li(currentItem, this)
             if (user != null && Admins.isAdmin(user))
                 ADMIN.li(currentItem, this)
+            FAQ.li(currentItem, this)
             LOGG_UT.li(currentItem, this)
         }
     }
@@ -71,6 +73,7 @@ enum class NavBarItem(val itemHref: String, val itemText: String) {
     BRUKER("/user", "Dine erklæringer"),
     LOGG_UT("/oauth2/logout", "Logg ut"),
     ADMIN("/admin", "Admin"),
+    FAQ("/faq", "FAQ"),
     NONE("", "");
 
     fun li(navBarItem: NavBarItem, ul: UL) =
@@ -90,3 +93,42 @@ fun UL.hrefListItem(listHref: String, text: String) {
 }
 
 fun LocalDateTime.displayFormat(): String = "$dayOfMonth.$monthValue.$year"
+
+fun Route.faqRoute() {
+    get("faq") {
+        call.respondHtmlContent("FAQ", FAQ) {
+            h1 { +"FAQ" }
+            h2 { +"Hva er en organisasjonsenhet?" }
+            p {
+                +"""En organisasjonsenhet er teamet ditt eller evt annen del av organisasjonen du tilhører om du 
+                |ikke er en del av ett team."""
+
+            }
+            p {
+                +""" +Det er ingen predefinerte organisasjonsenheter, så det må teamet/enheten lage selv.
+                "|Den som oppretter enheten kan legge inn sin egen e-mail og vil da få mulighet til å legge til andre. 
+                |Alle som tilhører en organisasjonsenhet kan redigere rapporter som tilhører enheten.""".trimMargin()
+            }
+            h2 { +"Kan man lagre rapporten og komme tilbake seinere?" }
+            p {
+                +"Ja. Rapporten lagres automatisk og det er ikke noe problem å begynne på en rapport og fortsette på den senere."
+                +"Du kan også fortsette å redigere på rapporten selv om den er ferdigutfylt, f.eks hvis du har rettet opp en feil"
+            }
+            h2 { +"Kan flere jobbe på samme rapport?" }
+            p { +"Ja, alle som er medlemmer av en organisasjonsenhet kan redigere rapporter som tilhører enheten." }
+            p { +"Samtidighet er ikke på plass enda, så det vil si at det er viktig at den kun utfylles på 1 skjerm av gangen, hvis ikke risikerer en at ting bli overskrevet." }
+            h2 { +"Må jeg sende rapporten noe sted?" }
+            p { +"Nei! UU-teamet samler inn rapporten direkte, så det er ikke nødvendig å gjøre noe mer enn å fylle ut." }
+            h2 { +"Hvor skal jeg si om jeg har oppdaget ett problem?" }
+            p {
+                +"Legg inn et issue i "
+                a {
+                    href = "https://github.com/navikt/accessibility-reporting-tool/issues"
+                    +"github-repoet"
+                }
+            }
+            h2 { +"Andre spørsmål" }
+            p { +"Om du har andre spørsmål kan du stille de i nav-uu kanalen på slack" }
+        }
+    }
+}
