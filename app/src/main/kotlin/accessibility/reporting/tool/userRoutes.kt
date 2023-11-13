@@ -16,7 +16,7 @@ fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
         val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
-        call.respondHtmlContent(call.user.email, NavBarItem.BRUKER) {
+        call.respondHtmlContent("Rapporter for: " + call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
             a(classes = "cta") {
                 href = "/reports/new"
