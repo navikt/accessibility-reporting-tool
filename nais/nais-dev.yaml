@@ -1,0 +1,57 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: a11y-statement
+  namespace: a11y-statement
+  labels:
+    team: a11y-statement
+spec:
+  image: "{{ image }}"
+  port: 8080
+  liveness:
+    path: /isalive
+    initialDelay: 30
+  readiness:
+    path: /isready
+    initialDelay: 5
+  replicas:
+    min: 1
+    max: 2
+    cpuThresholdPercentage: 100
+  ingresses:
+    - "https://a11y-statement.intern.dev.nav.no"
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+    sidecar:
+      enabled: true
+      autoLogin: true
+  gcp:
+    sqlInstances:
+      - name: a11y-statement
+        type: POSTGRES_15
+        tier: db-custom-1-4096
+        diskType: SSD
+        diskSize: 10
+        diskAutoresize: true
+        autoBackupHour: 3
+        databases:
+          - name: a11y-statement
+            envVarPrefix: DB
+        maintenance:
+          day: 1
+          hour: 4
+        cascadingDelete: false
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1024Mi
+    requests:
+      cpu: "50m"
+      memory: 256Mi
+  env:
+    - name: PORT
+      value: "8080"
+    - name: ADMINS
+      value: "Rannveig.Alette.Skjerve@nav.no,Kari.Anne.Reitan.Andersen@nav.no,Carl.Hedgren@nav.no,Eilif.Johansen@nav.no,Morten.Tollefsen@nav.no"
