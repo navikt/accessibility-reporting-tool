@@ -100,13 +100,13 @@ fun Route.faqRoute() {
             h1 { +"FAQ" }
             h2 { +"Hva er en organisasjonsenhet?" }
             p {
-                +"""En organisasjonsenhet er teamet ditt eller evt annen del av organisasjonen du tilhører om du 
+                +"""En organisasjonsenhet er teamet ditt eller evt annen del av organisasjonen du tilhører om du
                 |ikke er en del av ett team."""
 
             }
             p {
-                +""" +Det er ingen predefinerte organisasjonsenheter, så det må teamet/enheten lage selv.
-                "|Den som oppretter enheten kan legge inn sin egen e-mail og vil da få mulighet til å legge til andre. 
+                +""" Det er ingen predefinerte organisasjonsenheter, så det må teamet/enheten lage selv.
+                |Den som oppretter enheten kan legge inn sin egen e-mail og vil da få mulighet til å legge til andre.
                 |Alle som tilhører en organisasjonsenhet kan redigere rapporter som tilhører enheten.""".trimMargin()
             }
             h2 { +"Kan man lagre rapporten og komme tilbake seinere?" }
@@ -119,7 +119,7 @@ fun Route.faqRoute() {
             p { +"Samtidighet er ikke på plass enda, så det vil si at det er viktig at den kun utfylles på 1 skjerm av gangen, hvis ikke risikerer en at ting bli overskrevet." }
             h2 { +"Må jeg sende rapporten noe sted?" }
             p { +"Nei! UU-teamet samler inn rapporten direkte, så det er ikke nødvendig å gjøre noe mer enn å fylle ut." }
-            h2 { +"Hvor skal jeg si om jeg har oppdaget ett problem?" }
+            h2 { +"Hvor skal jeg si ifra dersom jeg har oppdaget ett problem?" }
             p {
                 +"Legg inn et issue i "
                 a {
@@ -128,7 +128,7 @@ fun Route.faqRoute() {
                 }
             }
             h2 { +"Andre spørsmål" }
-            p { +"Om du har andre spørsmål kan du stille de i nav-uu kanalen på slack" }
+            p { +"Om du har andre spørsmål kan du stille de i nav-uu kanalen på slack eller sende en mail til universel.utformning@nav.no" }
         }
     }
 }
