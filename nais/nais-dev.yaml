@@ -19,11 +19,12 @@ spec:
     max: 2
     cpuThresholdPercentage: 100
   ingresses:
-    - "https://a11y-statement.dev.nav.no"
+    - "https://a11y-statement.intern.dev.nav.no"
   azure:
     application:
       enabled: true
       allowAllUsers: true
+      tenant: nav.no
     sidecar:
       enabled: true
       autoLogin: true
