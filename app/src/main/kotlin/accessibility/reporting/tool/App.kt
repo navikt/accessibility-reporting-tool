@@ -18,6 +18,8 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import mu.KotlinLogging
 import java.lang.IllegalArgumentException
 import io.prometheus.client.CollectorRegistry
@@ -29,17 +31,24 @@ fun main() {
     val authContext = AzureAuthContext()
     Flyway.runFlywayMigrations(Environment())
     val repository = ReportRepository(PostgresDatabase(environment))
-    embeddedServer(Netty, port = System.getenv("PORT")?.toInt()?:8081, module = { this.api(repository) { installAuthentication(authContext) } }).start(
+    embeddedServer(
+        Netty,
+        port = System.getenv("PORT")?.toInt() ?: 8081,
+        module = { this.api(repository) { installAuthentication(authContext) } }).start(
         wait = true
     )
 }
 
 
 fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
+    val prometehusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
-    val log = KotlinLogging.logger {  }
+    val log = KotlinLogging.logger { }
     authInstaller()
-    install(MicrometerMetrics)
+    install(MicrometerMetrics) {
+        registry = prometehusRegistry
+    }
+
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             when (cause) {
@@ -60,11 +69,9 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
 
     routing {
         get("/metrics") {
-            val collectorRegistry = CollectorRegistry.defaultRegistry
-            call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
-                TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(emptySet()))
-            }
+            call.respond(prometehusRegistry.scrape())
         }
+
         authenticate {
             organizationUnits(repository)
             userRoute(repository)
@@ -81,7 +88,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
 
     allRoutes(plugin(Routing))
         .filter { it.selector is HttpMethodRouteSelector }
-  .forEach {println("route: $it") }
+        .forEach { println("route: $it") }
 }
 
 
