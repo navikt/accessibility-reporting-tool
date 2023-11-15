@@ -19,7 +19,10 @@ spec:
     max: 2
     cpuThresholdPercentage: 100
   ingresses:
-    - "https://a11y-statement.intern.dev.nav.no"
+    - "https://a11y-statement.ekstern.dev.nav.no"
+  prometheus:
+    enabled: true
+    path: /metrics
   azure:
     application:
       enabled: true

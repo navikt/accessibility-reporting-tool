@@ -12,14 +12,14 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven("jitpack.io")
-
-
 }
 
 
 dependencies {
     implementation("io.ktor:ktor-serialization-jackson")
     implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-server-metrics-micrometer")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.7.0")
     implementation("io.ktor:ktor-client-content-negotiation")
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-netty")

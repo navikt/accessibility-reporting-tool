@@ -7,17 +7,22 @@ import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
+import com.zaxxer.hikari.metrics.micrometer.MicrometerMetricsTracker
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.http.content.*
+import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import mu.KotlinLogging
 import java.lang.IllegalArgumentException
+import io.prometheus.client.CollectorRegistry
+import io.prometheus.client.exporter.common.TextFormat
+
 
 fun main() {
     val environment = Environment()
@@ -31,9 +36,10 @@ fun main() {
 
 
 fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
+
     val log = KotlinLogging.logger {  }
     authInstaller()
-
+    install(MicrometerMetrics)
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             when (cause) {
@@ -53,6 +59,12 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
     }
 
     routing {
+        get("/metrics") {
+            val collectorRegistry = CollectorRegistry.defaultRegistry
+            call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
+                TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(emptySet()))
+            }
+        }
         authenticate {
             organizationUnits(repository)
             userRoute(repository)
