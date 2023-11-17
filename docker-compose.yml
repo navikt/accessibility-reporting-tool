@@ -30,7 +30,7 @@ services:
                     "aud": ["a11y"],
                     "email" : "carl@good.morning",
                     "name": "Carl Good Morning",
-                    "oid": "tadda-i-fixed-it"
+                    "oid": "carl@good.morning"
                   }
                 }
               ]

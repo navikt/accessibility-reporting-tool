@@ -21,7 +21,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
     route("admin") {
         get {
             call.unahtorizedIfNotAdmin()
-            call.respondHtmlContent("Admin", NavBarItem.NONE) {
+            call.respondHtmlContent("Admin", NavBarItem.ADMIN) {
                 h1 { +"Admin" }
                 h2 { +"Genererte rapporter" }
                 repository.getReports<ReportShortSummary>(ReportType.AGGREGATED).let { reports ->
