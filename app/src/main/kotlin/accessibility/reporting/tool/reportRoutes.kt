@@ -27,7 +27,7 @@ fun Route.reports(repository: ReportRepository) {
                 call.respondRedirect("/reports/collection/$reportId")
             }
             val organizations = repository.getAllOrganizationUnits()
-            call.respondHtmlContent("Tilgjengelighetsærklæring", NavBarItem.NONE) {
+            call.respondHtmlContent("Tilgjengelighetsærklæring for ${report.descriptiveName}", NavBarItem.NONE) {
                 reportContainer(
                     report = report,
                     organizations = organizations,
