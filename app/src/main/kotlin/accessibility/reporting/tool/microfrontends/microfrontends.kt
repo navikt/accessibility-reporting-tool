@@ -100,8 +100,7 @@ fun Route.faqRoute() {
             h1 { +"FAQ" }
             h2 { +"Hva er en organisasjonsenhet?" }
             p {
-                +"""En organisasjonsenhet er teamet ditt eller evt annen del av organisasjonen du tilhører om du
-                |ikke er en del av ett team."""
+                +"""En organisasjonsenhet er teamet ditt eller evt annen del av organisasjonen du tilhører om du ikke er en del av ett team."""
 
             }
             p {
