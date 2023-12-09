@@ -7,10 +7,10 @@ fun List<SuccessCriterion>.aggregateBreakingTheLaw(): String =
     filter { it.status == Status.NON_COMPLIANT && it.breakingTheLaw.isNotBlank() }.joinToString("\n") { it.breakingTheLaw }
 
 private fun List<SuccessCriterion>.aggregateLawDoesNotApply(): String =
-    filter { it.status == Status.NON_COMPLIANT && it.lawDoesNotApply.isNotBlank() }.joinToString("\n"){ it.lawDoesNotApply }
+    filter { it.status == Status.NON_COMPLIANT && it.lawDoesNotApply.isNotBlank() }.joinToString("\n") { it.lawDoesNotApply }
 
 private fun List<SuccessCriterion>.aggregateTooHardToComply(): String =
-    filter { it.status == Status.NON_COMPLIANT && it.tooHardToComply.isNotBlank() }.joinToString("\n"){ it.tooHardToComply }
+    filter { it.status == Status.NON_COMPLIANT && it.tooHardToComply.isNotBlank() }.joinToString("\n") { it.tooHardToComply }
 
 
 data class SuccessCriterion(
@@ -30,10 +30,21 @@ data class SuccessCriterion(
     val wcagVersion: String = "2.1"
 ) {
     lateinit var wcagLevel: WcagLevel
+    val successCriterionNumber = number
+
     fun devationIsDesputed() =
         breakingTheLaw.isEmpty() && (lawDoesNotApply.isNotEmpty() || tooHardToComply.isNotEmpty())
 
-    val successCriterionNumber = number
+    fun describeFindings(): String =
+        when {
+            status == Status.COMPLIANT -> "Ingen avvik"
+            status == Status.NOT_TESTED -> "Ikke testet"
+            status == Status.NOT_APPLICABLE && breakingTheLaw.isNotEmpty() -> "Det er funnet avvik.$breakingTheLaw"
+            status == Status.NOT_APPLICABLE && lawDoesNotApply.isNotEmpty() -> "Avvikene er ikke underlagt kravet. $lawDoesNotApply "
+            status == Status.NOT_APPLICABLE && tooHardToComply.isNotEmpty() -> "Avvikene er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet. $tooHardToComply"
+            else -> "Ukjent"
+        }
+
 
     companion object {
         fun List<SuccessCriterion>.disputedDeviationCount() =
@@ -79,7 +90,6 @@ data class SuccessCriterion(
                     Status.NOT_TESTED
                 }
             }
-
 
         fun fromJson(rawJson: JsonNode, version: Version, isStale: Boolean): SuccessCriterion =
             SuccessCriterion(

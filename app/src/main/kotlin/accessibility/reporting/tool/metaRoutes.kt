@@ -10,15 +10,19 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.html.*
 
-fun Routing.meta() {
+fun Routing.meta(prometehusRegistry: PrometheusMeterRegistry) {
 
     get("/isalive") {
         call.respond(HttpStatusCode.OK)
     }
     get("/isready") {
         call.respond(HttpStatusCode.OK)
+    }
+    get("/metrics") {
+        call.respond(prometehusRegistry.scrape())
     }
 }
 
@@ -50,14 +54,12 @@ fun Route.landingPage(repository: ReportRepository) {
             }
 
             h2 { +"Samlerapporter" }
-            //TODO: readonly versjon
             if (    reports.filter { it.reportType == ReportType.AGGREGATED }.isNullOrEmpty()) {
                 p {+"Ingen samlerapporter"}
             } else
             ul {
                 reports.filter { it.reportType == ReportType.AGGREGATED }.forEach { report -> reportListItem(report) }
             }
-
         }
     }
 }

@@ -7,7 +7,6 @@ import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
-import com.zaxxer.hikari.metrics.micrometer.MicrometerMetricsTracker
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -22,8 +21,6 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import mu.KotlinLogging
 import java.lang.IllegalArgumentException
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.exporter.common.TextFormat
 
 
 fun main() {
@@ -68,10 +65,6 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
     }
 
     routing {
-        get("/metrics") {
-            call.respond(prometehusRegistry.scrape())
-        }
-
         authenticate {
             organizationUnits(repository)
             userRoute(repository)
@@ -80,7 +73,8 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             adminRoutes(repository)
             faqRoute()
         }
-        meta()
+        meta(prometehusRegistry)
+        openReportRoute(repository)
         staticResources("/static", "static") {
             preCompressed(CompressedFileType.GZIP)
         }

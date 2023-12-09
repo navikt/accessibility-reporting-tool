@@ -80,6 +80,7 @@ open class Report(
                     )
                 }
     }
+
     fun copy(
         reportId: String? = null,
         url: String? = null,
@@ -173,7 +174,8 @@ open class Report(
         ReportType.SINGLE -> "Tilgjengelighetserklæring"
     }
 
-    fun writeAccess(user: User): Boolean = when {
+    fun writeAccess(user: User?): Boolean = when {
+        user == null -> false
         Admins.isAdmin(user) -> true
         isOwner(user) -> true
         organizationUnit?.isMember(user) == true -> true
