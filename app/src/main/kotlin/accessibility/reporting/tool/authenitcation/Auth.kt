@@ -33,7 +33,7 @@ val ApplicationCall.user: User
     get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Princial ikke satt")
 
 val ApplicationCall.adminUser: User
-    get() = user.also { if (!Admins.isAdmin(it)) throw NotAdminException() }
+    get() = user.also { if (!user.groups.contains("ADMIN ENV")) throw NotAdminException() }
 
 fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
 
@@ -49,8 +49,8 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
                     name = jwtCredential.payload.getClaim("name")?.asString(),
                     // V- This here is a bug, preferred_username, upn and or email are
                     email = jwtCredential.payload.getClaim("preferred_username")?.asString() ?: jwtCredential.payload.getClaim("oid").asString()!!,
-
-                    oid = jwtCredential.payload.getClaim("oid").asString()!!
+                    oid = jwtCredential.payload.getClaim("oid").asString()!!,
+                    groups = jwtCredential.payload.getClaim("groups").asList(String::class.java),
                 )
             }
 
@@ -61,7 +61,7 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
     }
 }
 
-data class User(val email: String, val name: String?, val oid: String?) : Principal {
+data class User(val email: String, val name: String?, val oid: String?, val groups: List<String>) : Principal {
 
     override fun equals(other: Any?): Boolean {
         if (other is User) {
@@ -75,7 +75,8 @@ data class User(val email: String, val name: String?, val oid: String?) : Princi
             User(
                 email = node["email"].asText(),
                 name = node["name"].asText(),
-                oid = node["oid"]?.takeIf { !it.isNull }?.asText()
+                oid = node["oid"]?.takeIf { !it.isNull }?.asText(),
+                groups = node["groups"].map({ it.asText()})
             )
         }
     }

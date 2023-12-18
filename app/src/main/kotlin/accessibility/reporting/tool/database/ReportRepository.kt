@@ -154,7 +154,8 @@ class ReportRepository(val database: Database) {
                         updateBy = User(
                             email = organizationUnit.email,
                             name = organizationUnit.name,
-                            oid = "organizationUnit"
+                            oid = "organizationUnit",
+                            groups = emptyList()
                         )
                     )
                 )

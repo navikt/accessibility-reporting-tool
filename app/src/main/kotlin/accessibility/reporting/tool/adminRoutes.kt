@@ -8,6 +8,7 @@ import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -18,6 +19,7 @@ private const val updateCriterionEndpoint = "/collection/submit"
 private const val updateMetadataPath = "/collection/metadata"
 
 fun Route.adminRoutes(repository: ReportRepository) {
+
     route("admin") {
         get {
             call.unahtorizedIfNotAdmin()
