@@ -18,7 +18,7 @@ class ReportTest {
 
     @Test
     fun `Finner kriterie basert på nummer`() {
-        val testReport = Version1.newReport(
+        val testReport = SucessCriteriaV1.newReport(
             organizationUnit = testOrg,
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
@@ -26,7 +26,7 @@ class ReportTest {
             descriptiveName = "Some name"
         )
 
-        testReport.findCriterion("1.1.1") shouldBe Version1.criteriaTemplate.first()
+        testReport.findCriterion("1.1.1") shouldBe SucessCriteriaV1.criteriaTemplate.first()
         shouldThrow<IllegalArgumentException> {
             testReport.findCriterion("3.4.4")
         }
@@ -34,7 +34,7 @@ class ReportTest {
 
     @Test
     fun `lager kopi av rapport med oppdatert sukksesskriterie`() {
-        val testReport = Version1.newReport(
+        val testReport = SucessCriteriaV1.newReport(
             organizationUnit = testOrg,
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
@@ -42,7 +42,7 @@ class ReportTest {
             descriptiveName = "some name 2"
         )
 
-        val testUpdatedCriterion = Version1.criteriaTemplate.find { it.number == "1.3.2" }!!.copy(
+        val testUpdatedCriterion = SucessCriteriaV1.criteriaTemplate.find { it.number == "1.3.2" }!!.copy(
             status = Status.NON_COMPLIANT,
             breakingTheLaw = "not cool"
         )
@@ -57,15 +57,15 @@ class ReportTest {
 
             successCriteria.forEach { newReportCriterion ->
                 if (newReportCriterion.number != testUpdatedCriterion.number) {
-                    newReportCriterion shouldBe Version1.criteriaTemplate.find { it.number == newReportCriterion.number }
+                    newReportCriterion shouldBe SucessCriteriaV1.criteriaTemplate.find { it.number == newReportCriterion.number }
                 } else {
-                    newReportCriterion shouldNotBe Version1.criteriaTemplate.find { it.number == "1.3.2" }
+                    newReportCriterion shouldNotBe SucessCriteriaV1.criteriaTemplate.find { it.number == "1.3.2" }
                     newReportCriterion.status shouldBe Status.NON_COMPLIANT
                     newReportCriterion.breakingTheLaw shouldBe "not cool"
                 }
             }
         }
-        val testUpdatedCriterion2 = Version1.criteriaTemplate.find { it.number == "4.1.1" }!!.copy(
+        val testUpdatedCriterion2 = SucessCriteriaV1.criteriaTemplate.find { it.number == "4.1.1" }!!.copy(
             status = Status.COMPLIANT
         )
 
@@ -86,7 +86,7 @@ class ReportTest {
 
         val memberUser = User(email = "member@member.test", name = "Member Membersen", oid = "member-oid",groups = listOf())
 
-        val testReport = Version1.newReport(
+        val testReport = SucessCriteriaV1.newReport(
             organizationUnit = testOrg,
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",

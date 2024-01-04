@@ -57,7 +57,7 @@ fun BODY.reportContainer(
                                     updatePath = updateMetadataUrl
                                 )
                             )
-                            add(StatementMetadata("Ansvarlig", report.user.email, null))
+                            add(StatementMetadata("Ansvarlig", report.author.email, null))
 
                             add(
                                 StatementMetadata(
@@ -68,7 +68,7 @@ fun BODY.reportContainer(
                             )
                             StatementMetadata(
                                 label = "Sist oppdatert av",
-                                value = (report.lastUpdatedBy ?: report.user).email,
+                                value = (report.lastUpdatedBy ?: report.author).email,
                                 hxId = "metadata-oppdatert-av"
                             )
 

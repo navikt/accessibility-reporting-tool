@@ -2,6 +2,7 @@ package accessibility.reporting.tool.authenitcation
 
 
 import accessibility.reporting.tool.database.Admins
+import accessibility.reporting.tool.wcag.Author
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -30,7 +31,7 @@ import mu.KotlinLogging
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-private val logger = KotlinLogging.logger {  }
+private val logger = KotlinLogging.logger { }
 val ApplicationCall.user: User
     get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Princial ikke satt")
 
@@ -51,7 +52,8 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
                 User(
                     name = jwtCredential.payload.getClaim("name")?.asString(),
                     // V- This here is a bug, preferred_username, upn and or email are
-                    email = jwtCredential.payload.getClaim("preferred_username")?.asString() ?: jwtCredential.payload.getClaim("oid").asString()!!,
+                    email = jwtCredential.payload.getClaim("preferred_username")?.asString()
+                        ?: jwtCredential.payload.getClaim("oid").asString()!!,
                     oid = jwtCredential.payload.getClaim("oid").asString()!!,
                     groups = jwtCredential.payload.getClaim("groups").asList(String::class.java),
                 )
@@ -64,25 +66,17 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
     }
 }
 
-data class User(val email: String, val name: String?, val oid: String?, val groups: List<String>) : Principal {
+data class User(val email: String, val name: String?, val oid: String, val groups: List<String>) : Principal {
 
     override fun equals(other: Any?): Boolean {
         if (other is User) {
-            return other.email == this.oid || other.oid == this.oid || this.email == other.oid
+            return other.oid == this.oid
         }
         return super.equals(other)
     }
 
-    companion object {
-        fun fromJson(jsonNode: JsonNode?): User? = jsonNode?.takeIf { !it.isNull }?.let { node ->
-            User(
-                email = node["email"].asText(),
-                name = node["name"].asText(),
-                oid = node["oid"]?.takeIf { !it.isNull }?.asText(),
-                groups = node["groups"].map({ it.asText()})
-            )
-        }
-    }
+    fun toAuthor() = Author(email, oid)
+
 }
 
 class AzureAuthContext {

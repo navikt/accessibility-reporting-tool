@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
-import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
@@ -67,7 +66,7 @@ fun Route.reports(repository: ReportRepository) {
 
                 val newReportId = UUID.randomUUID().toString()
                 repository.upsertReport(
-                    Version1.newReport(
+                    SucessCriteriaV1.newReport(
                         organizationUnit, newReportId, url, call.user, descriptiveName
                     )
                 )

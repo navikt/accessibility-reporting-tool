@@ -6,33 +6,33 @@ import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.operable
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.perceivable
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.robust
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.understandable
-import accessibility.reporting.tool.wcag.Version1.ContentGroups.ikonerBilderGrafer
-import accessibility.reporting.tool.wcag.Version1.ContentGroups.lydVideoAnimasjoner
-import accessibility.reporting.tool.wcag.Version1.ContentGroups.skjema
-import accessibility.reporting.tool.wcag.Version1.ContentGroups.tastatur
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`1-1 Tekstalternativer`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`1-2 Tidsbaserte medier`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`1-3 Mulig å tilpasse`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`1-4 Mulig å skille fra hverandre`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`2-1 Tilgjengelig med tastatur`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`2-2 Nok tid`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`2-4 Navigerbar`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`2-5 Inndatametode`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`3-1 Leselig`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`3-2 Forutsigbar`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`3-3 Inndatahjelp`
-import accessibility.reporting.tool.wcag.Version1.Guidelines.`4-1 Kompatibel`
-import accessibility.reporting.tool.wcag.Version1.Tools.arcToolkit
-import accessibility.reporting.tool.wcag.Version1.Tools.cca
-import accessibility.reporting.tool.wcag.Version1.Tools.devTools
-import accessibility.reporting.tool.wcag.Version1.Tools.skjønn
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.ContentGroups.ikonerBilderGrafer
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.ContentGroups.lydVideoAnimasjoner
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.ContentGroups.skjema
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.ContentGroups.tastatur
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`1-1 Tekstalternativer`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`1-2 Tidsbaserte medier`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`1-3 Mulig å tilpasse`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`1-4 Mulig å skille fra hverandre`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`2-1 Tilgjengelig med tastatur`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`2-2 Nok tid`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`2-4 Navigerbar`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`2-5 Inndatametode`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`3-1 Leselig`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`3-2 Forutsigbar`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`3-3 Inndatahjelp`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`4-1 Kompatibel`
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.arcToolkit
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.cca
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.devTools
+import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.skjønn
 import accessibility.reporting.tool.wcag.WcagLevel.*
 import mu.KotlinLogging
 import java.time.LocalDateTime
 
 val log = KotlinLogging.logger { }
 
-object Version1 {
+object SucessCriteriaV1 {
     val lastTextUpdate: LocalDateTime = LocalDateTime.parse("2023-09-06T14:00:00.00")
 
     fun newReport(
@@ -47,8 +47,8 @@ object Version1 {
         successCriteria = criteriaTemplate,
         testData = null,
         url = url,
-        user = user,
-        version = Version.V1,
+        author = user.toAuthor(),
+        version = Version.V2,
         created = LocalDateTimeHelper.nowAtUtc(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = null,
