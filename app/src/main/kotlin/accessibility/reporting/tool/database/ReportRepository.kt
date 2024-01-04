@@ -141,7 +141,7 @@ class ReportRepository(val database: Database) {
                     "id" to organizationUnit.id,
                     "name" to organizationUnit.name,
                     "email" to organizationUnit.email,
-                    "members" to organizationUnit.members.joinToString(",")
+                    "members" to organizationUnit.members.toStringList()
                 )
             )
         }
@@ -205,6 +205,10 @@ class ReportRepository(val database: Database) {
         return getAllOrganizationUnits()
     }
 }
+
+private fun MutableSet<String>.toStringList(): String = toList()
+    .filter { it.isNotEmpty() }
+    .joinToString((","))
 
 fun List<String>.sqlList(): String = joinToString(",", "(", ")") { "'$it'" }
 
