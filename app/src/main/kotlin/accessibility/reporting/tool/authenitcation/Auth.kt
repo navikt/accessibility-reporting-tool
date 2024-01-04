@@ -33,7 +33,7 @@ val ApplicationCall.user: User
     get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Princial ikke satt")
 
 val ApplicationCall.adminUser: User
-    get() = user.also { if (!user.groups.contains("ADMIN ENV")) throw NotAdminException() }
+    get() = user.also { if (!user.groups.contains(System.getenv("ADMIN_GROUP"))) throw NotAdminException() }
 
 fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
 
