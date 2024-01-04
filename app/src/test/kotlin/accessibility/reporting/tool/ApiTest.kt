@@ -31,9 +31,9 @@ class ApiTest {
                 api(repository = ReportRepository(db), authInstaller = {})
             }
 
-            client.get("/isalive")
-            client.get("/isready")
-            client.get("/metrics").apply {
+            client.get("isalive")
+            client.get("isready")
+            client.get("open/metrics").apply {
                 bodyAsText() shouldNotBe  ""
             }
         }
