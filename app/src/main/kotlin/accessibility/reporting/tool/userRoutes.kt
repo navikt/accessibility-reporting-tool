@@ -15,7 +15,7 @@ import kotlinx.html.ul
 fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
-        val reports = repository.getReportsForUser(call.user.oid!!)
+        val reports = repository.getReportsForUser(call.user.oid)
         call.respondHtmlContent("Rapporter for: " + call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
             a(classes = "cta") {

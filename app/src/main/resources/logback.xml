@@ -1,18 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE configuration>
+<configuration debug="true">
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
 
-<configuration>
-    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
-    <import class="ch.qos.logback.core.ConsoleAppender"/>
-
-    <appender name="STDOUT" class="ConsoleAppender">
-        <encoder class="PatternLayoutEncoder">
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp- %msg%n</pattern>
-        </encoder>
+    <property name="loggingPattern"
+              value="%d [%-5level] [%thread] %logger{5} %replace(- [%X{consumerId}, %X{callId}, %X{userId}] ){'- \[, , \] ',''}- %m%n"/>
+    <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
-
-    <root level="trace">
-        <appender-ref ref="STDOUT"/>
+    <root level="INFO">
+        <appender-ref ref="stdout_json"/>
     </root>
 </configuration>
 

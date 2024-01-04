@@ -73,7 +73,7 @@ open class Report(
                         successCriteria = jsonNode["successCriteria"].map {
                             SuccessCriterion.fromJson(
                                 it,
-                                Version.V1,
+                                Version.V2,
                                 lastChanged.isBefore(SucessCriteriaV1.lastTextUpdate)
                             )
                         },
@@ -106,7 +106,7 @@ open class Report(
                         successCriteria = jsonNode["successCriteria"].map {
                             SuccessCriterion.fromJson(
                                 it,
-                                Version.V1,
+                                Version.V2,
                                 lastChanged.isBefore(SucessCriteriaV1.lastTextUpdate)
                             )
                         },

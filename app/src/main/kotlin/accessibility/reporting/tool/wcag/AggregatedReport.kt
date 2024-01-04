@@ -28,7 +28,7 @@ class AggregatedReport : Report {
         url = url,
         descriptiveName = descriptiveName,
         organizationUnit = organizationUnit,
-        version = Version.V1,
+        version = Version.V2,
         testData = null,
         author = user.toAuthor(),
         successCriteria = reports.map { it.successCriteria }.flatten().aggregate(),

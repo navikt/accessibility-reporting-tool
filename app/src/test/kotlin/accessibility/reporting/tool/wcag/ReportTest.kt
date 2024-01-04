@@ -50,7 +50,7 @@ class ReportTest {
         val updatedReport = testReport.withUpdatedCriterion(testUpdatedCriterion, testUser)
         updatedReport.assert {
             reportId shouldBe testReport.reportId
-            user shouldBe testReport.user
+            author shouldBe testReport.author
             organizationUnit shouldBe testReport.organizationUnit
             url shouldBe testReport.url
             lastChanged shouldBeAfter testReport.lastChanged
@@ -74,9 +74,17 @@ class ReportTest {
         updatedReport.withUpdatedCriterion(testUpdatedCriterion2, contributor).assert {
             successCriteria.count { it.status != Status.NOT_TESTED } shouldBe 2
             contributers.size shouldBe 1
-            contributers.first() shouldBe contributor
-            user shouldBe testUser
-            lastUpdatedBy shouldBe contributor
+            contributers.first().assert {
+              oid shouldBe contributor.oid
+              email shouldBe contributor.email
+            }
+            author.email shouldBe testReport.author.email
+            author.oid shouldBe testReport.author.oid
+            lastUpdatedBy.assert {
+                require(this!=null)
+                email shouldBe contributor.email
+                oid shouldBe contributor.oid
+            }
         }
     }
 
