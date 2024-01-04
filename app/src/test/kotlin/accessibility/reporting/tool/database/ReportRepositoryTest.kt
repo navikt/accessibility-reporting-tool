@@ -89,7 +89,7 @@ class ReportRepositoryTest {
     @Test
     fun `alter org units`() {
         val testOrg1 = OrganizationUnit("some-id", "Some unit", "tadda@nav.no")
-        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no" )
+        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no")
         val testOrg2 = OrganizationUnit(
             "some-other-two",
             "Child unit",
@@ -105,12 +105,12 @@ class ReportRepositoryTest {
 
         repository.getReportForOrganizationUnit(testOrg1.id).apply {
             first.assert {
-                require(this!=null)
+                require(this != null)
                 members.size shouldBe 1
             }
             second.size shouldBe 1
             second.first().assert {
-                require(organizationUnit!=null)
+                require(organizationUnit != null)
                 organizationUnit!!.id shouldBe testOrg1.id
                 organizationUnit!!.members.size shouldBe 1
             }
@@ -141,7 +141,7 @@ class ReportRepositoryTest {
                 testOrg.name
             )
         }
-        repository.deleteOrgUnit(orgUnitId=testOrg1.id).size shouldBe 4
+        repository.deleteOrgUnit(orgUnitId = testOrg1.id).size shouldBe 4
     }
 
     @Test
@@ -207,14 +207,14 @@ class ReportRepositoryTest {
         repository.upsertReport(
             dummyReportV1(
                 url = "http://dummyurl4.test",
-                user = User(email = testUserOid, name = null, oid = null)
+                user = User(email = testUserOid, name = null, oid = null, groups = listOf())
             )
         )
 
         repository.upsertReport(
             dummyReportV1(
                 url = "http://dummyurl4.test",
-                user = User(email = "otheruser", name = null, oid = null)
+                user = User(email = "otheruser", name = null, oid = null, groups = listOf())
             )
         )
 
@@ -240,7 +240,7 @@ class ReportRepositoryTest {
     private fun dummyReportV1(
         url: String = "http://dummyurl.test",
         orgUnit: OrganizationUnit? = null,
-        user: User = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+        user: User = User(email = testUserEmail, name = testUserName, oid = testUserOid, groups = listOf()),
         reportType: ReportType = ReportType.SINGLE
     ) = Report(
         reportId = UUID.randomUUID().toString(),
@@ -264,7 +264,7 @@ class ReportRepositoryTest {
         AggregatedReport(
             url = "https://aggregated.test",
             descriptiveName = "Aggregated dummy report",
-            user = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+            user = User(email = testUserEmail, name = testUserName, oid = testUserOid, groups = listOf()),
             organizationUnit = orgUnit,
             reports = listOf(
                 dummyReportV1(),

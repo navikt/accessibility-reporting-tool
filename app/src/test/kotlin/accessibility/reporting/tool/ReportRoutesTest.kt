@@ -45,7 +45,7 @@ class ReportRoutesTest {
                 organizationUnit = null,
                 version = Version.V1,
                 testData = null,
-                user = User(email = "tadda", name = "tadda", oid = testUserOid),
+                user = User(email = "tadda", name = "tadda", oid = testUserOid, groups = listOf()),
                 successCriteria = Version.V1.criteria,
                 filters = mutableListOf(),
                 created = LocalDateTimeHelper.nowAtUtc(),

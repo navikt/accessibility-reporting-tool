@@ -14,7 +14,7 @@ import java.util.UUID
 
 class ReportTest {
     private val testOrg = OrganizationUnit.createNew(name = "Test organisasjonsenhet", email = "test@nav.no")
-    private val testUser = User("testuser@nav.no", "Test User", UUID.randomUUID().toString())
+    private val testUser = User("testuser@nav.no", "Test User", UUID.randomUUID().toString(),groups = listOf())
 
     @Test
     fun `Finner kriterie basert på nummer`() {
@@ -70,7 +70,7 @@ class ReportTest {
         )
 
         val contributor =
-            User("other.user@test.ja", "Contributor Contributerson", UUID.randomUUID().toString())
+            User("other.user@test.ja", "Contributor Contributerson", UUID.randomUUID().toString(),groups = listOf())
         updatedReport.withUpdatedCriterion(testUpdatedCriterion2, contributor).assert {
             successCriteria.count { it.status != Status.NOT_TESTED } shouldBe 2
             contributers.size shouldBe 1
@@ -84,7 +84,7 @@ class ReportTest {
     fun tilgangsjekk() {
         mockkStatic(Admins::class)
 
-        val memberUser = User(email = "member@member.test", name = "Member Membersen", oid = "member-oid")
+        val memberUser = User(email = "member@member.test", name = "Member Membersen", oid = "member-oid",groups = listOf())
 
         val testReport = Version1.newReport(
             organizationUnit = testOrg,
@@ -104,7 +104,8 @@ class ReportTest {
             User(
                 email = "Member@Member.test",
                 name = "Member Membersen",
-                oid = "member-oid"
+                oid = "member-oid",
+                groups = listOf()
             )
         ) shouldBe true
     }
