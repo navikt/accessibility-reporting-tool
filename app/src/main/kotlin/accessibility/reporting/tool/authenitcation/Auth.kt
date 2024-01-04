@@ -26,9 +26,11 @@ import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import mu.KotlinLogging
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
+private val logger = KotlinLogging.logger {  }
 val ApplicationCall.user: User
     get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Princial ikke satt")
 
@@ -45,6 +47,7 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
             }
 
             validate { jwtCredential ->
+                logger.info { jwtCredential.payload }
                 User(
                     name = jwtCredential.payload.getClaim("name")?.asString(),
                     // V- This here is a bug, preferred_username, upn and or email are
