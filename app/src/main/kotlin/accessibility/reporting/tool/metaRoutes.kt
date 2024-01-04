@@ -21,7 +21,7 @@ fun Routing.meta(prometehusRegistry: PrometheusMeterRegistry) {
     get("/isready") {
         call.respond(HttpStatusCode.OK)
     }
-    get("/metrics") {
+    get("open/metrics") {
         call.respond(prometehusRegistry.scrape())
     }
 }
