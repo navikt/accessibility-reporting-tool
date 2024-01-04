@@ -209,7 +209,7 @@ open class Report(
         ).apply { if (!isOwner(updateBy)) contributers.add(updateBy.toAuthor()) }
 
         fun isOwner(callUser: User): Boolean =
-            author.oid == callUser.oid
+            author.oid == callUser.oid.str()
 
         fun h1() = when (reportType) {
             ReportType.AGGREGATED -> "Tilgjengelighetserklæring (Samlerapport)"
@@ -238,8 +238,8 @@ open class Report(
         val email: String,
         val members: MutableSet<String> = mutableSetOf()
     ) {
-        fun isMember(user: User) = members.any { it == user.email.comparable() }
-        fun addMember(userEmail: String) = members.add(userEmail.comparable())
+        fun isMember(user: User) = members.any { it == user.email.str().comparable() }
+        fun addMember(userEmail: User.Email) = members.add(userEmail.str().comparable())
         fun removeMember(userEmail: String) = members.removeIf { userEmail.comparable() == it.comparable() }
 
         companion object {

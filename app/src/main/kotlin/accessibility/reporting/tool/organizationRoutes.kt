@@ -1,5 +1,6 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.ReportRepository
@@ -68,7 +69,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                                     name = "orgunit-email"
                                 }
                                 button {
-                                    "bytt eier"
+                                    +"bytt eier"
                                 }
                             }
                         }
@@ -121,7 +122,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         formParameters["orgunit"] ?: throw IllegalArgumentException("organisasjonsenhet-id mangler")
                     )
                     ?.apply {
-                        addMember(formParameters["member"].toString())
+                        addMember(formParameters["member"].toEmail())
                         repository.upsertOrganizationUnit(this)
                     }
                     ?: throw IllegalArgumentException("organisasjonsenhet finnes ikke")
@@ -204,6 +205,8 @@ fun Route.organizationUnits(repository: ReportRepository) {
         }
     }
 }
+
+fun String?.toEmail(): User.Email  = this?.let {  User.Email(this)}?: throw IllegalArgumentException("mailadresse kan ikke være null")
 
 private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
     id = "member-list-container"

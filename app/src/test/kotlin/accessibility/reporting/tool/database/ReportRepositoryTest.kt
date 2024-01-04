@@ -2,6 +2,8 @@ package accessibility.reporting.tool.database
 
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.User.Email
+import accessibility.reporting.tool.toEmail
 import accessibility.reporting.tool.wcag.*
 import assert
 import io.kotest.assertions.withClue
@@ -25,9 +27,9 @@ class ReportRepositoryTest {
     )
     private val database = LocalPostgresDatabase.cleanDb()
     private val repository = ReportRepository(database)
-    private val testUserEmail = "tadda@test.tadda"
+    private val testUserEmail = Email("tadda@test.tadda")
     private val testUserName = "Tadda Taddasen"
-    private val testUserOid = UUID.randomUUID().toString()
+    private val testUserOid = User.Oid(UUID.randomUUID().toString())
 
     @BeforeAll
     fun setup() {
@@ -98,7 +100,7 @@ class ReportRepositoryTest {
 
         repository.upsertOrganizationUnit(testOrg1)
         repository.upsertReport(dummyReportV2(orgUnit = testOrg1))
-        testOrg1.addMember("testMember@test.ko")
+        testOrg1.addMember("testMember@test.ko".toEmail())
         repository.upsertOrganizationUnit(testOrg1)
 
         repository.getReportForOrganizationUnit(testOrg1.id).apply {
@@ -198,10 +200,10 @@ class ReportRepositoryTest {
 
     @Test
     fun `get reports for user`() {
-        val testUser = User(email = testUserOid, name = null, oid = testUserOid, groups = listOf())
+        val testUser = User(email = Email("randomemail"), name = null, oid = testUserOid, groups = listOf())
         val updatedReport = dummyReportV2(
             url = "http://dummyurl4.test",
-            user = User(email = testUserOid, name = null, oid = testUserOid, groups = listOf())
+            user = User(email = Email("randomemail"), name = null, oid = testUserOid, groups = listOf())
         )
 
         repository.upsertReport(dummyReportV2(user = testUser, url = "http://dummyx2.test"))

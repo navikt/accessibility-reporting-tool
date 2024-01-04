@@ -2,6 +2,7 @@ package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
+import accessibility.reporting.tool.toEmail
 import assert
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.date.shouldBeAfter
@@ -14,7 +15,8 @@ import java.util.UUID
 
 class ReportTest {
     private val testOrg = OrganizationUnit.createNew(name = "Test organisasjonsenhet", email = "test@nav.no")
-    private val testUser = User("testuser@nav.no", "Test User", UUID.randomUUID().toString(),groups = listOf())
+    private val testUser =
+        User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
 
     @Test
     fun `Finner kriterie basert på nummer`() {
@@ -70,20 +72,25 @@ class ReportTest {
         )
 
         val contributor =
-            User("other.user@test.ja", "Contributor Contributerson", UUID.randomUUID().toString(),groups = listOf())
+            User(
+                "other.user@test.ja".toEmail(),
+                "Contributor Contributerson",
+                User.Oid(UUID.randomUUID().toString()),
+                groups = listOf()
+            )
         updatedReport.withUpdatedCriterion(testUpdatedCriterion2, contributor).assert {
             successCriteria.count { it.status != Status.NOT_TESTED } shouldBe 2
             contributers.size shouldBe 1
             contributers.first().assert {
-              oid shouldBe contributor.oid
-              email shouldBe contributor.email
+                oid shouldBe contributor.oid.str()
+                email shouldBe contributor.email.str()
             }
             author.email shouldBe testReport.author.email
             author.oid shouldBe testReport.author.oid
             lastUpdatedBy.assert {
-                require(this!=null)
-                email shouldBe contributor.email
-                oid shouldBe contributor.oid
+                require(this != null)
+                email shouldBe contributor.email.str()
+                oid shouldBe contributor.oid.str()
             }
         }
     }
@@ -92,7 +99,12 @@ class ReportTest {
     fun tilgangsjekk() {
         mockkStatic(Admins::class)
 
-        val memberUser = User(email = "member@member.test", name = "Member Membersen", oid = "member-oid",groups = listOf())
+        val memberUser = User(
+            email = User.Email("member@member.test"),
+            name = "Member Membersen",
+            oid = User.Oid("member-oid"),
+            groups = listOf()
+        )
 
         val testReport = SucessCriteriaV1.newReport(
             organizationUnit = testOrg,
@@ -110,9 +122,9 @@ class ReportTest {
 
         updatedReport.writeAccess(
             User(
-                email = "Member@Member.test",
+                email = User.Email("Member@Member.test"),
                 name = "Member Membersen",
-                oid = "member-oid",
+                oid = User.Oid("member-oid"),
                 groups = listOf()
             )
         ) shouldBe true

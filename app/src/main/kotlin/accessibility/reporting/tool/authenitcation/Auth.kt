@@ -1,29 +1,25 @@
 package accessibility.reporting.tool.authenitcation
 
 
-import accessibility.reporting.tool.database.Admins
+import accessibility.reporting.tool.authenitcation.User.Email
+import accessibility.reporting.tool.authenitcation.User.Oid
 import accessibility.reporting.tool.wcag.Author
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -51,10 +47,8 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
                 logger.info { jwtCredential.payload }
                 User(
                     name = jwtCredential.payload.getClaim("name")?.asString(),
-                    // V- This here is a bug, preferred_username, upn and or email are
-                    email = jwtCredential.payload.getClaim("preferred_username")?.asString()
-                        ?: jwtCredential.payload.getClaim("oid").asString()!!,
-                    oid = jwtCredential.payload.getClaim("oid").asString()!!,
+                    email = Email(jwtCredential.payload.getClaim("preferred_username").asString()),
+                    oid = Oid(jwtCredential.payload.getClaim("oid").asString()!!),
                     groups = jwtCredential.payload.getClaim("groups").asList(String::class.java),
                 )
             }
@@ -66,7 +60,17 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
     }
 }
 
-data class User(val email: String, val name: String?, val oid: String, val groups: List<String>) : Principal {
+data class User(val email: Email, val name: String?, val oid: Oid, val groups: List<String>) : Principal {
+
+    @JvmInline
+    value class Oid(private val s: String) {
+        fun str() = s
+    }
+
+    @JvmInline
+    value class Email(private val s: String) {
+        fun str() = s
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other is User) {
@@ -75,7 +79,7 @@ data class User(val email: String, val name: String?, val oid: String, val group
         return super.equals(other)
     }
 
-    fun toAuthor() = Author(email, oid)
+    fun toAuthor() = Author(email = email.str(), oid = oid.str())
 
 }
 
