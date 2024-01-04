@@ -40,6 +40,7 @@ fun Route.reports(repository: ReportRepository) {
         delete("/{id}") {
             repository.deleteReport(call.id)
             val reports = repository.getReportsForUser(call.user.oid!!) //TODO fjern
+                .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
             fun response() = createHTML().ul(classes = "report-list") {
                 reports.map { report -> reportListItem(report, true) }
             }

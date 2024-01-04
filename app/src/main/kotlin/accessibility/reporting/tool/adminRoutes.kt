@@ -26,7 +26,10 @@ fun Route.adminRoutes(repository: ReportRepository) {
                 h2 { +"Genererte rapporter" }
                 repository.getReports<ReportShortSummary>(ReportType.AGGREGATED).let { reports ->
                     if (reports.isNotEmpty()) {
-                        ul { reports.map { reportListItem(it, true, "/reports/collection") } }
+                        ul {
+                            reports.sortedBy { it.title.lowercase() }
+                                .map { reportListItem(it, true, "/reports/collection") }
+                        }
                     } else {
                         p { +"Fant ingen samlerapporter" }
                     }
@@ -35,7 +38,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                 repository.getReports<ReportShortSummary>(ReportType.SINGLE).let { reports ->
                     h2 { +"Rapporter for enkeltsider" }
                     ul("report-list") {
-                        reports.filter { it.reportType == ReportType.SINGLE }
+                        reports.sortedBy { it.title.lowercase() }.filter { it.reportType == ReportType.SINGLE }
                             .forEach { report ->
                                 reportListItem(
                                     report,
@@ -61,6 +64,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
             val report =
                 repository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException("Ukjent rapport")
             val srcReports = repository.getReports<ReportShortSummary>(null, report.fromReports.map { it.reportId })
+                .sortedBy { it.title.lowercase() }
             val organizations = repository.getAllOrganizationUnits()
 
             call.respondHtmlContent("Tilgjengelighetserklæring", NavBarItem.NONE) {
@@ -104,6 +108,8 @@ fun Route.adminRoutes(repository: ReportRepository) {
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
             repository.deleteReport(id)
             val reports = repository.getReports<ReportShortSummary>(ReportType.AGGREGATED)
+                .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
+
             fun response() = createHTML().ul(classes = "report-list") {
                 reports.map { report -> reportListItem(report, true, "/reports/collection") }
             }
@@ -212,6 +218,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     },
                     user = call.adminUser,
                     reports = repository.getReports<Report>(ids = formParameters.getAll("report"))
+                        .sortedBy { it.descriptiveName }
                 ).let {
                     repository.upsertReportReturning<AggregatedReport>(it)
                 }.apply {

@@ -16,6 +16,7 @@ fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
         val reports = repository.getReportsForUser(call.user.oid!!) //TODO: fjern optional når rapportert er oppdatert
+            .sortedBy { it.descriptiveName?.lowercase()?:it.url }
         call.respondHtmlContent("Rapporter for: " + call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
             a(classes = "cta") {
