@@ -22,7 +22,7 @@ spec:
     - "https://a11y-statement.nav.no"
   prometheus:
     enabled: true
-    path: /metrics
+    path: /open/metrics
   azure:
     application:
       enabled: true
@@ -34,6 +34,9 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
+      autoLoginIgnorePaths:
+        - /open/*
+        - /static/*
   gcp:
     sqlInstances:
       - name: a11y-statement
