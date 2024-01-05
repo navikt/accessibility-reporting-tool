@@ -16,7 +16,8 @@ fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
         val reports = repository.getReportsForUser(call.user.oid)
-        call.respondHtmlContent("Rapporter for: " + call.user.email.str(), NavBarItem.BRUKER) {
+            .sortedBy { it.descriptiveName?.lowercase()?:it.url }
+        call.respondHtmlContent("Rapporter for: " + call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }
             a(classes = "cta") {
                 href = "/reports/new"

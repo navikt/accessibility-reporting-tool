@@ -28,7 +28,7 @@ fun Routing.meta(prometehusRegistry: PrometheusMeterRegistry) {
 
 fun Route.landingPage(repository: ReportRepository) {
     get {
-        val reports = repository.getReports<ReportShortSummary>()
+        val reports = repository.getReports<ReportShortSummary>().sortedBy { it.title.lowercase() }
         call.respondHtmlContent("a11y rapportering", FORSIDE) {
             img {
                 id = "uu-katt"
