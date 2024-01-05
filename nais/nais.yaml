@@ -26,6 +26,7 @@ spec:
   azure:
     application:
       enabled: true
+      allowAllUsers: false
       tenant: nav.no
       claims:
         groups:
