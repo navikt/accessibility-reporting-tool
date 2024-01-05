@@ -26,7 +26,7 @@ services:
               "requestMappings": [
                 {
                   "requestParam": "grant_type",
-                  "claims": {\
+                  "claims": {
                     "aud": ["a11y"],
                     "email" : "carl@good.morning",
                     "name": "Carl Good Morning",
