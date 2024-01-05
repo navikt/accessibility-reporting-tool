@@ -1,6 +1,8 @@
 package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.User.Email
+import accessibility.reporting.tool.authenitcation.User.Oid
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -77,13 +79,13 @@ class ReportRepository(val database: Database) {
             Pair(orgUnit, reports)
         }
 
-    fun getReportsForUser(oid: String): List<Report> = database.list {
-        //tmp fiks
+    fun getReportsForUser(oid: Oid): List<Report> = database.list {
         queryOf(
             """select created, last_changed, report_data ->> 'version' as version, report_data from report
-                | where report_data -> 'user'->>'email'=:oid OR report_data -> 'user'->>'oid'=:oid""".trimMargin(),
+                | where report_data -> 'user'->>'oid'=:oid
+                |  OR report_data -> 'author'->>'oid'=:oid""".trimMargin(),
             mapOf(
-                "oid" to oid
+                "oid" to oid.str()
             )
         ).map { row -> report<Report>(row) }.asList
     }
@@ -152,9 +154,10 @@ class ReportRepository(val database: Database) {
                     report.withUpdatedMetadata(
                         organizationUnit = organizationUnit,
                         updateBy = User(
-                            email = organizationUnit.email,
+                            email = Email(organizationUnit.email),
                             name = organizationUnit.name,
-                            oid = "organizationUnit"
+                            oid = Oid("organizationUnit"),
+                            groups = emptyList()
                         )
                     )
                 )

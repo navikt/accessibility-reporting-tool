@@ -3,7 +3,6 @@ package accessibility.reporting.tool.database
 import accessibility.reporting.tool.authenitcation.User
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.util.*
 
 
 class PostgresDatabase(environment: Environment) : Database {
@@ -59,6 +58,6 @@ class Environment(
 }
 
 object Admins {
-    private val admins = System.getenv("ADMINS")?.split(",") ?: emptyList()
-    fun isAdmin(user: User) = admins.any { it.lowercase() == user.email.lowercase() }
+    private val admin_group = System.getenv("ADMIN_GROUP")
+    fun isAdmin(user: User) = user.groups.contains(admin_group)
 }

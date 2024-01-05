@@ -38,11 +38,13 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm:2.3.2")
     implementation("io.ktor:ktor-server-host-common-jvm:2.3.2")
     implementation("io.ktor:ktor-server-status-pages-jvm:2.3.2")
-    implementation("ch.qos.logback:logback-classic:1.4.8")
+    implementation("ch.qos.logback:logback-classic:1.4.12")
+    implementation("ch.qos.logback:logback-core:1.4.12")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.3")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:junit-jupiter-api")
     testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.2")
     testImplementation("org.testcontainers:testcontainers:1.18.3")

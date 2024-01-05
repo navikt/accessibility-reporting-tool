@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
-import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
@@ -39,7 +38,8 @@ fun Route.reports(repository: ReportRepository) {
         }
         delete("/{id}") {
             repository.deleteReport(call.id)
-            val reports = repository.getReportsForUser(call.user.oid!!) //TODO fjern
+
+            val reports = repository.getReportsForUser(call.user.oid)
                 .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
             fun response() = createHTML().ul(classes = "report-list") {
                 reports.map { report -> reportListItem(report, true) }
@@ -48,7 +48,7 @@ fun Route.reports(repository: ReportRepository) {
         }
         delete("/single/{id}") {
             repository.deleteReport(call.id)
-            val reports = repository.getReports<ReportShortSummary>(ReportType.SINGLE) //TODO fjern
+            val reports = repository.getReports<ReportShortSummary>(ReportType.SINGLE)
             fun response() = createHTML().ul(classes = "report-list") {
                 reports.map { report -> reportListItem(report, true, deletePath = "/reports/single") }
             }
@@ -68,7 +68,7 @@ fun Route.reports(repository: ReportRepository) {
 
                 val newReportId = UUID.randomUUID().toString()
                 repository.upsertReport(
-                    Version1.newReport(
+                    SucessCriteriaV1.newReport(
                         organizationUnit, newReportId, url, call.user, descriptiveName
                     )
                 )

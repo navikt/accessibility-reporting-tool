@@ -105,7 +105,7 @@ fun updatedMetadataStatus(report: Report): String = """
     createHTML().dd {
         id = "metadata-oppdatert-av"
         hxOOB("true")
-        +(report.lastUpdatedBy ?: report.user).email
+        +(report.lastUpdatedBy ?: report.author).email
     }
 }""".trimMargin()
 

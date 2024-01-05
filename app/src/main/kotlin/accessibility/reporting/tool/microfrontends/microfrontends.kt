@@ -42,7 +42,7 @@ suspend fun ApplicationCall.respondHtmlContent(
         }
 
         body(classes) {
-            p { +"innlogget som ${user.email}" }
+            p { +"Innlogget som ${user.email.str()}" }
             navbar(navBarItem, user)
             contentbuilder()
         }

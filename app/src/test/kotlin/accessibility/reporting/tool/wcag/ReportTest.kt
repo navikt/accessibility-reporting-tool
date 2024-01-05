@@ -2,6 +2,7 @@ package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
+import accessibility.reporting.tool.toEmail
 import assert
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.date.shouldBeAfter
@@ -14,11 +15,12 @@ import java.util.UUID
 
 class ReportTest {
     private val testOrg = OrganizationUnit.createNew(name = "Test organisasjonsenhet", email = "test@nav.no")
-    private val testUser = User("testuser@nav.no", "Test User", UUID.randomUUID().toString())
+    private val testUser =
+        User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
 
     @Test
     fun `Finner kriterie basert på nummer`() {
-        val testReport = Version1.newReport(
+        val testReport = SucessCriteriaV1.newReport(
             organizationUnit = testOrg,
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
@@ -26,7 +28,7 @@ class ReportTest {
             descriptiveName = "Some name"
         )
 
-        testReport.findCriterion("1.1.1") shouldBe Version1.criteriaTemplate.first()
+        testReport.findCriterion("1.1.1") shouldBe SucessCriteriaV1.criteriaTemplate.first()
         shouldThrow<IllegalArgumentException> {
             testReport.findCriterion("3.4.4")
         }
@@ -34,7 +36,7 @@ class ReportTest {
 
     @Test
     fun `lager kopi av rapport med oppdatert sukksesskriterie`() {
-        val testReport = Version1.newReport(
+        val testReport = SucessCriteriaV1.newReport(
             organizationUnit = testOrg,
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
@@ -42,7 +44,7 @@ class ReportTest {
             descriptiveName = "some name 2"
         )
 
-        val testUpdatedCriterion = Version1.criteriaTemplate.find { it.number == "1.3.2" }!!.copy(
+        val testUpdatedCriterion = SucessCriteriaV1.criteriaTemplate.find { it.number == "1.3.2" }!!.copy(
             status = Status.NON_COMPLIANT,
             breakingTheLaw = "not cool"
         )
@@ -50,33 +52,46 @@ class ReportTest {
         val updatedReport = testReport.withUpdatedCriterion(testUpdatedCriterion, testUser)
         updatedReport.assert {
             reportId shouldBe testReport.reportId
-            user shouldBe testReport.user
+            author shouldBe testReport.author
             organizationUnit shouldBe testReport.organizationUnit
             url shouldBe testReport.url
             lastChanged shouldBeAfter testReport.lastChanged
 
             successCriteria.forEach { newReportCriterion ->
                 if (newReportCriterion.number != testUpdatedCriterion.number) {
-                    newReportCriterion shouldBe Version1.criteriaTemplate.find { it.number == newReportCriterion.number }
+                    newReportCriterion shouldBe SucessCriteriaV1.criteriaTemplate.find { it.number == newReportCriterion.number }
                 } else {
-                    newReportCriterion shouldNotBe Version1.criteriaTemplate.find { it.number == "1.3.2" }
+                    newReportCriterion shouldNotBe SucessCriteriaV1.criteriaTemplate.find { it.number == "1.3.2" }
                     newReportCriterion.status shouldBe Status.NON_COMPLIANT
                     newReportCriterion.breakingTheLaw shouldBe "not cool"
                 }
             }
         }
-        val testUpdatedCriterion2 = Version1.criteriaTemplate.find { it.number == "4.1.1" }!!.copy(
+        val testUpdatedCriterion2 = SucessCriteriaV1.criteriaTemplate.find { it.number == "4.1.1" }!!.copy(
             status = Status.COMPLIANT
         )
 
         val contributor =
-            User("other.user@test.ja", "Contributor Contributerson", UUID.randomUUID().toString())
+            User(
+                "other.user@test.ja".toEmail(),
+                "Contributor Contributerson",
+                User.Oid(UUID.randomUUID().toString()),
+                groups = listOf()
+            )
         updatedReport.withUpdatedCriterion(testUpdatedCriterion2, contributor).assert {
             successCriteria.count { it.status != Status.NOT_TESTED } shouldBe 2
             contributers.size shouldBe 1
-            contributers.first() shouldBe contributor
-            user shouldBe testUser
-            lastUpdatedBy shouldBe contributor
+            contributers.first().assert {
+                oid shouldBe contributor.oid.str()
+                email shouldBe contributor.email.str()
+            }
+            author.email shouldBe testReport.author.email
+            author.oid shouldBe testReport.author.oid
+            lastUpdatedBy.assert {
+                require(this != null)
+                email shouldBe contributor.email.str()
+                oid shouldBe contributor.oid.str()
+            }
         }
     }
 
@@ -84,9 +99,14 @@ class ReportTest {
     fun tilgangsjekk() {
         mockkStatic(Admins::class)
 
-        val memberUser = User(email = "member@member.test", name = "Member Membersen", oid = "member-oid")
+        val memberUser = User(
+            email = User.Email("member@member.test"),
+            name = "Member Membersen",
+            oid = User.Oid("member-oid"),
+            groups = listOf()
+        )
 
-        val testReport = Version1.newReport(
+        val testReport = SucessCriteriaV1.newReport(
             organizationUnit = testOrg,
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
@@ -102,9 +122,10 @@ class ReportTest {
 
         updatedReport.writeAccess(
             User(
-                email = "Member@Member.test",
+                email = User.Email("Member@Member.test"),
                 name = "Member Membersen",
-                oid = "member-oid"
+                oid = User.Oid("member-oid"),
+                groups = listOf()
             )
         ) shouldBe true
     }

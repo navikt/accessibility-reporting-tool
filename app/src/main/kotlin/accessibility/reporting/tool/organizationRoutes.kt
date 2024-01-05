@@ -1,5 +1,6 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.ReportRepository
@@ -26,20 +27,21 @@ fun Route.organizationUnits(repository: ReportRepository) {
                     +"Legg til organisajonsenhet"
                 }
                 ul {
-                    id="orgunit-list"
+                    id = "orgunit-list"
                     repository.getAllOrganizationUnits().forEach { orgUnit ->
                         li {
                             a {
                                 href = "orgunit/${orgUnit.id}"
                                 +orgUnit.name
                             }
-                            if(Admins.isAdmin(call.user))
-                            button {
-                                hxDelete("orgunit/${orgUnit.id}")
-                                hxTarget("#orgunit-list")
-                                hxSwapOuter()
-                                hxConfirm("Vil du slette ${orgUnit.name}?")
-                                +"Slett organisasjonsenhet"
+                            if (Admins.isAdmin(call.user)) {
+                                button {
+                                    hxDelete("orgunit/${orgUnit.id}")
+                                    hxTarget("#orgunit-list")
+                                    hxSwapOuter()
+                                    hxConfirm("Vil du slette ${orgUnit.name}?")
+                                    +"Slett organisasjonsenhet"
+                                }
                             }
                         }
                     }
@@ -58,6 +60,19 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         p {
                             +"epost: ${orgUnit.email}"
                         }
+                        if (Admins.isAdmin(call.user)) {
+                            form {
+                                input {
+                                    type = InputType.text
+                                    required = true
+                                    placeholder = "new owner"
+                                    name = "orgunit-email"
+                                }
+                                button {
+                                    +"bytt eier"
+                                }
+                            }
+                        }
 
                         h2 { +"Medlemmer" }
                         div {
@@ -74,24 +89,25 @@ fun Route.organizationUnits(repository: ReportRepository) {
         }
 
         delete("{id}") {
-            val newOrgList = repository.deleteOrgUnit(call.parameters["id"]?:throw IllegalArgumentException("orgid mangler"))
+            val newOrgList =
+                repository.deleteOrgUnit(call.parameters["id"] ?: throw IllegalArgumentException("orgid mangler"))
 
             fun response() = createHTML().ul {
-                id="orgunit-list"
+                id = "orgunit-list"
                 newOrgList.forEach { orgUnit ->
                     li {
                         a {
                             href = "orgunit/${orgUnit.id}"
                             +orgUnit.name
                         }
-                        if(Admins.isAdmin(call.user))
-                        button {
-                            hxDelete("orgunit/${orgUnit.id}")
-                            hxTarget("#orgunit-list")
-                            hxSwapOuter()
-                            hxConfirm("Vil du slette ${orgUnit.name}?")
-                            +"Slett organisasjonsenhet"
-                        }
+                        if (Admins.isAdmin(call.user))
+                            button {
+                                hxDelete("orgunit/${orgUnit.id}")
+                                hxTarget("#orgunit-list")
+                                hxSwapOuter()
+                                hxConfirm("Vil du slette ${orgUnit.name}?")
+                                +"Slett organisasjonsenhet"
+                            }
                     }
                 }
             }
@@ -106,7 +122,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         formParameters["orgunit"] ?: throw IllegalArgumentException("organisasjonsenhet-id mangler")
                     )
                     ?.apply {
-                        addMember(formParameters["member"].toString())
+                        addMember(formParameters["member"].toEmail())
                         repository.upsertOrganizationUnit(this)
                     }
                     ?: throw IllegalArgumentException("organisasjonsenhet finnes ikke")
@@ -189,6 +205,8 @@ fun Route.organizationUnits(repository: ReportRepository) {
         }
     }
 }
+
+fun String?.toEmail(): User.Email  = this?.let {  User.Email(this)}?: throw IllegalArgumentException("mailadresse kan ikke være null")
 
 private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
     id = "member-list-container"

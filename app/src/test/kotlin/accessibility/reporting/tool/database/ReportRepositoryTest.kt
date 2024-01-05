@@ -2,6 +2,8 @@ package accessibility.reporting.tool.database
 
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.User.Email
+import accessibility.reporting.tool.toEmail
 import accessibility.reporting.tool.wcag.*
 import assert
 import io.kotest.assertions.withClue
@@ -9,8 +11,6 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import kotliquery.queryOf
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -27,9 +27,9 @@ class ReportRepositoryTest {
     )
     private val database = LocalPostgresDatabase.cleanDb()
     private val repository = ReportRepository(database)
-    private val testUserEmail = "tadda@test.tadda"
+    private val testUserEmail = Email("tadda@test.tadda")
     private val testUserName = "Tadda Taddasen"
-    private val testUserOid = UUID.randomUUID().toString()
+    private val testUserOid = User.Oid(UUID.randomUUID().toString())
 
     @BeforeAll
     fun setup() {
@@ -56,8 +56,8 @@ class ReportRepositoryTest {
 
     @Test
     fun upsertReport() {
-        val testReport = dummyReportV1()
-        val aggregatedTestReport = dummyAggregatedReportV1(orgUnit = testOrg)
+        val testReport = dummyReportV2()
+        val aggregatedTestReport = dummyAggregatedReportV2(orgUnit = testOrg)
         repository.upsertReport(testReport)
         repository.getReport<Report>(testReport.reportId).assert {
             require(this != null)
@@ -89,7 +89,7 @@ class ReportRepositoryTest {
     @Test
     fun `alter org units`() {
         val testOrg1 = OrganizationUnit("some-id", "Some unit", "tadda@nav.no")
-        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no" )
+        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no")
         val testOrg2 = OrganizationUnit(
             "some-other-two",
             "Child unit",
@@ -99,18 +99,18 @@ class ReportRepositoryTest {
             OrganizationUnit("some-id-thats-this", "Grandchild unit", "something@nav.no")
 
         repository.upsertOrganizationUnit(testOrg1)
-        repository.upsertReport(dummyReportV1(orgUnit = testOrg1))
-        testOrg1.addMember("testMember@test.ko")
+        repository.upsertReport(dummyReportV2(orgUnit = testOrg1))
+        testOrg1.addMember("testMember@test.ko".toEmail())
         repository.upsertOrganizationUnit(testOrg1)
 
         repository.getReportForOrganizationUnit(testOrg1.id).apply {
             first.assert {
-                require(this!=null)
+                require(this != null)
                 members.size shouldBe 1
             }
             second.size shouldBe 1
             second.first().assert {
-                require(organizationUnit!=null)
+                require(organizationUnit != null)
                 organizationUnit!!.id shouldBe testOrg1.id
                 organizationUnit!!.members.size shouldBe 1
             }
@@ -141,16 +141,16 @@ class ReportRepositoryTest {
                 testOrg.name
             )
         }
-        repository.deleteOrgUnit(orgUnitId=testOrg1.id).size shouldBe 4
+        repository.deleteOrgUnit(orgUnitId = testOrg1.id).size shouldBe 4
     }
 
     @Test
     fun `get reports by type`() {
-        val testReport = dummyReportV1()
-        val aggregatedTestReport = dummyAggregatedReportV1(orgUnit = testOrg)
+        val testReport = dummyReportV2()
+        val aggregatedTestReport = dummyAggregatedReportV2(orgUnit = testOrg)
         repository.upsertReport(testReport)
         repository.upsertReport(aggregatedTestReport)
-        repository.upsertReport(dummyAggregatedReportV1(orgUnit = testOrg))
+        repository.upsertReport(dummyAggregatedReportV2(orgUnit = testOrg))
 
         repository.getReports<Report>().size shouldBe 3
         repository.getReports<Report>(ReportType.SINGLE).size shouldBe 1
@@ -160,11 +160,11 @@ class ReportRepositoryTest {
 
     @Test
     fun `get reports by id`() {
-        val testReport = dummyReportV1()
-        val aggregatedTestReport = dummyAggregatedReportV1(orgUnit = testOrg)
+        val testReport = dummyReportV2()
+        val aggregatedTestReport = dummyAggregatedReportV2(orgUnit = testOrg)
         repository.upsertReport(testReport)
         repository.upsertReport(aggregatedTestReport)
-        repository.upsertReport(dummyAggregatedReportV1(orgUnit = testOrg))
+        repository.upsertReport(dummyAggregatedReportV2(orgUnit = testOrg))
 
         repository.getReports<Report>(ids = listOf(aggregatedTestReport.reportId, testReport.reportId)).size shouldBe 2
         repository.getReports<AggregatedReport>(ids = listOf(aggregatedTestReport.reportId)).size shouldBe 1
@@ -173,10 +173,10 @@ class ReportRepositoryTest {
 
     @Test
     fun `get reports for unit`() {
-        repository.upsertReport(dummyReportV1(orgUnit = testOrg))
-        repository.upsertReport(dummyReportV1("http://dummyurl2.test", testOrg))
-        repository.upsertReport(dummyReportV1("http://dummyurl3.test", testOrg))
-        repository.upsertReport(dummyReportV1("http://dummyurl4.test", testOrg))
+        repository.upsertReport(dummyReportV2(orgUnit = testOrg))
+        repository.upsertReport(dummyReportV2("http://dummyurl2.test", testOrg))
+        repository.upsertReport(dummyReportV2("http://dummyurl3.test", testOrg))
+        repository.upsertReport(dummyReportV2("http://dummyurl4.test", testOrg))
 
         repository.getReportForOrganizationUnit(testOrg.id).assert {
             require(first != null)
@@ -200,29 +200,28 @@ class ReportRepositoryTest {
 
     @Test
     fun `get reports for user`() {
+        val testUser = User(email = Email("randomemail"), name = null, oid = testUserOid, groups = listOf())
+        val updatedReport = dummyReportV2(
+            url = "http://dummyurl4.test",
+            user = User(email = Email("randomemail"), name = null, oid = testUserOid, groups = listOf())
+        )
 
-        repository.upsertReport(dummyReportV1())
-        repository.upsertReport(dummyReportV1("http://dummyurl2.test"))
-        repository.upsertReport(dummyReportV1("http://dummyurl3.test"))
+        repository.upsertReport(dummyReportV2(user = testUser, url = "http://dummyx2.test"))
+        repository.upsertReport(dummyReportV2(user = testUser, url = "http://dummyurl2.test"))
+        repository.upsertReport(dummyReportV2(user = testUser, url = "http://dummyurl3.test"))
         repository.upsertReport(
-            dummyReportV1(
-                url = "http://dummyurl4.test",
-                user = User(email = testUserOid, name = null, oid = null)
-            )
+            updatedReport
         )
 
         repository.upsertReport(
-            dummyReportV1(
-                url = "http://dummyurl4.test",
-                user = User(email = "otheruser", name = null, oid = null)
-            )
+            updatedReport
         )
 
 
         repository.getReportsForUser(testUserOid).assert {
-            size shouldBe 4 //TODO
-            withClue("Report with url dummyUrl.test is missing") {
-                any { it.url == "http://dummyurl.test" } shouldBe true
+            size shouldBe 4
+            withClue("Report with url http://dummyx2.test is missing") {
+                any { it.url == "http://dummyx2.test" } shouldBe true
             }
             withClue("Report with url dummyurl2.test is missing") {
                 any { it.url == "http://dummyurl2.test" } shouldBe true
@@ -237,19 +236,20 @@ class ReportRepositoryTest {
 
     }
 
-    private fun dummyReportV1(
+    private fun dummyReportV2(
         url: String = "http://dummyurl.test",
         orgUnit: OrganizationUnit? = null,
-        user: User = User(email = testUserEmail, name = testUserName, oid = testUserOid),
-        reportType: ReportType = ReportType.SINGLE
+        user: User = User(email = testUserEmail, name = testUserName, oid = testUserOid, groups = listOf()),
+        reportType: ReportType = ReportType.SINGLE,
+        id: String = UUID.randomUUID().toString()
     ) = Report(
-        reportId = UUID.randomUUID().toString(),
+        reportId = id,
         url = url,
         organizationUnit = orgUnit,
-        version = Version.V1,
+        version = Version.V2,
         testData = null,
-        user = user,
-        successCriteria = Version.V1.criteria,
+        author = user.toAuthor(),
+        successCriteria = Version.V2.criteria,
         filters = mutableListOf(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         created = LocalDateTimeHelper.nowAtUtc(),
@@ -258,17 +258,17 @@ class ReportRepositoryTest {
         reportType = reportType
     )
 
-    private fun dummyAggregatedReportV1(
+    private fun dummyAggregatedReportV2(
         orgUnit: OrganizationUnit? = null,
     ) =
         AggregatedReport(
             url = "https://aggregated.test",
             descriptiveName = "Aggregated dummy report",
-            user = User(email = testUserEmail, name = testUserName, oid = testUserOid),
+            user = User(email = testUserEmail, name = testUserName, oid = testUserOid, groups = listOf()),
             organizationUnit = orgUnit,
             reports = listOf(
-                dummyReportV1(),
-                dummyReportV1(orgUnit = OrganizationUnit("something", "something", "something"))
+                dummyReportV2(),
+                dummyReportV2(orgUnit = OrganizationUnit("something", "something", "something"))
             )
         )
 

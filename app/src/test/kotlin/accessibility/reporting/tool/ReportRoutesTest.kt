@@ -2,6 +2,8 @@ package accessibility.reporting.tool
 
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.User.Email
+import accessibility.reporting.tool.authenitcation.User.Oid
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.Report
@@ -43,10 +45,10 @@ class ReportRoutesTest {
                 reportId = "knownid",
                 url = "tadda",
                 organizationUnit = null,
-                version = Version.V1,
+                version = Version.V2,
                 testData = null,
-                user = User(email = "tadda", name = "tadda", oid = testUserOid),
-                successCriteria = Version.V1.criteria,
+                author = User(email = Email("tadda"), name = "tadda", oid = Oid(testUserOid), groups = listOf()).toAuthor(),
+                successCriteria = Version.V2.criteria,
                 filters = mutableListOf(),
                 created = LocalDateTimeHelper.nowAtUtc(),
                 lastChanged = LocalDateTimeHelper.nowAtUtc(),
