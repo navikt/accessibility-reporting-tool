@@ -8,7 +8,6 @@ import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -57,23 +56,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 org?.let { orgUnit ->
                     call.respondHtmlContent(orgUnit.name, NavBarItem.ORG_ENHETER) {
                         h1 { +orgUnit.name }
-                        p {
-                            +"epost: ${orgUnit.email}"
-                        }
-                        if (Admins.isAdmin(call.user)) {
-                            form {
-                                input {
-                                    type = InputType.text
-                                    required = true
-                                    placeholder = "new owner"
-                                    name = "orgunit-email"
-                                }
-                                button {
-                                    +"bytt eier"
-                                }
-                            }
-                        }
-
+                        div { ownerInfo(orgUnit, call.user) }
                         h2 { +"Medlemmer" }
                         div {
                             orgUnitMembersSection(orgUnit)
@@ -114,6 +97,23 @@ fun Route.organizationUnits(repository: ReportRepository) {
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 
+        post("{id}/owner") {
+            val params = call.receiveParameters()
+            val orgUnit = call.parameters["id"]?.let {
+                repository.getOrganizationUnit(it)
+            } ?: throw IllegalArgumentException("Ukjent organisasjonenhetsid")
+            val newOwnerEmail =
+                params["orgunit-email"] ?: throw IllegalArgumentException("Mangler email til ny eier")
+            repository.upsertOrganizationUnit(orgUnit.copy(email = newOwnerEmail))
+
+            call.respondText(status = HttpStatusCode.OK){
+                createHTML().div {
+                    ownerInfo(orgUnit.copy(email = newOwnerEmail), call.user)
+                }
+            }
+
+        }
+
         route("member") {
             post() {
                 val formParameters = call.receiveParameters()
@@ -151,7 +151,6 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 }
             }
         }
-
 
         route("new") {
             get {
@@ -206,7 +205,8 @@ fun Route.organizationUnits(repository: ReportRepository) {
     }
 }
 
-fun String?.toEmail(): User.Email  = this?.let {  User.Email(this)}?: throw IllegalArgumentException("mailadresse kan ikke være null")
+fun String?.toEmail(): User.Email =
+    this?.let { User.Email(this) } ?: throw IllegalArgumentException("mailadresse kan ikke være null")
 
 private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
     id = "member-list-container"
@@ -257,3 +257,24 @@ private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
     }
 }
 
+fun DIV.ownerInfo(orgUnit: OrganizationUnit, user: User) {
+    id = "orgunit-owner"
+    p {
+        +"epost: ${orgUnit.email}"
+    }
+    if (Admins.isAdmin(user)) {
+        form {
+            input {
+                type = InputType.text
+                required = true
+                placeholder = "new owner"
+                name = "orgunit-email"
+            }
+            button {
+                hxPost("${orgUnit.id}/owner")
+                hxTarget("#orgunit-owner")
+                +"bytt eier"
+            }
+        }
+    }
+}

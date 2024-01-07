@@ -145,6 +145,18 @@ class ReportRepositoryTest {
     }
 
     @Test
+    fun `changes owner of orgunit`(){
+        val testOrg1 = OrganizationUnit("some-id", "Some unit", "tadda@nav.no")
+        repository.upsertOrganizationUnit(testOrg1)
+        repository.upsertOrganizationUnit(testOrg1.copy(email = "newowner@nav.no"))
+        repository.getOrganizationUnit(testOrg1.id)!!.assert {
+            id shouldBe testOrg1.id
+            name shouldBe testOrg1.name
+            email shouldBe "newowner@nav.no"
+        }
+    }
+
+    @Test
     fun `get reports by type`() {
         val testReport = dummyReportV2()
         val aggregatedTestReport = dummyAggregatedReportV2(orgUnit = testOrg)
