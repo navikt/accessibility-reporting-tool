@@ -59,7 +59,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                         div { ownerInfo(orgUnit, call.user) }
                         h2 { +"Medlemmer" }
                         div {
-                            orgUnitMembersSection(orgUnit)
+                            orgUnitMembersSection(orgUnit, call.user)
                         }
 
                         if (reports.isNotEmpty()) {
@@ -106,7 +106,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 params["orgunit-email"] ?: throw IllegalArgumentException("Mangler email til ny eier")
             repository.upsertOrganizationUnit(orgUnit.copy(email = newOwnerEmail))
 
-            call.respondText(status = HttpStatusCode.OK){
+            call.respondText(status = HttpStatusCode.OK) {
                 createHTML().div {
                     ownerInfo(orgUnit.copy(email = newOwnerEmail), call.user)
                 }
@@ -130,7 +130,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 call.respondText(
                     contentType = ContentType.Text.Html,
                     status = HttpStatusCode.OK
-                ) { createHTML().div { orgUnitMembersSection(orgUnit) } }
+                ) { createHTML().div { orgUnitMembersSection(orgUnit, call.user) } }
             }
             delete {
                 val organizationUnit = repository.getOrganizationUnit(
@@ -146,7 +146,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
                 call.respondText(status = HttpStatusCode.OK, contentType = ContentType.Text.Html) {
                     createHTML().div {
-                        orgUnitMembersSection(organizationUnit)
+                        orgUnitMembersSection(organizationUnit, call.user)
                     }
                 }
             }
@@ -208,7 +208,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
 fun String?.toEmail(): User.Email =
     this?.let { User.Email(this) } ?: throw IllegalArgumentException("mailadresse kan ikke være null")
 
-private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
+private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit, user: User) {
     id = "member-list-container"
     if (orgUnit.members.isNotEmpty()) {
         ul {
@@ -216,11 +216,13 @@ private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
             orgUnit.members.forEach {
                 li {
                     +it
-                    button {
-                        hxTarget("#member-list-container")
-                        hxDelete("/orgunit/member?email=$it&orgunit=${orgUnit.id}")
-                        hxTrigger("click")
-                        +"Fjern fra organisasjon"
+                    if (orgUnit.hasWriteAccess(user)) {
+                        button {
+                            hxTarget("#member-list-container")
+                            hxDelete("/orgunit/member?email=$it&orgunit=${orgUnit.id}")
+                            hxTrigger("click")
+                            +"Fjern fra organisasjon"
+                        }
                     }
                 }
             }
@@ -230,29 +232,31 @@ private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
             +"Denne enheten har ingen medlemmer"
         }
     }
-    form {
-        hxPost("/orgunit/member")
-        hxTarget("#member-list-container")
-        label {
-            htmlFor = "new-member-input"
-            +"Legg til medlem"
-        }
-        input {
-            id = "new-member-input"
-            name = "member"
-            type = InputType.email
-            placeholder = "xxxx@nav.no"
-            required = true
-        }
-        input {
-            type = InputType.hidden
-            name = "orgunit"
-            value = orgUnit.id
-        }
+    if (orgUnit.hasWriteAccess(user)) {
+        form {
+            hxPost("/orgunit/member")
+            hxTarget("#member-list-container")
+            label {
+                htmlFor = "new-member-input"
+                +"Legg til medlem"
+            }
+            input {
+                id = "new-member-input"
+                name = "member"
+                type = InputType.email
+                placeholder = "xxxx@nav.no"
+                required = true
+            }
+            input {
+                type = InputType.hidden
+                name = "orgunit"
+                value = orgUnit.id
+            }
 
-        button {
-            type = ButtonType.submit
-            +"Legg til medlem"
+            button {
+                type = ButtonType.submit
+                +"Legg til medlem"
+            }
         }
     }
 }
@@ -262,7 +266,7 @@ fun DIV.ownerInfo(orgUnit: OrganizationUnit, user: User) {
     p {
         +"epost: ${orgUnit.email}"
     }
-    if (Admins.isAdmin(user)) {
+    if (orgUnit.hasWriteAccess(user)) {
         form {
             input {
                 type = InputType.text

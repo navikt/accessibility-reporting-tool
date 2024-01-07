@@ -265,6 +265,8 @@ data class OrganizationUnit(
     }
 
     private fun String.comparable(): String = trimIndent().lowercase()
+    fun hasWriteAccess(user: User): Boolean =
+        user.email.str() == email || Admins.isAdmin(user) || members.any { it == user.email.str() }
 }
 
 
