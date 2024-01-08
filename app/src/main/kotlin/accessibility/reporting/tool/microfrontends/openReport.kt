@@ -10,6 +10,7 @@ fun BODY.openReport(report: Report) {
     main(classes = "report-container") {
         header(classes = "report-header") {
             h1 {
+                id="top"
                 span {
                     +report.h1()
                     +" for "
@@ -42,7 +43,7 @@ fun BODY.openReport(report: Report) {
             openSummaryLinks(report)
         }
         a(classes = "to-top") {
-            href = "#sc1.1.1"
+            href = "#top"
             +"Til toppen"
         }
     }
