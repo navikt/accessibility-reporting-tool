@@ -14,13 +14,11 @@ fun BODY.openReport(report: Report) {
                     +report.h1()
                     +" for "
                 }
-
                 span {
                     id = "report-titles"
                     +(report.descriptiveName ?: report.url)
                 }
             }
-
             dl(classes = "statement-metadata") {
                 dt { +"Sist oppdatert av "}
                 dd { +"${report.lastUpdatedBy?.email}" }
@@ -35,19 +33,14 @@ fun BODY.openReport(report: Report) {
                 span {
                     +"Status: "
                 }
-
                 span {
                     id = "metadata-status"
                     hxOOB("true")
                     +report.statusString()
                 }
-
-
             }
-
             openSummaryLinks(report)
         }
-
         a(classes = "to-top") {
             href = "#sc1.1.1"
             +"Til toppen"
