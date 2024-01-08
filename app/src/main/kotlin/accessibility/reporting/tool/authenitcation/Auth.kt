@@ -44,13 +44,6 @@ fun Application.installAuthentication(azureAuthContext: AzureAuthContext) {
             }
 
             validate { jwtCredential ->
-                logger.info { """
-                    Credentials:
-                    ${jwtCredential.payload.getClaim("name")?.asString()},
-                    ${jwtCredential.payload.getClaim("preferred_username").asString()},
-                    ${jwtCredential.payload.getClaim("oid").asString()}
-                    ${jwtCredential.payload.getClaim("groups").asList(String::class.java)},
-                """.trimIndent() }
                 User(
                     name = jwtCredential.payload.getClaim("name")?.asString(),
                     email = Email(jwtCredential.payload.getClaim("preferred_username").asString()),
