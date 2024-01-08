@@ -1,8 +1,10 @@
 package accessibility.reporting.tool.microfrontends
 
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.Status
 import accessibility.reporting.tool.wcag.SuccessCriterion
 import kotlinx.html.*
+import java.time.format.DateTimeFormatter
 
 fun BODY.openReport(report: Report) {
     main(classes = "report-container") {
@@ -19,18 +21,11 @@ fun BODY.openReport(report: Report) {
                 }
             }
 
-            details {
-                summary {
-                    +"Vis/rediger metadata"
-                }
-                div(classes = "statement-metadata") {
-                    dl {
-                        //Tittel
-                        //URL
-                        //Sist oppdatert
-                        //
-                    }
-                }
+            dl(classes = "statement-metadata") {
+                dt { +"Sist oppdatert av "}
+                dd { +"${report.lastUpdatedBy?.email}" }
+                dt { +"Sist oppdatert"}
+                dd { +"${report.lastChanged.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}" }
             }
         }
 
@@ -50,14 +45,7 @@ fun BODY.openReport(report: Report) {
 
             }
 
-            summaryLinks(report)
-        }
-
-        div(classes = "sc-list") {
-            h2 {
-                +"Detaljert status"
-            }
-            report.successCriteria.map { succsessCriteriaSummary(it) }
+            openSummaryLinks(report)
         }
 
         a(classes = "to-top") {
@@ -67,7 +55,40 @@ fun BODY.openReport(report: Report) {
     }
 }
 
-fun DIV.succsessCriteriaSummary(successCriterion: SuccessCriterion){
-    h3 { "${successCriterion.name } ${successCriterion.name}" }
-    p { +successCriterion.describeFindings() }
+fun FlowContent.openSummaryLinks(report: Report) = div(classes = "summary") {
+    hxOOB("outerHTML:.summary")
+    val sortedCriteria = report.successCriteria.groupBy { it.status }
+
+    h3 { +"Ikke testet" }
+    sortedSummaryLinks(sortedCriteria[Status.NOT_TESTED])
+
+    h3 { +"Avvik" }
+    sortedSummaryLinks(sortedCriteria[Status.NON_COMPLIANT])
+
+    h3 { +"Ikke aktuelt" }
+    sortedSummaryLinks(sortedCriteria[Status.NOT_APPLICABLE])
+
+    h3 { +"OK" }
+    sortedSummaryLinks(sortedCriteria[Status.COMPLIANT])
+}
+
+private fun DIV.sortedSummaryLinks(sortedCriteria: List<SuccessCriterion>?) {
+    if (sortedCriteria.isNullOrEmpty()) {
+        p { +"Ingen kriterier" }
+    } else {
+        sortedCriteria?.apply {
+            ul {
+                forEach {
+                    li {
+                        h3 {
+                            +"${it.number} ${it.name}"
+                        }
+                        p {
+                            +"${it.describeFindings()}"
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
