@@ -8,7 +8,6 @@ import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -57,26 +56,10 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 org?.let { orgUnit ->
                     call.respondHtmlContent(orgUnit.name, NavBarItem.ORG_ENHETER) {
                         h1 { +orgUnit.name }
-                        p {
-                            +"epost: ${orgUnit.email}"
-                        }
-                        if (Admins.isAdmin(call.user)) {
-                            form {
-                                input {
-                                    type = InputType.text
-                                    required = true
-                                    placeholder = "new owner"
-                                    name = "orgunit-email"
-                                }
-                                button {
-                                    +"bytt eier"
-                                }
-                            }
-                        }
-
+                        div { ownerInfo(orgUnit, call.user) }
                         h2 { +"Medlemmer" }
                         div {
-                            orgUnitMembersSection(orgUnit)
+                            orgUnitMembersSection(orgUnit, call.user)
                         }
 
                         if (reports.isNotEmpty()) {
@@ -114,6 +97,23 @@ fun Route.organizationUnits(repository: ReportRepository) {
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
 
+        post("{id}/owner") {
+            val params = call.receiveParameters()
+            val orgUnit = call.parameters["id"]?.let {
+                repository.getOrganizationUnit(it)
+            } ?: throw IllegalArgumentException("Ukjent organisasjonenhetsid")
+            val newOwnerEmail =
+                params["orgunit-email"] ?: throw IllegalArgumentException("Mangler email til ny eier")
+            repository.upsertOrganizationUnit(orgUnit.copy(email = newOwnerEmail))
+
+            call.respondText(status = HttpStatusCode.OK) {
+                createHTML().div {
+                    ownerInfo(orgUnit.copy(email = newOwnerEmail), call.user)
+                }
+            }
+
+        }
+
         route("member") {
             post() {
                 val formParameters = call.receiveParameters()
@@ -130,7 +130,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 call.respondText(
                     contentType = ContentType.Text.Html,
                     status = HttpStatusCode.OK
-                ) { createHTML().div { orgUnitMembersSection(orgUnit) } }
+                ) { createHTML().div { orgUnitMembersSection(orgUnit, call.user) } }
             }
             delete {
                 val organizationUnit = repository.getOrganizationUnit(
@@ -146,12 +146,11 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
                 call.respondText(status = HttpStatusCode.OK, contentType = ContentType.Text.Html) {
                     createHTML().div {
-                        orgUnitMembersSection(organizationUnit)
+                        orgUnitMembersSection(organizationUnit, call.user)
                     }
                 }
             }
         }
-
 
         route("new") {
             get {
@@ -206,9 +205,10 @@ fun Route.organizationUnits(repository: ReportRepository) {
     }
 }
 
-fun String?.toEmail(): User.Email  = this?.let {  User.Email(this)}?: throw IllegalArgumentException("mailadresse kan ikke være null")
+fun String?.toEmail(): User.Email =
+    this?.let { User.Email(this) } ?: throw IllegalArgumentException("mailadresse kan ikke være null")
 
-private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
+private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit, user: User) {
     id = "member-list-container"
     if (orgUnit.members.isNotEmpty()) {
         ul {
@@ -216,11 +216,13 @@ private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
             orgUnit.members.forEach {
                 li {
                     +it
-                    button {
-                        hxTarget("#member-list-container")
-                        hxDelete("/orgunit/member?email=$it&orgunit=${orgUnit.id}")
-                        hxTrigger("click")
-                        +"Fjern fra organisasjon"
+                    if (orgUnit.hasWriteAccess(user)) {
+                        button {
+                            hxTarget("#member-list-container")
+                            hxDelete("/orgunit/member?email=$it&orgunit=${orgUnit.id}")
+                            hxTrigger("click")
+                            +"Fjern fra organisasjon"
+                        }
                     }
                 }
             }
@@ -230,30 +232,53 @@ private fun DIV.orgUnitMembersSection(orgUnit: OrganizationUnit) {
             +"Denne enheten har ingen medlemmer"
         }
     }
-    form {
-        hxPost("/orgunit/member")
-        hxTarget("#member-list-container")
-        label {
-            htmlFor = "new-member-input"
-            +"Legg til medlem"
-        }
-        input {
-            id = "new-member-input"
-            name = "member"
-            type = InputType.email
-            placeholder = "xxxx@nav.no"
-            required = true
-        }
-        input {
-            type = InputType.hidden
-            name = "orgunit"
-            value = orgUnit.id
-        }
+    if (orgUnit.hasWriteAccess(user)) {
+        form {
+            hxPost("/orgunit/member")
+            hxTarget("#member-list-container")
+            label {
+                htmlFor = "new-member-input"
+                +"Legg til medlem"
+            }
+            input {
+                id = "new-member-input"
+                name = "member"
+                type = InputType.email
+                placeholder = "xxxx@nav.no"
+                required = true
+            }
+            input {
+                type = InputType.hidden
+                name = "orgunit"
+                value = orgUnit.id
+            }
 
-        button {
-            type = ButtonType.submit
-            +"Legg til medlem"
+            button {
+                type = ButtonType.submit
+                +"Legg til medlem"
+            }
         }
     }
 }
 
+fun DIV.ownerInfo(orgUnit: OrganizationUnit, user: User) {
+    id = "orgunit-owner"
+    p {
+        +"epost: ${orgUnit.email}"
+    }
+    if (orgUnit.hasWriteAccess(user)) {
+        form {
+            input {
+                type = InputType.text
+                required = true
+                placeholder = "new owner"
+                name = "orgunit-email"
+            }
+            button {
+                hxPost("${orgUnit.id}/owner")
+                hxTarget("#orgunit-owner")
+                +"bytt eier"
+            }
+        }
+    }
+}

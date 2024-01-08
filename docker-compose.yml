@@ -30,6 +30,7 @@ services:
                     "aud": ["a11y"],
                     "email" : "carl@good.morning",
                     "name": "Carl Good Morning",
+                    "preferred_username": "carl@good.morning",
                     "oid": "carl@good.morning",
                     "preferred_username": "carl@good.morning", 
                     "groups": ["admins"]
