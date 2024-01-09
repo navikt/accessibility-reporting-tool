@@ -37,9 +37,9 @@ data class SuccessCriterion(
 
     fun describeFindings(): String =
         when {
-            status == Status.COMPLIANT -> "Ingen avvik"
-            status == Status.NOT_TESTED -> "Ikke testet"
-            status == Status.NOT_APPLICABLE -> "Kriteriet gjelder ikke"
+            status == Status.COMPLIANT -> ""
+            status == Status.NOT_TESTED -> ""
+            status == Status.NOT_APPLICABLE -> ""
             status == Status.NON_COMPLIANT && breakingTheLaw.isNotEmpty() -> "$breakingTheLaw"
             status == Status.NON_COMPLIANT && lawDoesNotApply.isNotEmpty() -> "$lawDoesNotApply"
             status == Status.NON_COMPLIANT && tooHardToComply.isNotEmpty() -> "$tooHardToComply"

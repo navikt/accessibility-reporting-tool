@@ -31,10 +31,10 @@ fun BODY.openReport(report: Report) {
         nav(classes = "sc-toc") {
             attributes["aria-label"] = "Status"
             h2 {
-                span {
+                div {
                     +"Status: "
                 }
-                span {
+                div {
                     id = "metadata-status"
                     hxOOB("true")
                     +report.statusString()
