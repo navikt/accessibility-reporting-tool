@@ -7,14 +7,10 @@ import kotlinx.html.*
 import java.time.format.DateTimeFormatter
 
 fun BODY.openReport(report: Report) {
-    main(classes = "report-container") {
-        header(classes = "report-header") {
+    main {
+        header {
             h1 {
                 id="top"
-                span {
-                    +report.h1()
-                    +" for "
-                }
                 span {
                     id = "report-titles"
                     +(report.descriptiveName ?: report.url)
@@ -28,7 +24,7 @@ fun BODY.openReport(report: Report) {
             }
         }
 
-        nav(classes = "sc-toc") {
+        div (classes = "open-report") {
             attributes["aria-label"] = "Status"
             h2 {
                 div {
