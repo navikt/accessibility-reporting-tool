@@ -74,7 +74,7 @@ private fun DIV.sortedSummaryLinks(sortedCriteria: List<SuccessCriterion>?) {
             ul {
                 forEach {
                     li {
-                        h3 {
+                        h4 {
                             +"${it.number} ${it.name}"
                         }
                         p {
