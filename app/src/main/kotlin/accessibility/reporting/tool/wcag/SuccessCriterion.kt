@@ -40,9 +40,9 @@ data class SuccessCriterion(
             status == Status.COMPLIANT -> "Ingen avvik"
             status == Status.NOT_TESTED -> "Ikke testet"
             status == Status.NOT_APPLICABLE -> "Kriteriet gjelder ikke"
-            status == Status.NON_COMPLIANT && breakingTheLaw.isNotEmpty() -> "Det er funnet avvik: $breakingTheLaw"
-            status == Status.NON_COMPLIANT && lawDoesNotApply.isNotEmpty() -> "Avvikene er ikke underlagt kravet: $lawDoesNotApply "
-            status == Status.NON_COMPLIANT && tooHardToComply.isNotEmpty() -> "Avvikene er unntatt fordi det er en uforholdsmessig stor byrde å følge kravet: $tooHardToComply"
+            status == Status.NON_COMPLIANT && breakingTheLaw.isNotEmpty() -> "$breakingTheLaw"
+            status == Status.NON_COMPLIANT && lawDoesNotApply.isNotEmpty() -> "$lawDoesNotApply"
+            status == Status.NON_COMPLIANT && tooHardToComply.isNotEmpty() -> "$tooHardToComply"
             else -> "Ukjent"
         }
 
