@@ -31,7 +31,16 @@ class AggregatedReport : Report {
         version = Version.V2,
         testData = null,
         author = user.toAuthor(),
-        successCriteria = reports.map { it.successCriteria }.flatten().aggregate(),
+        successCriteria = reports.map { report ->
+            report.successCriteria.map { criterion ->
+                SuccessCriterionSummary(
+                    reportTitle = report.descriptiveName ?: url,
+                    contactPerson = report.author.email,
+                    content = criterion
+                )
+            }
+
+        }.flatten().aggregate(),
         filters = mutableListOf(),
         created = LocalDateTimeHelper.nowAtUtc(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
@@ -101,7 +110,16 @@ class AggregatedReport : Report {
                 )
             }
         return AggregatedReport(
-            this.copy(reportId = reportId, successCriteria = (successCriteria + srcReport.successCriteria).aggregate()),
+            this.copy(
+                reportId = reportId,
+                successCriteria = (successCriteria + srcReport.successCriteria).map {
+                    SuccessCriterionSummary(
+                        reportTitle = srcReport.descriptiveName ?: srcReport.url,
+                        contactPerson = srcReport.author.email,
+                        content = it
+                    )
+                }.aggregate()
+            ),
             updatedFromReports,
             fromOrganizations
         )
@@ -139,10 +157,11 @@ class ReportShortSummary(
     val reportType: ReportType,
     val lastChanged: LocalDateTime
 ) : ReportContent {
-    val title = descriptiveName?:url
+    val title = descriptiveName ?: url
     fun hasUpdates(srcReports: List<ReportShortSummary>): Boolean =
         !wasDeleted(srcReports) &&
-        srcReports.any { srcReport -> srcReport.reportId == this.reportId && srcReport.lastChanged.isAfter(this.lastChanged) }
+                srcReports.any { srcReport -> srcReport.reportId == this.reportId && srcReport.lastChanged.isAfter(this.lastChanged) }
+
     fun wasDeleted(srcReports: List<ReportShortSummary>) = srcReports.none { it.reportId == this.reportId }
 
     companion object {

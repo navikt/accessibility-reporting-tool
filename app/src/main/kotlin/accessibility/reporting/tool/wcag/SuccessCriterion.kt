@@ -1,6 +1,5 @@
 package accessibility.reporting.tool.wcag
 
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
 import com.fasterxml.jackson.databind.JsonNode
 
 fun List<SuccessCriterion>.aggregateBreakingTheLaw(): String =
@@ -40,9 +39,9 @@ data class SuccessCriterion(
             status == Status.COMPLIANT -> ""
             status == Status.NOT_TESTED -> ""
             status == Status.NOT_APPLICABLE -> ""
-            status == Status.NON_COMPLIANT && breakingTheLaw.isNotEmpty() -> "$breakingTheLaw"
-            status == Status.NON_COMPLIANT && lawDoesNotApply.isNotEmpty() -> "$lawDoesNotApply"
-            status == Status.NON_COMPLIANT && tooHardToComply.isNotEmpty() -> "$tooHardToComply"
+            status == Status.NON_COMPLIANT && breakingTheLaw.isNotEmpty() -> breakingTheLaw
+            status == Status.NON_COMPLIANT && lawDoesNotApply.isNotEmpty() -> lawDoesNotApply
+            status == Status.NON_COMPLIANT && tooHardToComply.isNotEmpty() -> tooHardToComply
             else -> "Ukjent"
         }
 
@@ -54,11 +53,11 @@ data class SuccessCriterion(
         fun List<SuccessCriterion>.deviationCount() =
             count { it.status == Status.NON_COMPLIANT && !it.devationIsDesputed() }
 
-        fun List<SuccessCriterion>.aggregate(): List<SuccessCriterion> =
-            groupBy { it.number }
+        fun List<SuccessCriterionSummary>.aggregate(): List<SuccessCriterion> =
+            groupBy { it.content.number }
                 .values
                 .map { list ->
-                    list.first().let { template ->
+                    list.first().content.let { template ->
                         SuccessCriterion(
                             name = template.name,
                             description = template.description,
@@ -66,11 +65,11 @@ data class SuccessCriterion(
                             guideline = template.guideline,
                             tools = template.tools,
                             number = template.number,
-                            breakingTheLaw = list.aggregateBreakingTheLaw(),
-                            lawDoesNotApply = list.aggregateLawDoesNotApply(),
-                            tooHardToComply = list.aggregateTooHardToComply(),
+                            breakingTheLaw = list.joinToString("\n") { it.breakingTheLaw },
+                            lawDoesNotApply = list.joinToString("\n") { it.lawDoesNotApply },
+                            tooHardToComply = list.joinToString("\n") { it.tooHardToComply },
                             contentGroup = template.contentGroup,
-                            status = list.resolveStatus(),
+                            status = list.map { it.content }.resolveStatus(),
                             wcagUrl = template.wcagUrl,
                             helpUrl = template.helpUrl,
                             wcagVersion = template.wcagVersion
@@ -137,3 +136,26 @@ enum class Status(val display: String) {
         }
     }
 }
+
+data class SuccessCriterionSummary(val reportTitle: String, val contactPerson: String, val content: SuccessCriterion) {
+    val breakingTheLaw: String =
+        if (content.breakingTheLaw.isNotEmpty()) {
+            aggregatedText(text = content.breakingTheLaw)
+        } else ""
+
+    val lawDoesNotApply: String =
+        if (content.lawDoesNotApply.isNotEmpty()) {
+            aggregatedText(text = content.lawDoesNotApply)
+        } else ""
+
+    val tooHardToComply: String =
+        if (content.tooHardToComply.isNotEmpty()) {
+            aggregatedText(text = content.tooHardToComply)
+        } else ""
+
+    private fun aggregatedText(text: String) = """
+            $text
+            -- $reportTitle, kontaktperson: $contactPerson
+        """.trimIndent()
+}
+

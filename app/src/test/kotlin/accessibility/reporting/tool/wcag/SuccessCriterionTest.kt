@@ -21,7 +21,8 @@ class SuccessCriterionTest {
             .plus(testCriterion("1.2.3", status = Status.NOT_TESTED))
 
         testcriteria.
-            aggregate()
+        mapToSummary()
+            .aggregate()
             .assert {
                 size shouldBe 2
                 first().assert {
@@ -32,14 +33,42 @@ class SuccessCriterionTest {
                     guideline shouldBe "guideline 1.1.1"
                     tools shouldBe "tools 1.1.1"
                     number shouldBe number
-                    breakingTheLaw shouldBe "nei\nnei\nnei\nnei\nnei"
-                    lawDoesNotApply shouldBe "law\nlaw\nlaw\nlaw\nlaw"
-                    tooHardToComply shouldBe "too hard\ntoo hard\ntoo hard\ntoo hard\ntoo hard"
-                    contentGroup shouldBe "contentgroup 1.1.1"
-                    status shouldBe Status.NON_COMPLIANT
-                    wcagUrl shouldBe "wcagUrl 1.1.1"
-                    helpUrl shouldBe "helpurl 1.1.1"
-                    wcagVersion shouldBe "wcagversion 1.1.1"
+                    breakingTheLaw shouldBe """
+                        nei
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        nei
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        nei
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        nei
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        nei
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                    """.trimIndent()
+                    lawDoesNotApply shouldBe """
+                        law
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        law
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        law
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        law
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        law
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                    """.trimIndent()
+                    tooHardToComply shouldBe """
+                        too hard
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        too hard
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        too hard
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        too hard
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                        too hard
+                        -- Testtittel, kontaktperson: testperson@tes.no
+                    """.trimIndent()
                 }
                 get(1).assert {
                     number shouldBe "1.2.3"
@@ -54,6 +83,7 @@ class SuccessCriterionTest {
     fun `resolver riktig status`() {
         (testCriterion(status = Status.COMPLIANT) * 5)
             .plus(testCriterion(status = Status.NOT_TESTED) * 5)
+            .mapToSummary()
             .aggregate()
             .assert {
                 size shouldBe 1
@@ -64,6 +94,7 @@ class SuccessCriterionTest {
             .plus(testCriterion(status = Status.NOT_TESTED) * 5)
             .plus(testCriterion(status = Status.NON_COMPLIANT))
             .plus(testCriterion(status = Status.NOT_APPLICABLE))
+            .mapToSummary()
             .aggregate()
             .assert {
                 size shouldBe 1
@@ -71,15 +102,23 @@ class SuccessCriterionTest {
             }
 
         listOf(testCriterion(status = Status.NOT_APPLICABLE), testCriterion(status = Status.COMPLIANT))
+            .mapToSummary()
             .aggregate()
             .first().status shouldBe Status.COMPLIANT
 
         (testCriterion(status = Status.NOT_APPLICABLE) * 5)
+            .mapToSummary()
             .aggregate()
             .first().status shouldBe Status.NOT_APPLICABLE
     }
 
 
+}
+
+private fun List<SuccessCriterion>.mapToSummary() = map {
+    SuccessCriterionSummary(
+        reportTitle = "Testtittel", contactPerson = "testperson@tes.no", content = it
+    )
 }
 
 private operator fun SuccessCriterion.times(amount: Int) = mutableListOf<SuccessCriterion>().apply {
