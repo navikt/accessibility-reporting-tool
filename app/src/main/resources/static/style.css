@@ -26,6 +26,24 @@ header {
 
 }
 
+
+.card-container {
+   display: flex;
+   flex-wrap: wrap;
+   justify-content: space-around;
+   padding: 20px;
+   }
+
+.card {
+    background-color: white; /* card background color */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* box-shadow effects */
+    border-radius: 10px; /* rounded corners */
+    width: 200px; /* card width */
+    margin: 20px; /* space around cards */
+    padding: 20px; /* space inside cards */
+    text-align: center; /* center card text */
+}
+
 main {
     grid-row: 2 / 3;
     background-color: white;
@@ -39,6 +57,8 @@ div {
 footer {
     grid-row: 4 / 5;
     background-color: var(--blue);
+    color: white;
+    padding: 60px;
 }
 
 a {
