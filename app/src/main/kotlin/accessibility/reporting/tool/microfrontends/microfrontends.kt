@@ -14,7 +14,7 @@ suspend fun ApplicationCall.respondHtmlContent(
     title: String,
     navBarItem: NavBarItem,
     classes: String = "default-body-class",
-    contentbuilder: BODY.() -> Unit
+    contentbuilder: MAIN.() -> Unit
 ) {
     respondHtml {
         lang = "no"
@@ -42,9 +42,20 @@ suspend fun ApplicationCall.respondHtmlContent(
         }
 
         body(classes) {
-            p { +"Innlogget som ${user.email.str()}" }
             navbar(navBarItem, user)
-            contentbuilder()
+            main {
+                contentbuilder()
+            }
+            div(classes="grey-box") {
+                div{ +"Card"}
+                div{ +"Card"}
+                div{ +"Card"}
+                div{ +"Card"}
+                div{ +"Card"}
+            }
+            footer {
+                +"very footer"
+            }
         }
 
     }
@@ -64,6 +75,7 @@ fun BODY.navbar(currentItem: NavBarItem, user: User? = null) {
             FAQ.li(currentItem, this)
             LOGG_UT.li(currentItem, this)
         }
+        +"Inlogget som ${user?.email?.str()}"
     }
 }
 

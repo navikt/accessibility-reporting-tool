@@ -10,6 +10,7 @@ import io.ktor.server.application.*
 import io.ktor.server.html.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.css.*
 import kotlinx.html.*
 
 
@@ -31,7 +32,7 @@ fun Route.openReportRoute(repository: ReportRepository) {
 suspend fun ApplicationCall.respondHtmlOpenContent(
     title: String,
     classes: String = "default-body-class",
-    contentbuilder: BODY.() -> Unit
+    contentbuilder: MAIN.() -> Unit
 ){
     respondHtml {
         lang = "no"
@@ -59,7 +60,9 @@ suspend fun ApplicationCall.respondHtmlOpenContent(
         }
 
         body(classes) {
-            contentbuilder()
+            main {
+                contentbuilder()
+            }
         }
 
     }

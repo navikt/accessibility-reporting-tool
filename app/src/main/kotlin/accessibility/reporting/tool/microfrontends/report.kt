@@ -6,7 +6,7 @@ import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.ReportContent
 import kotlinx.html.*
 
-fun BODY.reportContainer(
+fun MAIN.reportContainer(
     report: Report,
     organizations: List<OrganizationUnit>,
     updateCriterionUrl: String,

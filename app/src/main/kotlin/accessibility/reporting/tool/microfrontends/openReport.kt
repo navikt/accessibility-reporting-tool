@@ -6,7 +6,7 @@ import accessibility.reporting.tool.wcag.SuccessCriterion
 import kotlinx.html.*
 import java.time.format.DateTimeFormatter
 
-fun BODY.openReport(report: Report) {
+fun MAIN.openReport(report: Report) {
     main {
         header {
             h1 {

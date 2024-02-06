@@ -69,8 +69,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                 .sortedBy { it.title.lowercase() }
             val organizations = repository.getAllOrganizationUnits()
 
-            call.respondHtmlContent("Tilgjengelighetserklæring", NavBarItem.NONE) {
-                reportContainer(
+            call.respondHtmlContent("Tilgjengelighetserklæring", NavBarItem.NONE) { reportContainer(
                     report = report,
                     organizations = organizations,
                     updateCriterionUrl = updateCriterionEndpoint,

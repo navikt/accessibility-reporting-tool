@@ -1,13 +1,44 @@
 /* Theme */
-body {
+:root {
+    --blue: #244f91;
+    --grey: #eceef0;
+}
+* {
     font-family: "Source Sans Pro", Arial, sans-serif;
     line-height: 1.333;
     font-size: 1.125rem;
     color: #333;
+}
 
-    max-width: 60rem;
-    margin: 0 auto;
-    padding: 0 1em;
+body {
+       display: grid;
+       grid-template-columns: 1fr;
+       grid-template-rows: 50px auto auto auto;
+       grid-gap: 0;
+       height: 100vh;
+       margin: 0;
+       padding: 0;
+       box-sizing: border-box;
+   }
+
+header {
+    grid-row: 1 / 2;
+
+}
+
+main {
+    grid-row: 2 / 3;
+    background-color: white;
+}
+
+div {
+    grid-row: 3 / 4;
+    background-color: var(--grey);
+}
+
+footer {
+    grid-row: 4 / 5;
+    background-color: var(--blue);
 }
 
 a {
