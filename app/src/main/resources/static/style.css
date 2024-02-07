@@ -1,8 +1,8 @@
-/* Theme */
 :root {
     --blue: #244f91;
     --grey: #eceef0;
 }
+
 * {
     font-family: "Source Sans Pro", Arial, sans-serif;
     line-height: 1.333;
@@ -13,19 +13,13 @@
 body {
        display: grid;
        grid-template-columns: 1fr;
-       grid-template-rows: 50px auto auto auto;
+       grid-template-rows: 50px auto auto 80px;
        grid-gap: 0;
        height: 100vh;
        margin: 0;
        padding: 0;
        box-sizing: border-box;
    }
-
-header {
-    grid-row: 1 / 2;
-
-}
-
 
 .card-container {
    display: flex;
@@ -35,13 +29,17 @@ header {
    }
 
 .card {
-    background-color: white; /* card background color */
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); /* box-shadow effects */
-    border-radius: 10px; /* rounded corners */
-    width: 200px; /* card width */
-    margin: 20px; /* space around cards */
-    padding: 20px; /* space inside cards */
-    text-align: center; /* center card text */
+    background-color: white;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    border-radius: 10px;
+    width: 200px;
+    margin: 20px;
+    padding: 20px;
+    text-align: center;
+}
+
+header {
+    grid-row: 1 / 2;
 }
 
 main {
@@ -58,7 +56,7 @@ footer {
     grid-row: 4 / 5;
     background-color: var(--blue);
     color: white;
-    padding: 60px;
+    padding: 20px;
 }
 
 a {
@@ -81,14 +79,12 @@ a:hover, a:hover:after {
     background-color: #e7f4fb;
 }
 
-/* Front page stuff */
 #uu-katt {
     width:400px;
     margin-top: 45px;
     float: right;
 }
 
-/* Main layout for report registration page */
 .report-header {
     grid-area: report-header;
 }
