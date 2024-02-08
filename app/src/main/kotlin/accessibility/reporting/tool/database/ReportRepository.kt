@@ -85,7 +85,7 @@ class ReportRepository(val database: Database) {
                 | where report_data -> 'user'->>'oid'=:oid
                 |  OR report_data -> 'author'->>'oid'=:oid""".trimMargin(),
             mapOf(
-                "oid" to oid.str()
+                "oid" to oid.str(),
             )
         ).map { row -> report<Report>(row) }.asList
     }

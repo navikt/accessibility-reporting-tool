@@ -46,13 +46,7 @@ suspend fun ApplicationCall.respondHtmlContent(
             main {
                 contentbuilder()
             }
-            div(classes="card-container") {
-                div(classes="card"){ +"Card"}
-                div(classes="card"){ +"Card"}
-                div(classes="card"){ +"Card"}
-                div(classes="card"){ +"Card"}
 
-            }
             footer {
 
                 +"Har du spørsmål eller behov for støtte? Ta gjerne kontakt i #nav-uu kanalen på slack eller sende en mail til universel.utformning@nav.no"

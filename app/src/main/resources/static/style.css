@@ -11,46 +11,47 @@
 }
 
 body {
-       display: grid;
-       grid-template-columns: 1fr;
-       grid-template-rows: 50px auto auto 80px;
-       grid-gap: 0;
-       height: 100vh;
-       margin: 0;
-       padding: 0;
-       box-sizing: border-box;
-   }
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 50px auto 80px;
+    grid-gap: 0;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 .card-container {
-   display: flex;
-   flex-wrap: wrap;
-   justify-content: space-around;
-   padding: 20px;
-   }
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
 
 .card {
     background-color: white;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     border-radius: 10px;
+}
+
+.report-list {
+    list-style: none;
+}
+
+.report-list > .card {
     width: 200px;
-    margin: 20px;
-    padding: 20px;
-    text-align: center;
 }
 
 header {
     grid-row: 1 / 2;
 }
 
+
 main {
     grid-row: 2 / 3;
     background-color: white;
+    margin: 0 auto;
 }
 
-div {
-    grid-row: 3 / 4;
-    background-color: var(--grey);
-}
 
 footer {
     grid-row: 4 / 5;
@@ -80,7 +81,7 @@ a:hover, a:hover:after {
 }
 
 #uu-katt {
-    width:400px;
+    width: 400px;
     margin-top: 45px;
     float: right;
 }
@@ -132,6 +133,25 @@ a:hover, a:hover:after {
     margin: 0 0 .75em 0;
 }
 
+.panels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    grid-column-gap: 8px;
+    grid-row-gap: 8px;
+}
+
+.reports {
+    grid-area: 1 / 1 / 2 / 4;
+}
+
+.data {
+    grid-area: 2 / 1 / 4 / 3;
+}
+
+.members {
+    grid-area: 2 / 3 / 4 / 4;
+}
 
 /* Open reports */
 .open-report ul {

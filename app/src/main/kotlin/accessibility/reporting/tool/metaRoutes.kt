@@ -1,9 +1,12 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.microfrontends.NavBarItem.FORSIDE
 import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.microfrontends.reportListItem
-import accessibility.reporting.tool.microfrontends.respondHtmlContent
+import accessibility.reporting.tool.wcag.ReportContent
 import accessibility.reporting.tool.wcag.ReportShortSummary
 import accessibility.reporting.tool.wcag.ReportType
 import io.ktor.http.*
@@ -11,6 +14,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import kotlinx.css.*
 import kotlinx.html.*
 
 fun Routing.meta(prometehusRegistry: PrometheusMeterRegistry) {
@@ -29,37 +33,58 @@ fun Routing.meta(prometehusRegistry: PrometheusMeterRegistry) {
 fun Route.landingPage(repository: ReportRepository) {
     get {
         val reports = repository.getReports<ReportShortSummary>().sortedBy { it.title.lowercase() }
+
+
         call.respondHtmlContent("a11y rapportering", FORSIDE) {
-            img {
-                id = "uu-katt"
-                src = "/static/UU-katt.svg"
-                alt = "A11y cat loves you!"
-                title = "A11y cat loves you!"
+            div {
+                p {
+                    a(classes = "cta") {
+                        href = "/reports/new"
+                        +"Lag ny erklæring"
+                    }
+                }
+            }
+            div(classes="panels") {
+                div(classes = "reports card") {
+                    h2 { +"Rapporter" }
+                    if (reports.filter { it.reportType == ReportType.SINGLE }.isNullOrEmpty()) {
+                        p { +"Ingen rapporter" }
+                    } else
+                        ul("report-list card-container") {
+                            reports.filter { it.reportType == ReportType.SINGLE }
+                                .forEach { report -> reportCard(report) }
+                        }
+                }
+                div(classes = "data card") {
+
+                }
+                div(classes = "members card") {
+
+                }
             }
 
             h1 { +"a11y rapporteringsverktøy for NAV" }
-            p {
-                a(classes = "cta") {
-                    href = "/reports/new"
-                    +"Lag ny erklæring"
-                }
-            }
-            h2 { +"Rapporter for enkeltsider" }
-            if (reports.filter { it.reportType == ReportType.SINGLE }.isNullOrEmpty()) {
-                p {+"Ingen rapporter"}
-            } else
-            ul("report-list") {
-                reports.filter { it.reportType == ReportType.SINGLE }
-                    .forEach { report -> reportListItem(report) }
-            }
 
             h2 { +"Samlerapporter" }
-            if (    reports.filter { it.reportType == ReportType.AGGREGATED }.isNullOrEmpty()) {
-                p {+"Ingen samlerapporter"}
+            if (reports.filter { it.reportType == ReportType.AGGREGATED }.isNullOrEmpty()) {
+                p { +"Ingen samlerapporter" }
             } else
-            ul {
-                reports.filter { it.reportType == ReportType.AGGREGATED }.forEach { report -> reportListItem(report) }
-            }
+                ul {
+                    reports.filter { it.reportType == ReportType.AGGREGATED }
+                        .forEach { report -> reportListItem(report) }
+                }
+        }
+    }
+}
+
+fun UL.reportCard(
+    report: ReportContent,
+    rootPath: String = "/reports",
+) {
+    li(classes="card") {
+         a {
+            href = "$rootPath/${report.reportId}"
+            +(report.descriptiveName ?: report.url)
         }
     }
 }

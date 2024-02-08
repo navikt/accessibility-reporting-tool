@@ -134,11 +134,12 @@ fun UL.reportListItem(
     rootPath: String = "/reports",
     deletePath: String? = null
 ) {
-    li {
+    li(classes="card") {
         a {
             href = "$rootPath/${report.reportId}"
             +(report.descriptiveName ?: report.url)
         }
+
         if (allowDelete)
             button {
                 hxDelete("${deletePath ?: rootPath}/${report.reportId}")
