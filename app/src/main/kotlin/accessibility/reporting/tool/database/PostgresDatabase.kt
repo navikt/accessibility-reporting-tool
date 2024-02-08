@@ -61,7 +61,5 @@ class Environment(
 object Admins {
     private val log = KotlinLogging.logger {  }
     private val admin_group = System.getenv("ADMIN_GROUP")
-    fun isAdmin(user: User) = user.groups.contains(admin_group).also {
-        log.info { "Groups user hører til : ${user.groups.joinToString()}\nResultat av isAdmin: $it" }
-    }
+    fun isAdmin(user: User) = user.groups.contains(admin_group)
 }
