@@ -134,7 +134,7 @@ fun UL.reportListItem(
     rootPath: String = "/reports",
     deletePath: String? = null
 ) {
-    li(classes="card") {
+    li {
         a {
             href = "$rootPath/${report.reportId}"
             +(report.descriptiveName ?: report.url)
