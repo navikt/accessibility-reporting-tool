@@ -5,6 +5,7 @@ metadata:
   namespace: a11y-statement
   labels:
     team: a11y-statement
+    good: very-trust
 spec:
   image: "{{ image }}"
   port: 8080
@@ -65,3 +66,4 @@ spec:
       value: "8080"
     - name: ADMIN_GROUP
       value: "07bca51b-e5dc-484a-ac09-685e61244b6b"
+
