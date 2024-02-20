@@ -1,11 +1,6 @@
 on:
-  workflow_dispatch:
-    inputs:
-      cluster:
-        description: 'Det clusteret branchen skal deployes til'
-        required: true
-        type: string
-
+  push:
+    
 jobs:
   run-tests:
     name: Run tests
@@ -49,6 +44,6 @@ jobs:
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: ${{ inputs.cluster }}
+          CLUSTER: dev-gcp
           RESOURCE: ./nais/nais-dev.yaml
           VAR: image=${{ needs.build.outputs.image }}
