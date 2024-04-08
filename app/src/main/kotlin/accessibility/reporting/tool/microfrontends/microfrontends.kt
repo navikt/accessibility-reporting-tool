@@ -127,7 +127,7 @@ fun Route.faqRoute() {
                 }
             }
             h2 { +"Andre spørsmål" }
-            p { +"Om du har andre spørsmål kan du stille de i nav-uu kanalen på slack eller sende en mail til universel.utformning@nav.no" }
+            p { +"Om du har andre spørsmål kan du stille de i nav-uu kanalen på slack eller sende en mail til universell.utformning@nav.no" }
         }
     }
 }
