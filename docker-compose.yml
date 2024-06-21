@@ -47,7 +47,7 @@ services:
       - "6379:6379"
 
   wonderwall:
-    image: ghcr.io/nais/wonderwall:latest
+    image: ghcr.io/nais/wonderwall:2023-08-10-135210-2825608
     # alternatively,
     # build: .
     ports:

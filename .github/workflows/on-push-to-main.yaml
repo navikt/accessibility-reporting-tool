@@ -5,6 +5,7 @@ on:
     paths-ignore:
       - README.md
       - .gitignore
+      - docker-compose.yml
 jobs:
   run-tests:
     name: Run tests
