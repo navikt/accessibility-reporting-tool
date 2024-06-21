@@ -23,3 +23,7 @@ i [docker-compose](docker-compose.yml)
 
 Default verdi på dev-logging er DEBUG, kan endres i [logback-dev.xml](app/src/main/resources/logback-dev.xml)
 
+## Troubleshooting
+###Unresolved Network Adress når du prøver å starte appen (mac)
+1. Åpne /etc/host `open /etc/hosts`
+2. Legg inn på ny linje: `127.0.0.1 host.docker.internal`
