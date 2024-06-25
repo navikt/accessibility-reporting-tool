@@ -38,6 +38,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm:2.3.2")
     implementation("io.ktor:ktor-server-host-common-jvm:2.3.2")
     implementation("io.ktor:ktor-server-status-pages-jvm:2.3.2")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.12")
     implementation("ch.qos.logback:logback-classic:1.4.12")
     implementation("ch.qos.logback:logback-core:1.4.12")
     implementation("net.logstash.logback:logstash-logback-encoder:7.3")
