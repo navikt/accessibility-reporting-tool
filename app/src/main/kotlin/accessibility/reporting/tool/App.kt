@@ -7,13 +7,16 @@ import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
+import accessibility.reporting.tool.rest.reports
 import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.http.content.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -45,6 +48,9 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
     install(MicrometerMetrics) {
         registry = prometehusRegistry
     }
+    install(ContentNegotiation){
+        jackson()
+    }
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
@@ -72,6 +78,9 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             landingPage(repository)
             adminRoutes(repository)
             faqRoute()
+            route("api"){
+                reports(repository)
+            }
         }
         meta(prometehusRegistry)
         openReportRoute(repository)
