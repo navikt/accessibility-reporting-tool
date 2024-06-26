@@ -19,7 +19,7 @@ spec:
     max: 2
     cpuThresholdPercentage: 100
   ingresses:
-    - "https://a11ystatement.nav.no"
+    - "https://a11y-statement.nav.no"
   prometheus:
     enabled: true
     path: /open/metrics
