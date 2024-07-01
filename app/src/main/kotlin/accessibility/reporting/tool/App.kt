@@ -6,7 +6,7 @@ import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
-import accessibility.reporting.tool.rest.reports
+import accessibility.reporting.tool.rest.jsonApiReports
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -92,7 +92,7 @@ fun Application.api(
             adminRoutes(repository)
             faqRoute()
             route("api") {
-                reports(repository)
+                jsonApiReports(repository)
             }
         }
         meta(prometehusRegistry)
