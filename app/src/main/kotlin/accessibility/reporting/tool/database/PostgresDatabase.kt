@@ -1,5 +1,6 @@
 package accessibility.reporting.tool.database
 
+import accessibility.reporting.tool.Environment
 import accessibility.reporting.tool.authenitcation.User
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -39,22 +40,6 @@ class PostgresDatabase(environment: Environment) : Database {
             }
             return config
         }
-    }
-}
-
-
-class Environment(
-    dbHost: String = System.getenv("DB_HOST"),
-    dbPort: String = System.getenv("DB_PORT"),
-    dbName: String = System.getenv("DB_DATABASE"),
-    val dbUser: String = System.getenv("DB_USERNAME"),
-    val dbPassword: String = System.getenv("DB_PASSWORD"),
-
-    ) {
-    val dbUrl: String = if (dbHost.endsWith(":$dbPort")) {
-        "jdbc:postgresql://${dbHost}/$dbName"
-    } else {
-        "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
     }
 }
 
