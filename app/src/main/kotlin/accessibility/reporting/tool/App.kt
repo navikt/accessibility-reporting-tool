@@ -7,6 +7,7 @@ import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
 import accessibility.reporting.tool.rest.jsonApiReports
+import accessibility.reporting.tool.rest.jsonapiteams
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -93,6 +94,7 @@ fun Application.api(
             faqRoute()
             route("api") {
                 jsonApiReports(repository)
+                jsonapiteams(repository)
             }
         }
         meta(prometehusRegistry)

@@ -31,6 +31,12 @@ class ApiTest {
         name = "Testorganisation",
         email = "testorganisation@nav.no"
     )
+
+    private val testOrg2 = OrganizationUnit(
+        id = "1234568",
+        name = "Testorganization",
+        email = "testorganization@nav.no"
+    )
     private val initialReports =
         listOf(dummyReportV2(orgUnit = testOrg), dummyReportV2(orgUnit = testOrg), dummyReportV2(orgUnit = testOrg))
 
@@ -38,6 +44,7 @@ class ApiTest {
     @BeforeAll()
     fun populateDb() {
         repository.upsertOrganizationUnit(testOrg)
+        repository.upsertOrganizationUnit(testOrg2)
         initialReports.forEach { report ->
             repository.upsertReport(report)
         }
@@ -60,7 +67,32 @@ class ApiTest {
         }
     }
 
+    @Test
+    fun `Returns a summary of of all teams`() = testApplication {
+        application {
+            api(repository = repository, corsAllowedOrigins = "*", corsAllowedSchemes = listOf("http","https")) { mockEmptyAuth() }
+        }
+
+        client.get("api/teams").assert {
+            status shouldBe HttpStatusCode.OK
+            objectmapper.readTree(bodyAsText()).toList().assert {
+                this.size shouldBe 2
+                val org = this.find {it["id"].asText() == "1234567"}
+                require(org!=null) {"org is null"}
+                org["name"].asText() shouldBe "Testorganisation"
+                org["email"].asText() shouldBe "testorganisation@nav.no"
+                val org2 = this.find {it["id"].asText() == "1234568"}
+                require(org2!=null) {"org is null"}
+                org2["name"].asText() shouldBe "Testorganization"
+                org2["email"].asText() shouldBe "testorganization@nav.no"
+
+            }
+        }
+    }
+
 }
+
+
 
 private fun Report.assertExists(jsonList: List<JsonNode>) {
     val result = jsonList.find { jsonNode -> jsonNode["navn"].asText() == descriptiveName }
