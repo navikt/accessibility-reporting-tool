@@ -2,15 +2,12 @@ package accessibility.reporting.tool
 
 import LocalPostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.Author
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.ReportShortSummary
 import assert
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -45,10 +42,11 @@ class ApiTest {
             repository.upsertReport(report)
         }
     }
+
     @Test
     fun `Returns a summary of of all reports`() = testApplication {
         application {
-            api(repository) { mockEmptyAuth() }
+            api(repository = repository, corsAllowedOrigins = "*", corsAllowedSchemes = listOf("http","https")) { mockEmptyAuth() }
         }
 
         client.get("api/reports/summary").assert {

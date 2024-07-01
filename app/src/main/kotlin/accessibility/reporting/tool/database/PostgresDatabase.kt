@@ -49,6 +49,7 @@ class Environment(
     dbName: String = System.getenv("DB_DATABASE"),
     val dbUser: String = System.getenv("DB_USERNAME"),
     val dbPassword: String = System.getenv("DB_PASSWORD"),
+    val corsAllowedOrigin: String = System.getenv("")
 
     ) {
     val dbUrl: String = if (dbHost.endsWith(":$dbPort")) {

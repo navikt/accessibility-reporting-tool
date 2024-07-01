@@ -17,11 +17,12 @@ import io.ktor.server.http.content.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.micrometer.prometheus.PrometheusConfig
-import io.micrometer.prometheus.PrometheusMeterRegistry
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import mu.KotlinLogging
 import java.lang.IllegalArgumentException
 
@@ -34,13 +35,23 @@ fun main() {
     embeddedServer(
         Netty,
         port = System.getenv("PORT")?.toInt() ?: 8081,
-        module = { this.api(repository) { installAuthentication(authContext) } }).start(
+        module = {
+            this.api(
+                corsAllowedOrigins = environment.corsAllowedOrigin,
+                repository = repository
+            ) { installAuthentication(authContext) }
+        }).start(
         wait = true
     )
 }
 
 
-fun Application.api(repository: ReportRepository, authInstaller: Application.() -> Unit) {
+fun Application.api(
+    corsAllowedOrigins: String,
+    corsAllowedSchemes: List<String> = listOf("https"),
+    repository: ReportRepository,
+    authInstaller: Application.() -> Unit
+) {
     val prometehusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     val log = KotlinLogging.logger { }
@@ -48,8 +59,11 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
     install(MicrometerMetrics) {
         registry = prometehusRegistry
     }
-    install(ContentNegotiation){
+    install(ContentNegotiation) {
         jackson()
+    }
+    install(CORS) {
+        allowHost(host = corsAllowedOrigins, schemes = corsAllowedSchemes)
     }
 
     install(StatusPages) {
@@ -78,7 +92,7 @@ fun Application.api(repository: ReportRepository, authInstaller: Application.() 
             landingPage(repository)
             adminRoutes(repository)
             faqRoute()
-            route("api"){
+            route("api") {
                 reports(repository)
             }
         }

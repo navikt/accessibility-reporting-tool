@@ -37,7 +37,11 @@ class ReportRoutesTest {
                     skipWhen { true }
                 }
             }
-            api(repository = ReportRepository(db), authInstaller = {})
+            api(
+                repository = ReportRepository(db),
+                corsAllowedOrigins = "*",
+                corsAllowedSchemes = listOf("http", "https"),
+                authInstaller = {})
         }
 
         repository.upsertReport(
@@ -47,7 +51,12 @@ class ReportRoutesTest {
                 organizationUnit = null,
                 version = Version.V2,
                 testData = null,
-                author = User(email = Email("tadda"), name = "tadda", oid = Oid(testUserOid), groups = listOf()).toAuthor(),
+                author = User(
+                    email = Email("tadda"),
+                    name = "tadda",
+                    oid = Oid(testUserOid),
+                    groups = listOf()
+                ).toAuthor(),
                 successCriteria = Version.V2.criteria,
                 filters = mutableListOf(),
                 created = LocalDateTimeHelper.nowAtUtc(),
@@ -65,6 +74,5 @@ class ReportRoutesTest {
         client.get("/reports/knownid").status shouldBe HttpStatusCode.OK
         client.get("/reports/notknownid").status shouldBe HttpStatusCode.BadRequest
         client.get("/reports/new").status shouldBe HttpStatusCode.OK
-
     }
 }
