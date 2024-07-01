@@ -2,7 +2,6 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.AzureAuthContext
 import accessibility.reporting.tool.authenitcation.installAuthentication
-import accessibility.reporting.tool.database.Environment
 import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
@@ -111,4 +110,20 @@ fun Application.api(
 
 fun allRoutes(root: Route): List<Route> {
     return listOf(root) + root.children.flatMap { allRoutes(it) }
+}
+
+class Environment(
+    dbHost: String = System.getenv("DB_HOST"),
+    dbPort: String = System.getenv("DB_PORT"),
+    dbName: String = System.getenv("DB_DATABASE"),
+    val dbUser: String = System.getenv("DB_USERNAME"),
+    val dbPassword: String = System.getenv("DB_PASSWORD"),
+    val corsAllowedOrigin: String = System.getenv("CORS_ALLOWED_ORIGIN")
+
+) {
+    val dbUrl: String = if (dbHost.endsWith(":$dbPort")) {
+        "jdbc:postgresql://${dbHost}/$dbName"
+    } else {
+        "jdbc:postgresql://${dbHost}:${dbPort}/${dbName}"
+    }
 }
