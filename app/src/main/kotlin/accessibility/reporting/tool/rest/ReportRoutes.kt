@@ -9,7 +9,7 @@ import io.ktor.server.routing.*
 fun Route.jsonApiReports(repository: ReportRepository) {
 
     route("reports") {
-        get("/summary") {
+        get("/list") {
             call.respond(
                 repository.getReports<ReportShortSummary>()
                     .map { ReportWithUrl(it.url, it.descriptiveName?:it.url)})

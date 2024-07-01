@@ -49,7 +49,7 @@ class ApiTest {
             api(repository = repository, corsAllowedOrigins = "*", corsAllowedSchemes = listOf("http","https")) { mockEmptyAuth() }
         }
 
-        client.get("api/reports/summary").assert {
+        client.get("api/reports/list").assert {
             status shouldBe HttpStatusCode.OK
             objectmapper.readTree(bodyAsText()).toList().assert {
                 this.size shouldBe 3
