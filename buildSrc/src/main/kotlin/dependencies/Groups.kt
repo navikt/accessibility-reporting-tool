@@ -60,20 +60,20 @@ object Ktor : Dependency("2.3.2", groupId = "io.ktor") {
 
 object Testdependencies {
 
-    const val MOCKK = "io.mockk:mockk:1.13.8"
-    object TestContainers : Dependency(version = "1.18.3", groupId = "org.testcontainers") {
+    const val MOCKK = "io.mockk:mockk:1.13.11"
+    object TestContainers : Dependency(version = "1.19.8", groupId = "org.testcontainers") {
         val containers = dependency("testcontainers")
         val jupiterRunner = dependency("junit-jupiter")
         val postgres = dependency("postgresql")
     }
 
-    object Kotest : Dependency(version = "5.9.0", groupId = "io.kotest") {
+    object Kotest : Dependency(version = "5.9.1", groupId = "io.kotest") {
 
         val junit5Runner = dependency("kotest-runner-junit5")
         val assertionsCore = dependency("kotest-assertions-core")
     }
 
-    object Jupiter : Dependency("5.9.2", "org.junit.jupiter") {
+    object Jupiter : Dependency("5.10.3", "org.junit.jupiter") {
         private const val ENGINE_ARTIFACT_ID = "junit-jupiter-engine"
 
         val engine = dependency(ENGINE_ARTIFACT_ID)
