@@ -39,7 +39,7 @@ class ReportRoutesTest {
             }
             api(
                 repository = ReportRepository(db),
-                corsAllowedOrigins = "*",
+                corsAllowedOrigins = listOf("*"),
                 corsAllowedSchemes = listOf("http", "https"),
                 authInstaller = {})
         }

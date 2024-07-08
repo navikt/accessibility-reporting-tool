@@ -60,7 +60,7 @@ private val database = LocalPostgresDatabase.cleanDb()
         application {
             api(
                 repository = repository,
-                corsAllowedOrigins = "*",
+                corsAllowedOrigins = listOf("*"),
                 corsAllowedSchemes = listOf("http", "https")
             ) { mockEmptyAuth() }
         }
@@ -81,7 +81,7 @@ private val database = LocalPostgresDatabase.cleanDb()
         application {
             api(
                 repository = repository,
-                corsAllowedOrigins = "*",
+                corsAllowedOrigins = listOf("*"),
                 corsAllowedSchemes = listOf("http", "https")
             ) { mockEmptyAuth() }
         }
@@ -108,7 +108,7 @@ private val database = LocalPostgresDatabase.cleanDb()
         application {
             api(
                 repository = repository,
-                corsAllowedOrigins = "*",
+                corsAllowedOrigins = listOf("*"),
                 corsAllowedSchemes = listOf("http", "https")
             ) { mockEmptyAuth() }
         }
