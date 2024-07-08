@@ -4,6 +4,8 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
+import accessibility.reporting.tool.rest.NewTeam
+import accessibility.reporting.tool.wcag.OrganizationUnit.Companion.toOrgUnitId
 import accessibility.reporting.tool.wcag.Status.*
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
@@ -249,6 +251,13 @@ data class OrganizationUnit(
             email = email,
             members = mutableSetOf()
         )
+        fun createNew (newTeam: NewTeam)= OrganizationUnit(
+            id =  newTeam.name.toOrgUnitId(),
+            name = newTeam.name,
+            email = newTeam.email,
+            members = newTeam.members.toMutableSet()
+        )
+
 
         private fun String.toOrgUnitId() = trimMargin()
             .lowercase()

@@ -47,7 +47,7 @@ fun main() {
 
 
 fun Application.api(
-    corsAllowedOrigins: String,
+    corsAllowedOrigins: List<String>,
     corsAllowedSchemes: List<String> = listOf("https"),
     repository: ReportRepository,
     authInstaller: Application.() -> Unit
@@ -63,7 +63,9 @@ fun Application.api(
         jackson()
     }
     install(CORS) {
-        allowHost(host = corsAllowedOrigins, schemes = corsAllowedSchemes)
+        corsAllowedOrigins.forEach { allowedHost ->
+            allowHost(host = allowedHost, schemes = corsAllowedSchemes)
+        }
     }
 
     install(StatusPages) {
@@ -120,7 +122,7 @@ class Environment(
     dbName: String = System.getenv("DB_DATABASE"),
     val dbUser: String = System.getenv("DB_USERNAME"),
     val dbPassword: String = System.getenv("DB_PASSWORD"),
-    val corsAllowedOrigin: String = System.getenv("CORS_ALLOWED_ORIGIN")
+    val corsAllowedOrigin: List<String> = System.getenv("CORS_ALLOWED_ORIGIN").split(",")
 
 ) {
     val dbUrl: String = if (dbHost.endsWith(":$dbPort")) {
