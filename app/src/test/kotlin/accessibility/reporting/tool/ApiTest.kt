@@ -1,6 +1,7 @@
 package accessibility.reporting.tool
 
 import LocalPostgresDatabase
+import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
@@ -16,7 +17,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.testing.*
 import kotliquery.queryOf
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -26,12 +26,19 @@ class ApiTest {
 
     val objectmapper = jacksonObjectMapper()
 
-private val database = LocalPostgresDatabase.cleanDb()
+    private val database = LocalPostgresDatabase.cleanDb()
     private val repository = ReportRepository(database)
     private val testOrg = OrganizationUnit(
         id = "1234567",
         name = "Testorganisation",
         email = "testorganisation@nav.no"
+    )
+
+    private val testUser = User(
+        email = User.Email(s = "test@test.nav"),
+        name = "Test Testlin",
+        oid = User.Oid(s = "testoid"),
+        groups = listOf()
     )
 
     private val testOrg2 = OrganizationUnit(
@@ -110,9 +117,9 @@ private val database = LocalPostgresDatabase.cleanDb()
                 repository = repository,
                 corsAllowedOrigins = listOf("*"),
                 corsAllowedSchemes = listOf("http", "https")
-            ) { mockEmptyAuth() }
+            ) { installJwtTestAuth() }
         }
-        client.post("api/teams/new") {
+        client.authenticatedPost(testUser,"api/teams/new") {
             setBody(
                 """{
                 "name": "team 1",
@@ -123,12 +130,12 @@ private val database = LocalPostgresDatabase.cleanDb()
             """.trimMargin()
             )
             contentType(
-               ContentType.Application.Json
+                ContentType.Application.Json
             )
         }.assert {
             status shouldBe HttpStatusCode.OK
         }
-        client.post("api/teams/new") {
+        client.authenticatedPost(testUser,"api/teams/new") {
             setBody(
                 """{
                 "name": "team 2",
@@ -163,15 +170,14 @@ private val database = LocalPostgresDatabase.cleanDb()
     }
 }
 
+private fun Report.assertExists(jsonList: List<JsonNode>) {
+    val result = jsonList.find { jsonNode -> jsonNode["navn"].asText() == descriptiveName }
+    require(result != null)
+    result["url"].asText() shouldBe this.url
+}
 
-    private fun Report.assertExists(jsonList: List<JsonNode>) {
-        val result = jsonList.find { jsonNode -> jsonNode["navn"].asText() == descriptiveName }
-        require(result != null)
-        result["url"].asText() shouldBe this.url
+private fun Application.mockEmptyAuth() = authentication {
+    jwt {
+        skipWhen { true }
     }
-
-    private fun Application.mockEmptyAuth() = authentication {
-        jwt {
-            skipWhen { true }
-        }
-    }
+}

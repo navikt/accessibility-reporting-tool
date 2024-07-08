@@ -3,6 +3,8 @@ package accessibility.reporting.tool
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.wcag.*
+import io.ktor.client.*
+import io.ktor.client.request.*
 import java.util.*
 
 val defaultUserEmail = User.Email("tadda@test.tadda")
