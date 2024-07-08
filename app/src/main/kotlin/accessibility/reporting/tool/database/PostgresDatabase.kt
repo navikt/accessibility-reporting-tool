@@ -4,8 +4,6 @@ import accessibility.reporting.tool.Environment
 import accessibility.reporting.tool.authenitcation.User
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import mu.KotlinLogging
-
 
 class PostgresDatabase(environment: Environment) : Database {
 
@@ -44,9 +42,6 @@ class PostgresDatabase(environment: Environment) : Database {
 }
 
 object Admins {
-    private val log = KotlinLogging.logger {  }
     private val admin_group = System.getenv("ADMIN_GROUP")
-    fun isAdmin(user: User) = user.groups.contains(admin_group).also {
-        log.info { "Groups user hører til : ${user.groups.joinToString()}\nResultat av isAdmin: $it" }
-    }
+    fun isAdmin(user: User) = user.groups.contains(admin_group)
 }
