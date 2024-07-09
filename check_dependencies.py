@@ -1,21 +1,22 @@
 # importing the module
 import json
+import sys
 import subprocess
 import re
 from datetime import date
 
-
 json_file_name = 'build/dependencyUpdates/dependencies.json'
 dependency_definition_file = "buildSrc/src/main/kotlin/dependencies/Groups.kt"
 
+
 def run_checks():
-    subprocess.call(["./gradlew", "dependencyUpdates"])
+    if len(sys.argv) > 1 and str(sys.argv[1])== "--runTask":
+        subprocess.call(["./gradlew", "dependencyUpdates"])
     updates = list(get_avaiable_updates())
     if len(updates) != 0:
         updates_summary = [map_dependency(dep) for dep in updates if is_major_version(dep)]
-        print(f'Found {len(updates_summary)} outdated dependencies')
         write_as_comment(updates_summary)
-
+        raise SystemExit(f'Found {len(updates_summary)} outdated dependencies')
 
 
 def get_avaiable_updates():
@@ -32,6 +33,7 @@ def is_major_version(version):
 
 def map_dependency(dep):
     return f'{dep["group"]}:  {dep["version"]} -> {dep["available"]["milestone"]}'
+
 
 def write_as_comment(pending_updates):
     dependency_file = open(dependency_definition_file, 'a')
