@@ -7,7 +7,6 @@ import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import assert
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -93,7 +92,7 @@ class ApiTest {
     @Test
     fun `Create a new team `() = setupTestApi(repository) {
 
-        client.authenticatedPost(testUser, "api/teams/new") {
+        client.postWithJwtUser(testUser, "api/teams/new") {
             setBody(
                 """{
                 "name": "team 1",
@@ -109,7 +108,7 @@ class ApiTest {
         }.assert {
             status shouldBe HttpStatusCode.OK
         }
-        client.authenticatedPost(testUser, "api/teams/new") {
+        client.postWithJwtUser(testUser, "api/teams/new") {
             setBody(
                 """{
                 "name": "team 2",

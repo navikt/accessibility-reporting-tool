@@ -9,7 +9,6 @@ import io.ktor.client.request.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import mu.KotlinLogging
 import java.util.*
 
 object JwtConfig {
@@ -59,13 +58,13 @@ fun Application.installJwtTestAuth() {
     }
 }
 
-suspend fun HttpClient.authenticatedGet(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+suspend fun HttpClient.getWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     get(urlString) {
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }
 
-suspend fun HttpClient.authenticatedPost(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+suspend fun HttpClient.postWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     post(urlString) {
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
