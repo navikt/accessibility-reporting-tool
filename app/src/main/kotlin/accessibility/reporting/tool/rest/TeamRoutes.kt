@@ -1,5 +1,6 @@
 package accessibility.reporting.tool.rest
 
+import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import io.ktor.http.*
@@ -21,6 +22,7 @@ fun Route.jsonapiteams (repository: ReportRepository){
     route("teams/new"){
         post {
             val newTeam=call.receive<NewTeam>()
+            println(call.user)
             repository.upsertOrganizationUnit(OrganizationUnit.createNew(newTeam))
             call.respond(HttpStatusCode.OK)
         }
