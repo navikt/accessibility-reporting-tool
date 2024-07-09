@@ -13,9 +13,6 @@ import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.testing.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -29,20 +26,8 @@ class ReportRoutesTest {
 
     @Disabled
     @Test
-    fun `når alle rapportRuter`() = testApplication {
+    fun `når alle rapportRuter`() = setupTestApi(repository) {
         val testUserOid = UUID.randomUUID().toString()
-        application {
-            authentication {
-                jwt {
-                    skipWhen { true }
-                }
-            }
-            api(
-                repository = ReportRepository(db),
-                corsAllowedOrigins = listOf("*"),
-                corsAllowedSchemes = listOf("http", "https"),
-                authInstaller = {})
-        }
 
         repository.upsertReport(
             Report(

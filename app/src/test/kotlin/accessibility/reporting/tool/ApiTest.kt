@@ -12,10 +12,6 @@ import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.testing.*
 import kotliquery.queryOf
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,8 +19,6 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApiTest {
-
-    val objectmapper = jacksonObjectMapper()
 
     private val database = LocalPostgresDatabase.cleanDb()
     private val repository = ReportRepository(database)
@@ -63,14 +57,7 @@ class ApiTest {
     }
 
     @Test
-    fun `Returns a summary of of all reports`() = testApplication {
-        application {
-            api(
-                repository = repository,
-                corsAllowedOrigins = listOf("*"),
-                corsAllowedSchemes = listOf("http", "https")
-            ) { mockEmptyAuth() }
-        }
+    fun `Returns a summary of of all reports`() = setupTestApi(repository) {
 
         client.get("api/reports/list").assert {
             status shouldBe HttpStatusCode.OK
@@ -84,14 +71,7 @@ class ApiTest {
     }
 
     @Test
-    fun `Returns a summary of of all teams`() = testApplication {
-        application {
-            api(
-                repository = repository,
-                corsAllowedOrigins = listOf("*"),
-                corsAllowedSchemes = listOf("http", "https")
-            ) { mockEmptyAuth() }
-        }
+    fun `Returns a summary of of all teams`() = setupTestApi(repository) {
 
         client.get("api/teams").assert {
             status shouldBe HttpStatusCode.OK
@@ -111,15 +91,9 @@ class ApiTest {
     }
 
     @Test
-    fun `Create a new team `() = testApplication {
-        application {
-            api(
-                repository = repository,
-                corsAllowedOrigins = listOf("*"),
-                corsAllowedSchemes = listOf("http", "https")
-            ) { installJwtTestAuth() }
-        }
-        client.authenticatedPost(testUser,"api/teams/new") {
+    fun `Create a new team `() = setupTestApi(repository) {
+
+        client.authenticatedPost(testUser, "api/teams/new") {
             setBody(
                 """{
                 "name": "team 1",
@@ -135,13 +109,12 @@ class ApiTest {
         }.assert {
             status shouldBe HttpStatusCode.OK
         }
-        client.authenticatedPost(testUser,"api/teams/new") {
+        client.authenticatedPost(testUser, "api/teams/new") {
             setBody(
                 """{
                 "name": "team 2",
                 "email": "abdd@gmail.no"
               }  
-                
       """.trimMargin()
             )
             contentType(
@@ -174,10 +147,4 @@ private fun Report.assertExists(jsonList: List<JsonNode>) {
     val result = jsonList.find { jsonNode -> jsonNode["navn"].asText() == descriptiveName }
     require(result != null)
     result["url"].asText() shouldBe this.url
-}
-
-private fun Application.mockEmptyAuth() = authentication {
-    jwt {
-        skipWhen { true }
-    }
 }
