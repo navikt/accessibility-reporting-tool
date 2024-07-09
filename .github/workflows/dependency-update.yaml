@@ -28,6 +28,7 @@ jobs:
           set +e
           pyhton3 check_dependencies.py
           echo "exitcode=$?" >> $GITHUB_OUTPUT
+          git status
       - name: Create PR
         if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         run: | 
