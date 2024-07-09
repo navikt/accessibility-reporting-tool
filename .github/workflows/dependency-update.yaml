@@ -1,14 +1,21 @@
-name: Check dependencies
-run-name: Oppdater ${{ github.event.inputs.id }} ${{ github.event.inputs.cluster }}
+name: Gradle dependency check
+
 on:
   workflow_dispatch
+
 jobs:
-  dependency-update:
+  dependency-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout project sources
+        uses: actions/checkout@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Run gradle dependency task
+        run: ./gradlew dependencyUpdates
+      - name: Setup python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      - id: run_dependency_check
-        run: python3 check_dependencies.py --runTask
+          python-version: '3.12'
+      - name: Check pending updates
+        run: python3  check_dependencies.py
