@@ -28,9 +28,12 @@ jobs:
           set +e
           pyhton3 check_dependencies.py
           echo "exitcode=$?" >> $GITHUB_OUTPUT
+          cat buildSrc/src/main/kotlin/dependencies/Groups.kt
           git status
+          echo "----------------------"
       - name: Create PR
         if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         run: | 
           echo "new pending updates"
+          cat buildSrc/src/main/kotlin/dependencies/Groups.kt
           git status
