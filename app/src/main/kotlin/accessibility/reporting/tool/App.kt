@@ -8,6 +8,7 @@ import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
 import accessibility.reporting.tool.rest.jsonApiReports
 import accessibility.reporting.tool.rest.jsonapiteams
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -61,7 +62,9 @@ fun Application.api(
         registry = prometehusRegistry
     }
     install(ContentNegotiation) {
-        jackson()
+        jackson{
+            registerModule(JavaTimeModule())
+        }
     }
     install(CORS) {
         corsAllowedOrigins.forEach { allowedHost ->

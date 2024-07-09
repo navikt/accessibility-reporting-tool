@@ -10,26 +10,35 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.css.data
 
-fun Route.jsonapiteams (repository: ReportRepository){
-    route("teams"){
+fun Route.jsonapiteams (repository: ReportRepository) {
+    route("teams") {
         get {
-            val teams = repository.getAllOrganizationUnits().map { org -> TeamSummary(id = org.id, name = org.name,email = org.email) }
+            val teams = repository.getAllOrganizationUnits()
+                .map { org -> TeamSummary(id = org.id, name = org.name, email = org.email) }
             call.respond(teams)
         }
-
     }
 
-    route("teams/new"){
+    route("teams/new") {
         post {
-            val newTeam=call.receive<NewTeam>()
+            val newTeam = call.receive<NewTeam>()
             println(call.user)
             repository.upsertOrganizationUnit(OrganizationUnit.createNew(newTeam))
             call.respond(HttpStatusCode.OK)
         }
     }
+    route("teams/{id}/reports") {
+        get {
+            val teamId =
+                call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest, "Missing or malformed id")
+            val reports = repository.getReportForOrganizationUnit(teamId).second
+                .map { report ->  ReportforTeam (id = report.reportId, name = report.descriptiveName.toString(), url = report.url )}
+            call.respond(reports)
+        }
+    }
 }
-data class NewTeam (
 
+data class NewTeam (
     val name: String,
     val email: String,
     val members: List<String> = emptyList()
@@ -39,5 +48,11 @@ data class TeamSummary (
     val id: String,
     val name: String,
     val email: String,
-    )
+)
+
+data class ReportforTeam(
+    val id: String,
+    val name: String,
+    val url: String
+)
 
