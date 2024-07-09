@@ -1,6 +1,5 @@
 name: Check dependencies
 run-name: Oppdater ${{ github.event.inputs.id }} ${{ github.event.inputs.cluster }}
-permissions:
 on:
   workflow_dispatch
 jobs:
