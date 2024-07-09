@@ -6,6 +6,7 @@ on:
       - README.md
       - .gitignore
       - docker-compose.yml
+      - github/workflows
 jobs:
   run-tests:
     name: Run tests
