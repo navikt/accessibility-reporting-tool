@@ -1,4 +1,4 @@
-name: Repo update microfrontend-manifest manually
+name: Check dependencies
 run-name: Oppdater ${{ github.event.inputs.id }} ${{ github.event.inputs.cluster }}
 
 on:
