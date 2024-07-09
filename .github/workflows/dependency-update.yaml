@@ -1,0 +1,15 @@
+name: Repo update microfrontend-manifest manually
+run-name: Oppdater ${{ github.event.inputs.id }} ${{ github.event.inputs.cluster }}
+
+on:
+  workflow_dispatch
+jobs:
+  dependency-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - id: 'run dependency check'
+        run: python3 check_dependencies.py --runTask
