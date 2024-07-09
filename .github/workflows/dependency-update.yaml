@@ -23,4 +23,13 @@ jobs:
         with:
           python-version: '3.12'
       - name: Check pending updates
-        run: python3  check_dependencies.py
+        id: dependency-check
+        run: |
+          set +e
+          pyhton3 check_dependencies.py
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
+      - name: Create PR
+        if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
+        run: | 
+          echo "new pending updates"
+          git status
