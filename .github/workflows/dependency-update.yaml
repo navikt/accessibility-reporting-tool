@@ -26,7 +26,7 @@ jobs:
         id: dependency-check
         run: |
           set +e
-          pyhton3 check_dependencies.py
+          pyhton3 check_dependencies.py --runTask
           echo "exitcode=$?" >> $GITHUB_OUTPUT
           cat buildSrc/src/main/kotlin/dependencies/Groups.kt
           git status

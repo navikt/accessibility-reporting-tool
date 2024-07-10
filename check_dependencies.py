@@ -1,13 +1,12 @@
 # importing the module
 import json
-import sys
 import subprocess
 import re
 import sys
-from datetime import date
+from datetime import datetime
 
 json_file_name = 'app/build/dependencyUpdates/dependencies.json'
-dependency_definition_file = "buildSrc/src/main/kotlin/dependencies/Groups.kt"
+dependency_definition_file =f'dependency_updates/{datetime.now()}.txt'
 
 
 def run_checks():
@@ -40,12 +39,10 @@ def map_dependency(dep):
 
 
 def write_as_comment(pending_updates):
-    dependency_file = open(dependency_definition_file, 'a')
-    dependency_file.write("\n/*\n")
-    dependency_file.write(f'{date.today()}: {len(pending_updates)} outdated dependencies')
+    dependency_file = open(dependency_definition_file, 'w')
+    dependency_file.write(f'{datetime.now()}: {len(pending_updates)} outdated dependencies')
     for pending in pending_updates:
         dependency_file.write(f'\n{pending}')
-    dependency_file.write("\n*/")
     dependency_file.close()
 
 

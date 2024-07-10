@@ -40,7 +40,7 @@ object Logback : Dependency(version = "1.5.6", groupId = "ch.qos.logback") {
     const val LOGSTASH_ENCODER = "net.logstash.logback:logstash-logback-encoder:7.4"
 }
 
-object Ktor : Dependency("2.3.2", groupId = "io.ktor") {
+object Ktor : Dependency("2.3.12", groupId = "io.ktor") {
 
     val jacksonSerialization = dependency("ktor-serialization-jackson")
     val clientCio = dependency("ktor-client-cio")
