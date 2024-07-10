@@ -18,8 +18,6 @@ jobs:
           distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-      - name: Run gradle dependency task
-        run: ./gradlew dependencyUpdates
       - name: Setup python
         uses: actions/setup-python@v4
         with:
@@ -29,7 +27,7 @@ jobs:
         run: |
           set +e
           git checkout -b dependency-update
-          pyhton3 check_dependencies.py --runTask
+          pyhton check_dependencies.py --runTask
           echo "exitcode=$?" >> $GITHUB_OUTPUT
           ls dependency_updates
           git status
