@@ -2,6 +2,8 @@ name: Gradle dependency check
 
 on:
   workflow_dispatch
+permissions:
+  contents: write
 
 jobs:
   dependency-scan:
