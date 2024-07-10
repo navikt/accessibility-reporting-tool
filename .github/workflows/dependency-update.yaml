@@ -27,7 +27,7 @@ jobs:
         run: |
           set +e
           git checkout -b dependency-update
-          pyhton check_dependencies.py --runTask
+          python3 check_dependencies.py --runTask
           echo "exitcode=$?" >> $GITHUB_OUTPUT
           ls dependency_updates
           git status
