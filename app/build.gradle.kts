@@ -7,6 +7,7 @@ import dependencies.Testdependencies.TestContainers
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    id("io.ktor.plugin") version "2.3.12"
 }
 
 repositories {
@@ -32,7 +33,7 @@ dependencies {
     implementation(Ktor.serverCors)
     implementation(Ktor.serverContentNegotiation)
     implementation(Flyway.core)
-    implementation (Flyway.postgres)
+    implementation(Flyway.postgres)
     implementation(Database.HIKARI)
     implementation(Database.POSTGRES)
     implementation(Database.KOTLIQUERY)
