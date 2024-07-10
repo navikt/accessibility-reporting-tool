@@ -1,0 +1,39 @@
+name: Gradle dependency check
+
+on:
+  workflow_dispatch
+
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v4
+      - name: Setup java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Run gradle dependency task
+        run: ./gradlew dependencyUpdates
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Check pending updates
+        id: dependency-check
+        run: |
+          set +e
+          pyhton3 check_dependencies.py --runTask
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
+          cat buildSrc/src/main/kotlin/dependencies/Groups.kt
+          git status
+          echo "----------------------"
+      - name: Create PR
+        if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
+        run: | 
+          echo "new pending updates"
+          cat buildSrc/src/main/kotlin/dependencies/Groups.kt
+          git status

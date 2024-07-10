@@ -6,6 +6,9 @@ on:
       - README.md
       - .gitignore
       - docker-compose.yml
+      - .github/workflows
+      - dependency_updates
+      - check_dependencies.py
 jobs:
   run-tests:
     name: Run tests

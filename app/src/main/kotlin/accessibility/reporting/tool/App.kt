@@ -70,6 +70,7 @@ fun Application.api(
         corsAllowedOrigins.forEach { allowedHost ->
             allowHost(host = allowedHost, schemes = corsAllowedSchemes)
         }
+        allowCredentials = true
     }
 
     install(StatusPages) {

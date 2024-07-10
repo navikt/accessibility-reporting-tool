@@ -1,11 +1,31 @@
-plugins {
-    // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.8.10"
-    id("io.ktor.plugin") version "2.3.2"
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import dependencies.*
+import dependencies.Database.Flyway
+import dependencies.Testdependencies.Jupiter
+import dependencies.Testdependencies.Kotest
+import dependencies.Testdependencies.TestContainers
 
+plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    `kotlin-dsl`
+    id("io.ktor.plugin") version "2.3.2"
+
 }
+
+buildscript {
+    repositories {
+        // Use 'gradle install' to install latest
+        mavenLocal()
+        gradlePluginPortal()
+    }
+
+    dependencies {
+        classpath("com.github.ben-manes:gradle-versions-plugin:+")
+    }
+}
+apply(plugin = "com.github.ben-manes.versions")
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -16,54 +36,47 @@ repositories {
 
 
 dependencies {
-    implementation("io.ktor:ktor-serialization-jackson")
-    implementation("io.ktor:ktor-client-cio")
-    implementation("io.ktor:ktor-server-metrics-micrometer")
-    implementation("io.micrometer:micrometer-registry-prometheus:1.13.1")
-    implementation("io.ktor:ktor-client-content-negotiation")
-    implementation("io.ktor:ktor-server-core")
-    implementation("io.ktor:ktor-server-netty")
-    implementation("io.ktor:ktor-server-html-builder")
-    implementation("io.ktor:ktor-server-auth")
-    implementation("io.ktor:ktor-server-auth-jwt")
-    implementation("io.ktor:ktor-server-status-pages")
-    implementation("io.ktor:ktor-server-cors")
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-css:1.0.0-pre.597")
-    implementation("org.flywaydb:flyway-core:9.20.1")
-    implementation("com.zaxxer:HikariCP:5.0.1")
-    implementation("org.postgresql:postgresql:42.6.0")
-    implementation("com.github.seratch:kotliquery:1.9.0")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.15.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
-    implementation("io.ktor:ktor-server-core-jvm:2.3.2")
-    implementation("io.ktor:ktor-server-host-common-jvm:2.3.2")
-    implementation("io.ktor:ktor-server-status-pages-jvm:2.3.2")
-    implementation("io.ktor:ktor-server-content-negotiation:2.3.12")
-    implementation("ch.qos.logback:logback-classic:1.4.12")
-    implementation("ch.qos.logback:logback-core:1.4.12")
-    implementation("net.logstash.logback:logstash-logback-encoder:7.3")
+    implementation(Ktor.jacksonSerialization)
+    implementation(Ktor.clientCio)
+    implementation(Ktor.micrometer)
+    implementation(Ktor.clientCio)
+    implementation(Ktor.serverCore)
+    implementation(Ktor.serverHostJvm)
+    implementation(Ktor.netty)
+    implementation(Ktor.htmlBuilder)
+    implementation(Ktor.serverAuth)
+    implementation(Ktor.serverAuthJwt)
+    implementation(Ktor.statusPages)
+    implementation(Ktor.serverCors)
+    implementation(Ktor.serverContentNegotiation)
+    implementation(Ktor.clientContentNegotiation)
+    implementation(Flyway.core)
+    implementation(Flyway.postgres)
+    implementation(Database.HIKARI)
+    implementation(Database.POSTGRES)
+    implementation(Database.KOTLIQUERY)
+    implementation(Jackson.core)
+    implementation(Jackson.kotlin)
+    implementation(Jackson.datatypeJsr310)
+    implementation(Logback.logbackClassic)
+    implementation(Logback.logbackCore)
+    implementation(Logback.LOGSTASH_ENCODER)
     implementation("io.github.microutils:kotlin-logging:3.0.5")
+    implementation("org.jetbrains.kotlin-wrappers:kotlin-css:1.0.0-pre.597")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.13.1")
 
 
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:junit-jupiter-api")
-    testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.2")
-    testImplementation("org.testcontainers:testcontainers:1.18.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.18.3")
-    testImplementation("org.testcontainers:postgresql:1.18.3")
-    testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
-    testImplementation("io.kotest:kotest-assertions-core:5.6.2")
-    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation(Jupiter.engine)
+    testImplementation(Jupiter.api)
+    testImplementation(Ktor.ktorServerTestHost)
+    testImplementation(TestContainers.containers)
+    testImplementation(TestContainers.jupiterRunner)
+    testImplementation(TestContainers.postgres)
+    testImplementation(Kotest.junit5Runner)
+    testImplementation(Kotest.assertionsCore)
+    testImplementation(Testdependencies.MOCKK)
 
 
-}
-
-// Apply a specific Java toolchain to ease working on different environments.
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
 }
 
 application {
@@ -71,7 +84,35 @@ application {
     mainClass.set("accessibility.reporting.tool.AppKt")
 }
 
+
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+
+tasks.named<DependencyUpdatesTask>("dependencyUpdates").configure {
+
+    // optional parameters
+    checkForGradleUpdate = true
+    outputFormatter = "json"
+    outputDir = "build/dependencyUpdates"
+    reportfileName = "dependencies"
+
+    rejectVersionIf {
+        isNonStable(candidate.version)
+    }
+}
+
+tasks.withType<ShadowJar> { isZip64 = true }
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
