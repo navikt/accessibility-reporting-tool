@@ -1,3 +1,5 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dependencies.*
 import dependencies.Database.Flyway
 import dependencies.Testdependencies.Jupiter
@@ -7,7 +9,23 @@ import dependencies.Testdependencies.TestContainers
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    `kotlin-dsl`
+    id("io.ktor.plugin") version "2.3.2"
+
 }
+
+buildscript {
+    repositories {
+        // Use 'gradle install' to install latest
+        mavenLocal()
+        gradlePluginPortal()
+    }
+
+    dependencies {
+        classpath("com.github.ben-manes:gradle-versions-plugin:+")
+    }
+}
+apply(plugin = "com.github.ben-manes.versions")
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -31,8 +49,9 @@ dependencies {
     implementation(Ktor.statusPages)
     implementation(Ktor.serverCors)
     implementation(Ktor.serverContentNegotiation)
+    implementation(Ktor.clientContentNegotiation)
     implementation(Flyway.core)
-    implementation (Flyway.postgres)
+    implementation(Flyway.postgres)
     implementation(Database.HIKARI)
     implementation(Database.POSTGRES)
     implementation(Database.KOTLIQUERY)
@@ -60,19 +79,40 @@ dependencies {
 
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
-
 application {
     // Define the main class for the application.
     mainClass.set("accessibility.reporting.tool.AppKt")
 }
 
+
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+
+tasks.named<DependencyUpdatesTask>("dependencyUpdates").configure {
+
+    // optional parameters
+    checkForGradleUpdate = true
+    outputFormatter = "json"
+    outputDir = "build/dependencyUpdates"
+    reportfileName = "dependencies"
+
+    rejectVersionIf {
+        isNonStable(candidate.version)
+    }
+}
+
+tasks.withType<ShadowJar> { isZip64 = true }
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }

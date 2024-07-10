@@ -6,13 +6,13 @@ import re
 import sys
 from datetime import date
 
-json_file_name = 'build/dependencyUpdates/dependencies.json'
+json_file_name = 'app/build/dependencyUpdates/dependencies.json'
 dependency_definition_file = "buildSrc/src/main/kotlin/dependencies/Groups.kt"
 
 
 def run_checks():
     if len(sys.argv) > 1 and str(sys.argv[1]) == "--runTask":
-        subprocess.call(["./gradlew", "dependencyUpdates"])
+        subprocess.call(["./gradlew", "app:dependencyUpdates"])
     updates = list(get_avaiable_updates())
     if len(updates) != 0:
         updates_summary = [map_dependency(dep) for dep in updates if is_major_version(dep)]
