@@ -41,7 +41,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git add .
           git commit -m 'Dependencies check failed $(date -u +%Y-%m-%dT%H%M)'
-          git push --set-upstream origin -u ${{ steps.dependency-check.outputs.branch }}
+          git push --set-upstream origin ${{ steps.dependency-check.outputs.branch }}
           gh pr create --title "Dependency updates required" --body "See log in dependency_updates for details"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
