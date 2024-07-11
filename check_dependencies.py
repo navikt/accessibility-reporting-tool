@@ -47,7 +47,8 @@ def write_findings_to_file(pending_updates):
         log_file.write("\n -----Dependency check ------\n")
         write_to_log(log_file, pending_updates)
     else:
-        write_to_log(open(dependency_log_file, 'w'), pending_updates)
+        new_log_file = open(dependency_log_file, 'x')
+        write_to_log(new_log_file, pending_updates)
 
     dependency_file = open(dependency_definition_file, 'a')
     dependency_file_header = f'\n/*\n{date_str}: {len(pending_updates)} outdated dependencies'
