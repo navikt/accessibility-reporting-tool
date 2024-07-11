@@ -36,7 +36,8 @@ jobs:
         if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         run: | 
           echo "Found ${{ steps.dependency-check.outputs.exitcode }} pending updates, creating PR"
-          git status
+          git config user.email "${{ github.run_id }}+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
           git add .
           git commit -m 'Dependencies check failed $(date -u +%Y-%m-%dT%H%M)'
           gh pr create --title "Dependency updates required" --body "See log in dependency_updates for details"
