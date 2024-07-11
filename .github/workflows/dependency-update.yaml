@@ -44,7 +44,7 @@ jobs:
           git commit -m 'Dependencies check failed'
           git config --global --add --bool push.autoSetupRemote true
           git push origin ${{ steps.dependency-check.outputs.branch }}
-          gh pr create --title "Dependency updates required" --body "See log in dependency_updates for details"
+          gh pr create --title "Dependency updates required" --body "See log in dependency_updates for details" --label dependency-update
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: No pending dependency updates
