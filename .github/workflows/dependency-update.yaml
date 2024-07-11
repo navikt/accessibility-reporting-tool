@@ -28,6 +28,7 @@ jobs:
       - name: Check pending updates
         id: dependency-check
         run: |
+          set +e
           git checkout -b "pending-updates-$(date -u +%Y-%m-%dT%H%M)"
           python3 check_dependencies.py --runTask
           echo "exitcode=$?" >> $GITHUB_OUTPUT
