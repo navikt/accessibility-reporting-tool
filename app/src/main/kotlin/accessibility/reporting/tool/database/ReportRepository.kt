@@ -3,6 +3,7 @@ package accessibility.reporting.tool.database
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.authenitcation.User.Oid
+import accessibility.reporting.tool.rest.Rapport
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -161,9 +162,9 @@ class ReportRepository(val database: Database) {
                         )
                     )
                 )
-
         }
     }
+
 
     fun getOrganizationUnit(id: String): OrganizationUnit? = database.query {
         queryOf("select * from organization_unit where organization_unit_id=:id", mapOf("id" to id)).map { row ->

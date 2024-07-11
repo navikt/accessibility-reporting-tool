@@ -2,12 +2,19 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
+import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.testing.*
 import java.util.*
 
 val defaultUserEmail = User.Email("tadda@test.tadda")
 const val defaultUserName = "Tadda Taddasen"
 val defaultUserOid = User.Oid(UUID.randomUUID().toString())
+val objectmapper = jacksonObjectMapper()
 fun dummyReportV2(
     url: String = "http://dummyurl.test",
     orgUnit: OrganizationUnit? = null,
@@ -43,3 +50,28 @@ fun dummyAggregatedReportV2(
             dummyReportV2(orgUnit = OrganizationUnit("something", "something", "something"))
         )
     )
+
+fun setupTestApi(
+    repository: ReportRepository,
+    withEmptyAuth: Boolean = false,
+    block: suspend ApplicationTestBuilder.() -> Unit
+) = testApplication {
+    application {
+        api(
+            repository = repository,
+            corsAllowedOrigins = listOf("*"),
+            corsAllowedSchemes = listOf("http", "https")
+        ) {
+            if (withEmptyAuth) {
+                mockEmptyAuth()
+            } else installJwtTestAuth()
+        }
+    }
+    block()
+}
+
+private fun Application.mockEmptyAuth() = authentication {
+    jwt {
+        skipWhen { true }
+    }
+}

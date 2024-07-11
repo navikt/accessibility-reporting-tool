@@ -8,6 +8,7 @@ import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
 import accessibility.reporting.tool.rest.jsonApiReports
 import accessibility.reporting.tool.rest.jsonapiteams
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -16,6 +17,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.http.content.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
@@ -60,7 +62,9 @@ fun Application.api(
         registry = prometehusRegistry
     }
     install(ContentNegotiation) {
-        jackson()
+        jackson{
+            registerModule(JavaTimeModule())
+        }
     }
     install(CORS) {
         corsAllowedOrigins.forEach { allowedHost ->
@@ -76,8 +80,12 @@ fun Application.api(
                     log.debug { "Feil i request fra bruker: ${cause.message}" }
                     call.respondText(status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad request")
                 }
-
+                is BadRequestException -> {
+                    log.debug(cause.message)
+                    call.respondText (status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad request")
+                }
                 else -> {
+                    log.error (cause) { "Feil i request fra bruker: ${cause.message}"}
                     log.error { "Ukjent feil: ${cause.message}" }
                     log.error { cause.stackTrace.contentToString() }
                     call.respondText(text = "500: ${cause.message}", status = HttpStatusCode.InternalServerError)
@@ -86,7 +94,6 @@ fun Application.api(
             }
         }
     }
-
     routing {
         authenticate {
             organizationUnits(repository)
