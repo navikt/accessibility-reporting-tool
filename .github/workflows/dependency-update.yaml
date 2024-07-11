@@ -34,7 +34,13 @@ jobs:
           python3 check_dependencies.py --runTask
           echo "exitcode=$?" >> $GITHUB_OUTPUT
           echo "branch=pending-updates-$(date -u +%Y-%m-%dT%H%M)"
-      - name: Create PR
+      - name: Close old update PRs
+        if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
+        uses: kyslik/close-pull-requests-based-on-label@v1.0.0
+        env:
+          LABEL: dependency-update
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }
+      - name: Create new PR
         if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         run: | 
           echo "Found ${{ steps.dependency-check.outputs.exitcode }} pending updates, creating PR"
