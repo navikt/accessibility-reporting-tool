@@ -32,6 +32,7 @@ jobs:
           git checkout -b "pending-updates-$(date -u +%Y-%m-%dT%H%M)"
           python3 check_dependencies.py --runTask
           echo "exitcode=$?" >> $GITHUB_OUTPUT
+          echo "branch=pending-updates-$(date -u +%Y-%m-%dT%H%M)"
       - name: Create PR
         if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         run: | 
@@ -40,6 +41,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git add .
           git commit -m 'Dependencies check failed $(date -u +%Y-%m-%dT%H%M)'
+          git push origin -u ${{ steps.dependency-check.outputs.branch }}
           gh pr create --title "Dependency updates required" --body "See log in dependency_updates for details"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
