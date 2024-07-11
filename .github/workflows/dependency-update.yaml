@@ -1,7 +1,17 @@
 name: Gradle dependency check
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * 5'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - README.md
+      - .gitignore
+      - docker-compose.yml
+      - .github/workflows
 permissions:
   contents: write
   pull-requests: write
