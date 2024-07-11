@@ -10,6 +10,7 @@ json_file_name = 'app/build/dependencyUpdates/dependencies.json'
 date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 dependency_log_file = f'dependency_updates/{datetime.now().strftime("%Y-%m")}.txt'
 dependency_definition_file = "buildSrc/src/main/kotlin/dependencies/Groups.kt"
+ignore_list = ["org.jetbrains.kotlin"]
 
 
 def run_checks():
@@ -34,7 +35,7 @@ def get_avaiable_updates():
 
 
 def is_major_version(version):
-    return bool(re.search("^[0-9.]*$", version["available"]["milestone"]))
+    return bool(re.search("^[0-9.]*$", version["available"]["milestone"])) and version["group"] not in ignore_list
 
 
 def map_dependency(dep):
