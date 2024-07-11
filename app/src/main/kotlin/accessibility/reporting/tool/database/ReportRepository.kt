@@ -91,6 +91,8 @@ class ReportRepository(val database: Database) {
         ).map { row -> report<Report>(row) }.asList
     }
 
+
+
     inline fun <reified T> getReports(type: ReportType? = null, ids: List<String>? = null): List<T> =
         try {
             database.list {

@@ -56,7 +56,7 @@ class ApiTest {
     }
 
     @Test
-    fun `Returns a summary of of all reports`() = setupTestApi(repository) {
+    fun `Returns a summary of of all reports`() = setupTestApi(database) {
 
         client.get("api/reports/list").assert {
             status shouldBe HttpStatusCode.OK
@@ -70,7 +70,7 @@ class ApiTest {
     }
 
     @Test
-    fun `Returns a summary of of all teams`() = setupTestApi(repository) {
+    fun `Returns a summary of of all teams`() = setupTestApi(database) {
 
         client.get("api/teams").assert {
             status shouldBe HttpStatusCode.OK
@@ -90,7 +90,7 @@ class ApiTest {
     }
 
     @Test
-    fun `Create a new team `() = setupTestApi(repository) {
+    fun `Create a new team `() = setupTestApi(database) {
 
         client.postWithJwtUser(testUser, "api/teams/new") {
             setBody(
