@@ -2,6 +2,9 @@ name: Gradle dependency check
 
 on:
   workflow_dispatch
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   dependency-scan:
@@ -16,24 +19,41 @@ jobs:
           distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-      - name: Run gradle dependency task
-        run: ./gradlew dependencyUpdates
       - name: Setup python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
+      - name: Get current date
+        id: date
+        run: echo "$(date +'%Y-%m-%d')"
       - name: Check pending updates
         id: dependency-check
         run: |
           set +e
-          pyhton3 check_dependencies.py --runTask
+          git checkout -b "pending-updates-$(date -u +%Y-%m-%dT%H%M)"
+          python3 check_dependencies.py --runTask
           echo "exitcode=$?" >> $GITHUB_OUTPUT
-          cat buildSrc/src/main/kotlin/dependencies/Groups.kt
-          git status
-          echo "----------------------"
-      - name: Create PR
+          echo "branch=pending-updates-$(date -u +%Y-%m-%dT%H%M)"
+      - name: Close old update PRs
+        if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
+        uses: kyslik/close-pull-requests-based-on-label@v1.0.0
+        env:
+          LABEL: dependency-update
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create new PR
         if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         run: | 
-          echo "new pending updates"
-          cat buildSrc/src/main/kotlin/dependencies/Groups.kt
-          git status
+          echo "Found ${{ steps.dependency-check.outputs.exitcode }} pending updates, creating PR"
+          git config user.email "${{ github.run_id }}+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add .
+          git commit -m 'Dependencies check failed'
+          git config --global --add --bool push.autoSetupRemote true
+          git push origin ${{ steps.dependency-check.outputs.branch }}
+          gh pr create --title "Dependency updates required" --body "See log in dependency_updates for details" --label dependency-update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: No pending dependency updates
+        if: ${{ steps.dependency-check.outputs.exitcode }} == '0'
+        run: |
+          echo "Gradle dependency scan at $(date -u +%Y-%m-%dT%H%M) completed without finding any outdated dependencies"
