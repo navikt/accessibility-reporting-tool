@@ -19,7 +19,7 @@ def run_checks():
     if len(updates) != 0:
         updates_summary = [map_dependency(dep) for dep in updates if is_major_version(dep)]
         write_findings_to_file(updates_summary)
-        print(f'Found {len(updates_summary)} outdated dependencies, see see {dependency_definition_file} for details')
+        print(f'Found {len(updates_summary)} outdated dependencies, see {dependency_definition_file} for details')
         sys.exit(len(updates_summary))
     else:
         sys.exit(0)
@@ -43,14 +43,17 @@ def map_dependency(dep):
 
 def write_findings_to_file(pending_updates):
     if os.path.exists(dependency_log_file):
+        print("Writing to logfile")
         log_file = open(dependency_log_file, 'a')
         log_file.write("\n -----Dependency check ------\n")
         write_to_log(log_file, pending_updates)
     else:
+        print("Creating logfile")
         new_log_file = open(dependency_log_file, 'x')
         write_to_log(new_log_file, pending_updates)
 
     dependency_file = open(dependency_definition_file, 'a')
+    print("Writing to dependencydefinitionfile")
     dependency_file_header = f'\n/*\n{date_str}: {len(pending_updates)} outdated dependencies'
     write_dependency_summary(dependency_file, dependency_file_header, pending_updates)
 
