@@ -39,7 +39,7 @@ jobs:
         uses: kyslik/close-pull-requests-based-on-label@v1.0.0
         env:
           LABEL: dependency-update
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create new PR
         if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         run: | 
