@@ -12,14 +12,19 @@ class OrganizationRepository(val database: Database) {
                        WHERE r.report_data -> 'user' ->> 'email' = :email
                           OR r.report_data -> 'author' ->> 'email' = :email""",*/
 
-            """SELECT DISTINCT ou.name
+            /*"""SELECT ou.name
            FROM organization_unit ou
            WHERE ou.email = :email""",
             mapOf(
                 "email" to email.str()
+            )*/
+            """SELECT ou.name
+               FROM organization_unit ou
+               WHERE ou.email = :email OR :email = ANY(string_to_array(ou.member, ','))
+            """,
+            mapOf(
+                "email" to email.str()
             )
-        ).map { row -> row.string("email") }.asList
+        ).map { row -> row.string("name") }.asList
     }
-
-
 }

@@ -22,7 +22,8 @@ fun dummyReportV2(
     orgUnit: OrganizationUnit? = null,
     user: User = User(email = defaultUserEmail, name = defaultUserName, oid = defaultUserOid, groups = listOf()),
     reportType: ReportType = ReportType.SINGLE,
-    id: String = UUID.randomUUID().toString()
+    id: String = UUID.randomUUID().toString(),
+    descriptiveName: String = "Dummynavn"
 ) = Report(
     reportId = id,
     url = url,
@@ -35,7 +36,7 @@ fun dummyReportV2(
     lastChanged = LocalDateTimeHelper.nowAtUtc(),
     created = LocalDateTimeHelper.nowAtUtc(),
     lastUpdatedBy = null,
-    descriptiveName = "Dummyname",
+    descriptiveName = descriptiveName,
     reportType = reportType
 )
 

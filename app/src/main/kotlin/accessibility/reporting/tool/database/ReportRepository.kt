@@ -212,7 +212,7 @@ class ReportRepository(val database: Database) {
     }
 }
 
-private fun MutableSet<String>.toStringList(): String = toList()
+fun MutableSet<String>.toStringList(): String = toList()
     .filter { it.isNotEmpty() }
     .joinToString((","))
 
