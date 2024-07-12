@@ -62,7 +62,7 @@ fun Application.api(
         registry = prometehusRegistry
     }
     install(ContentNegotiation) {
-        jackson{
+        jackson {
             registerModule(JavaTimeModule())
         }
     }
@@ -70,6 +70,7 @@ fun Application.api(
         corsAllowedOrigins.forEach { allowedHost ->
             allowHost(host = allowedHost, schemes = corsAllowedSchemes)
         }
+        allowHeader(HttpHeaders.AccessControlAllowOrigin)
         allowCredentials = true
     }
 
@@ -80,12 +81,14 @@ fun Application.api(
                     log.debug { "Feil i request fra bruker: ${cause.message}" }
                     call.respondText(status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad request")
                 }
+
                 is BadRequestException -> {
                     log.debug(cause.message)
-                    call.respondText (status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad request")
+                    call.respondText(status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad request")
                 }
+
                 else -> {
-                    log.error (cause) { "Feil i request fra bruker: ${cause.message}"}
+                    log.error(cause) { "Feil i request fra bruker: ${cause.message}" }
                     log.error { "Ukjent feil: ${cause.message}" }
                     log.error { cause.stackTrace.contentToString() }
                     call.respondText(text = "500: ${cause.message}", status = HttpStatusCode.InternalServerError)
