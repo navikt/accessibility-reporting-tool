@@ -45,7 +45,6 @@ jobs:
           echo "exitcode=$?" >> $GITHUB_OUTPUT
           echo "branch=pending-updates-$(date -u +%Y-%m-%dT%H%M)"
       - name: Close old update PRs
-        if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         uses: kyslik/close-pull-requests-based-on-label@v1.0.0
         env:
           LABEL: dependency-update
