@@ -23,3 +23,12 @@ org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
+ -----Dependency check ------
+2024-07-12 13:14:35: 7 outdated dependencies found
+com.fasterxml.jackson.core:  2.17.1 -> 2.17.2
+com.fasterxml.jackson.datatype:  2.17.1 -> 2.17.2
+com.fasterxml.jackson.module:  2.17.1 -> 2.17.2
+io.ktor:  2.3.2 -> 2.3.12
+io.ktor.plugin:  2.3.2 -> 2.3.12
+io.micrometer:  1.13.1 -> 1.13.2
+org.gradle.kotlin.kotlin-dsl:  4.4.0 -> 4.5.0
