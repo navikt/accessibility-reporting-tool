@@ -75,6 +75,7 @@ fun Application.api(
         corsAllowedOrigins.forEach { allowedHost ->
             allowHost(host = allowedHost, schemes = corsAllowedSchemes)
         }
+        allowHeader(HttpHeaders.AccessControlAllowOrigin)
         allowCredentials = true
     }
 

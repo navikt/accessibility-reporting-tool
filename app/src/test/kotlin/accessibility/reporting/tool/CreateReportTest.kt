@@ -18,7 +18,6 @@ class CreateReportTest {
 
     private val db = LocalPostgresDatabase.cleanDb()
 
-
     @Test
     fun `Create a new report `() = setupTestApi(db) {
         //TODO: legg til user på rapport

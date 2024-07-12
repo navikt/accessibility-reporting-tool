@@ -57,7 +57,6 @@ class ApiTest {
 
     @Test
     fun `Returns a summary of of all reports`() = setupTestApi(database) {
-
         client.get("api/reports/list").assert {
             status shouldBe HttpStatusCode.OK
             objectmapper.readTree(bodyAsText()).toList().assert {
@@ -71,7 +70,6 @@ class ApiTest {
 
     @Test
     fun `Returns a summary of of all teams`() = setupTestApi(database) {
-
         client.get("api/teams").assert {
             status shouldBe HttpStatusCode.OK
             objectmapper.readTree(bodyAsText()).toList().assert {
