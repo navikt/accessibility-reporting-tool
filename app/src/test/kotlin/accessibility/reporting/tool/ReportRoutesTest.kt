@@ -26,7 +26,7 @@ class ReportRoutesTest {
 
     @Disabled
     @Test
-    fun `når alle rapportRuter`() = setupTestApi(repository) {
+    fun `når alle rapportRuter`() = setupTestApi(db) {
         val testUserOid = UUID.randomUUID().toString()
 
         repository.upsertReport(

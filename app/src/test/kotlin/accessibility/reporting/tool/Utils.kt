@@ -1,7 +1,9 @@
 package accessibility.reporting.tool
 
+import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -20,7 +22,8 @@ fun dummyReportV2(
     orgUnit: OrganizationUnit? = null,
     user: User = User(email = defaultUserEmail, name = defaultUserName, oid = defaultUserOid, groups = listOf()),
     reportType: ReportType = ReportType.SINGLE,
-    id: String = UUID.randomUUID().toString()
+    id: String = UUID.randomUUID().toString(),
+    descriptiveName: String = "Dummynavn"
 ) = Report(
     reportId = id,
     url = url,
@@ -33,7 +36,7 @@ fun dummyReportV2(
     lastChanged = LocalDateTimeHelper.nowAtUtc(),
     created = LocalDateTimeHelper.nowAtUtc(),
     lastUpdatedBy = null,
-    descriptiveName = "Dummyname",
+    descriptiveName = descriptiveName,
     reportType = reportType
 )
 
@@ -52,13 +55,14 @@ fun dummyAggregatedReportV2(
     )
 
 fun setupTestApi(
-    repository: ReportRepository,
+    database: LocalPostgresDatabase,
     withEmptyAuth: Boolean = false,
     block: suspend ApplicationTestBuilder.() -> Unit
 ) = testApplication {
     application {
         api(
-            repository = repository,
+            repository = ReportRepository(database),
+            organizationRepository = OrganizationRepository(database),
             corsAllowedOrigins = listOf("*"),
             corsAllowedSchemes = listOf("http", "https")
         ) {

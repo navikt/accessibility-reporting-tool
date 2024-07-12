@@ -17,10 +17,9 @@ import org.junit.jupiter.api.TestInstance
 class CreateReportTest {
 
     private val db = LocalPostgresDatabase.cleanDb()
-    private val repository = ReportRepository(db)
 
     @Test
-    fun `Create a new report `() = setupTestApi(repository) {
+    fun `Create a new report `() = setupTestApi(db) {
         //TODO: legg til user på rapport
         val response = client.post("api/reports/new") {
             contentType(ContentType.Application.Json)

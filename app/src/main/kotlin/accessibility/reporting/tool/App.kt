@@ -3,11 +3,13 @@ package accessibility.reporting.tool
 import accessibility.reporting.tool.authenitcation.AzureAuthContext
 import accessibility.reporting.tool.authenitcation.installAuthentication
 import accessibility.reporting.tool.database.Flyway
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
 import accessibility.reporting.tool.rest.jsonApiReports
 import accessibility.reporting.tool.rest.jsonapiteams
+import accessibility.reporting.tool.rest.jsonApiUsers
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
@@ -34,13 +36,15 @@ fun main() {
     val authContext = AzureAuthContext()
     Flyway.runFlywayMigrations(Environment())
     val repository = ReportRepository(PostgresDatabase(environment))
+    val organizationRepository = OrganizationRepository(PostgresDatabase(environment))
     embeddedServer(
         Netty,
         port = System.getenv("PORT")?.toInt() ?: 8081,
         module = {
             this.api(
                 corsAllowedOrigins = environment.corsAllowedOrigin,
-                repository = repository
+                repository = repository,
+                organizationRepository = organizationRepository,
             ) { installAuthentication(authContext) }
         }).start(
         wait = true
@@ -52,6 +56,7 @@ fun Application.api(
     corsAllowedOrigins: List<String>,
     corsAllowedSchemes: List<String> = listOf("https"),
     repository: ReportRepository,
+    organizationRepository: OrganizationRepository,
     authInstaller: Application.() -> Unit
 ) {
     val prometehusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
@@ -108,6 +113,7 @@ fun Application.api(
             route("api") {
                 jsonApiReports(repository)
                 jsonapiteams(repository)
+                jsonApiUsers(repo = organizationRepository, repository = repository)
             }
         }
         meta(prometehusRegistry)
