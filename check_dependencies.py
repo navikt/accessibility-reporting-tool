@@ -10,23 +10,28 @@ json_file_name = 'app/build/dependencyUpdates/dependencies.json'
 date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 dependency_log_file = f'dependency_updates/{datetime.now().strftime("%Y-%m")}.txt'
 dependency_definition_file = "buildSrc/src/main/kotlin/dependencies/Groups.kt"
-ignore_list = ["org.jetbrains.kotlin"]
+ignore_list = ["org.jetbrains.kotlin", "org.gradle.kotlin.kotlin-dsl"]
 
 
 def run_checks():
-    if len(sys.argv) > 1 and str(sys.argv[1]) == "--runTask":
+    if len(sys.argv) > 1 and ("--runTask" in sys.argv):
         subprocess.call(["./gradlew", "app:dependencyUpdates"])
-    updates = list(get_avaiable_updates())
-    if len(updates) != 0:
-        updates_summary = [map_dependency(dep) for dep in updates if is_major_version(dep)]
-        write_findings_to_file(updates_summary)
-        print(f'Found {len(updates_summary)} outdated dependencies, see {dependency_definition_file} for details')
+    updates = list(get_available_updates())
+    updates_summary = [map_dependency(dep) for dep in updates if is_major_version(dep)]
+    if len(updates_summary) != 0:
+        if "--no-write" not in sys.argv:
+            write_findings_to_file(updates_summary)
+            print(f'Found {len(updates_summary)} outdated dependencies, see {dependency_definition_file} for details')
+        else:
+            print(f'Found {len(updates_summary)} outdated dependencies:')
+            print("\n".join(updates_summary))
         sys.exit(len(updates_summary))
     else:
+        print(f'Scan completed, no outdated dependencies found.')
         sys.exit(0)
 
 
-def get_avaiable_updates():
+def get_available_updates():
     with open(json_file_name, 'r') as json_file:
         data = json.load(json_file)
         available_updates = data["outdated"]["dependencies"]
