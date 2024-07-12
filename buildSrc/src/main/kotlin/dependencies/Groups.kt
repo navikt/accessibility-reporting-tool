@@ -80,3 +80,12 @@ object Testdependencies {
         val api = "$groupId:$ENGINE_ARTIFACT_ID:junit-jupiter-api"
     }
 }
+/*
+2024-07-12 08:06:10: 7 outdated dependencies
+com.fasterxml.jackson.core:  2.17.1 -> 2.17.2
+com.fasterxml.jackson.datatype:  2.17.1 -> 2.17.2
+com.fasterxml.jackson.module:  2.17.1 -> 2.17.2
+io.ktor:  2.3.2 -> 2.3.12
+io.ktor.plugin:  2.3.2 -> 2.3.12
+io.micrometer:  1.13.1 -> 1.13.2
+org.gradle.kotlin.kotlin-dsl:  4.4.0 -> 4.5.0
