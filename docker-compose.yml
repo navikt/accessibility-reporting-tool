@@ -94,3 +94,4 @@ services:
   #    DB_PASSWORD: "a11y"
   #    DB_PORT: "5432"
   #    DB_USERNAME: "postgres"
+  #    CORS_ALLOWED_ORIGIN: "*"
