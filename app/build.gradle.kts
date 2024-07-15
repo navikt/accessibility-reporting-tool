@@ -9,7 +9,7 @@ import dependencies.Testdependencies.TestContainers
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
-    `kotlin-dsl` version ("4.4.0")
+    `kotlin-dsl`
     id("io.ktor.plugin") version "2.3.12"
 
 }

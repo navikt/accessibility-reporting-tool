@@ -28,6 +28,8 @@ def run_checks():
         sys.exit(len(updates_summary))
     else:
         print(f'Scan completed, no outdated dependencies found.')
+        if len(ignore_list) != 0:
+            print(f'-- Ignored dependencies --\n{"\n".join(ignore_list)}')
         sys.exit(0)
 
 
@@ -59,7 +61,7 @@ def write_findings_to_file(pending_updates):
         write_to_log(new_log_file, pending_updates)
 
     dependency_file = open(dependency_definition_file, 'a')
-    print("Writing to dependencydefinitionfile")
+    print("Writing to dependency definition file")
     dependency_file_header = f'\n/*\n{date_str}: {len(pending_updates)} outdated dependencies'
     write_dependency_summary(dependency_file, dependency_file_header, pending_updates)
 
@@ -74,6 +76,7 @@ def write_dependency_summary(file, header, pending_updates):
     file.write(header)
     for pending in pending_updates:
         file.write(f'\n{pending}')
-
+    if len(ignore_list) != 0:
+        file.write(f'-- Ignored dependencies --\n{"\n".join(ignore_list)}')
 
 run_checks()
