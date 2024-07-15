@@ -66,6 +66,7 @@ class OrganizationRepositoryTest {
         assert(result.contains("DummyOrg1"))
     }
 
+
     @Test
     fun `finner organisasjonseneter uavhengig av upper eller lower case`(){
 
@@ -124,4 +125,6 @@ class OrganizationRepositoryTest {
         //repository.getOrganizationFor User(Test.Test@nav.no)
         //teste på at size er 2
     }
+
+
 }

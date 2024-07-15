@@ -1,9 +1,9 @@
-name: Gradle dependency check
+name: Gradle dependency scan
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 8 * * 5'
+    - cron: '0 10 * * *'
   push:
     branches:
       - main
@@ -45,13 +45,12 @@ jobs:
           echo "exitcode=$?" >> $GITHUB_OUTPUT
           echo "branch=pending-updates-$(date -u +%Y-%m-%dT%H%M)"
       - name: Close old update PRs
-        if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
         uses: kyslik/close-pull-requests-based-on-label@v1.0.0
         env:
           LABEL: dependency-update
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create new PR
-        if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
+        if: ${{ fromJson(steps.dependency-check.outputs.exitcode) != 0 }}
         run: | 
           echo "Found ${{ steps.dependency-check.outputs.exitcode }} pending updates, creating PR"
           git config user.email "${{ github.run_id }}+github-actions[bot]@users.noreply.github.com"
@@ -61,9 +60,11 @@ jobs:
           git config --global --add --bool push.autoSetupRemote true
           git push origin ${{ steps.dependency-check.outputs.branch }}
           gh pr create --title "Dependency updates required" --body "See log in dependency_updates for details" --label dependency-update
+          echo "Found ${{ steps.dependency-check.outputs.exitcode }} outdated dependencies " >> $GITHUB_STEP_SUMMARY
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: No pending dependency updates
-        if: ${{ steps.dependency-check.outputs.exitcode }} == '0'
+        if: ${{ fromJson(steps.dependency-check.outputs.exitcode) == 0 }}
         run: |
           echo "Gradle dependency scan at $(date -u +%Y-%m-%dT%H%M) completed without finding any outdated dependencies"
+          echo "No outdated dependencies found " >> $GITHUB_STEP_SUMMARY

@@ -26,7 +26,7 @@ object Database {
     const val POSTGRES = "org.postgresql:postgresql:42.7.3"
 }
 
-object Jackson : Dependency(version = "2.17.1", groupId = "com.fasterxml.jackson") {
+object Jackson : Dependency(version = "2.17.2", groupId = "com.fasterxml.jackson") {
 
     val core = dependency("jackson-core", ".core")
     val kotlin = dependency("jackson-module-kotlin", ".module")
