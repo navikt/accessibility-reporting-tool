@@ -123,7 +123,6 @@ fun Application.api(
             preCompressed(CompressedFileType.GZIP)
         }
         openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
-      //      codegen = StaticHtmlCodegen()
         }
     }
 
