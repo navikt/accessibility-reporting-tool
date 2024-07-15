@@ -56,6 +56,8 @@ object Ktor : Dependency("2.3.12", groupId = "io.ktor") {
     val serverCors = dependency("ktor-server-cors")
     val serverHostJvm = dependency("ktor-server-host-common-jvm")
     val ktorServerTestHost = dependency("ktor-server-test-host-jvm")
+    val ktorOpenApi = dependency("ktor-server-openapi")
+
 }
 
 object Testdependencies {
