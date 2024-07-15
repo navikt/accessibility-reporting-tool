@@ -50,7 +50,7 @@ jobs:
           LABEL: dependency-update
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create new PR
-        if: ${{ fromJson(steps.dependency-check.outputs.exitcode) != '0' }}
+        if: ${{ fromJson(steps.dependency-check.outputs.exitcode) != 0 }}
         run: | 
           echo "Found ${{ steps.dependency-check.outputs.exitcode }} pending updates, creating PR"
           git config user.email "${{ github.run_id }}+github-actions[bot]@users.noreply.github.com"
