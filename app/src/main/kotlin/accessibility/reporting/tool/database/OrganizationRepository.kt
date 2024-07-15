@@ -19,7 +19,7 @@ class OrganizationRepository(val database: Database) {
                 "email" to email.str()
             )*/
             """SELECT ou.name
-               FROM organization_unit ou<<<<<<< jaspreet-is-here
+               FROM organization_unit ou
                WHERE LOWER(ou.email) = LOWER(:email) OR LOWER(:email) = ANY(string_to_array(LOWER(ou.member), ','))         
 
             """,
