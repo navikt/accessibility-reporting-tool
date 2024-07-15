@@ -1,4 +1,4 @@
-name: Gradle dependency check
+name: Gradle dependency scan
 
 on:
   workflow_dispatch:
@@ -50,7 +50,7 @@ jobs:
           LABEL: dependency-update
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create new PR
-        if: ${{ steps.dependency-check.outputs.exitcode }} != '0'
+        if: ${{ fromJson(steps.dependency-check.outputs.exitcode) != '0' }}
         run: | 
           echo "Found ${{ steps.dependency-check.outputs.exitcode }} pending updates, creating PR"
           git config user.email "${{ github.run_id }}+github-actions[bot]@users.noreply.github.com"
@@ -63,6 +63,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: No pending dependency updates
-        if: ${{ steps.dependency-check.outputs.exitcode }} == '0'
+        if: ${{ fromJson(steps.dependency-check.outputs.exitcode) == 0 }}
         run: |
           echo "Gradle dependency scan at $(date -u +%Y-%m-%dT%H%M) completed without finding any outdated dependencies"
