@@ -23,3 +23,6 @@ org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
+ -----Dependency check ------
+2024-07-15 07:06:21: 1 outdated dependencies found
+io.micrometer:  1.13.1 -> 1.13.2
