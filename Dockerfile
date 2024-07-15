@@ -4,6 +4,7 @@ RUN ./gradlew build -i -x test
 
 FROM gcr.io/distroless/java17-debian11
 COPY --from=builder app/build/libs/app-all.jar app/app.jar
+COPY --from=builder docs docs
 ENV PORT=8080
 EXPOSE $PORT
 WORKDIR app
