@@ -63,7 +63,7 @@ dependencies {
     implementation(Logback.LOGSTASH_ENCODER)
     implementation("io.github.microutils:kotlin-logging:3.0.5")
     implementation("org.jetbrains.kotlin-wrappers:kotlin-css:1.0.0-pre.597")
-    implementation("io.micrometer:micrometer-registry-prometheus:1.13.2")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.13.1")
 
 
     testImplementation(Jupiter.engine)
