@@ -47,7 +47,7 @@ fun Route.jsonApiReports(repository: ReportRepository) {
             }
         }
 
-    }
+
 
     post("/new") {
         val report = call.receive<Rapport>()
@@ -72,7 +72,7 @@ fun Route.jsonApiReports(repository: ReportRepository) {
             """.trimMargin()
         }
         )
-    }
+    }}
 }
 
 

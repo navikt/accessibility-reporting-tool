@@ -8,7 +8,7 @@ import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.ReportType
 import accessibility.reporting.tool.wcag.Version
-import assert
+
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
