@@ -77,6 +77,6 @@ def write_dependency_summary(file, header, pending_updates):
     for pending in pending_updates:
         file.write(f'\n{pending}')
     if len(ignore_list) != 0:
-        file.write(f'-- Ignored dependencies --\n{"\n".join(ignore_list)}')
+        file.write(f'\n**Ignored dependencies\n{"\n".join(ignore_list)}')
 
 run_checks()
