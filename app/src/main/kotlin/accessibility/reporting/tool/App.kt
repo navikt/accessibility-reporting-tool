@@ -22,7 +22,6 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.plugins.openapi.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -122,8 +121,8 @@ fun Application.api(
         staticResources("/static", "static") {
             preCompressed(CompressedFileType.GZIP)
         }
-        openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
-        }
+        //openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
+        //}
     }
 
     allRoutes(plugin(Routing))
