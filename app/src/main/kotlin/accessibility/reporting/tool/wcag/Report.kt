@@ -156,6 +156,14 @@ open class Report(
         reportType = reportType ?: this.reportType
     )
 
+    fun updateCriteria  (criteria: List<SuccessCriterion>, updateBy: User): Report = copy(
+    successCriteria = criteria,
+    lastChanged = LocalDateTimeHelper.nowAtUtc(),
+    lastUpdatedBy = updateBy.toAuthor()
+    ).apply {
+        if (!isOwner(updateBy)) contributers.add(updateBy.toAuthor())
+    }
+
     open fun toJson(): String =
         objectMapper.writeValueAsString(this)
 
