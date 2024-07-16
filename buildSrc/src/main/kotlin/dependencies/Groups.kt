@@ -62,7 +62,7 @@ object Ktor : Dependency("2.3.12", groupId = "io.ktor") {
 
 object Testdependencies {
 
-    const val MOCKK = "io.mockk:mockk:1.13.11"
+    const val MOCKK = "io.mockk:mockk:1.13.12"
     object TestContainers : Dependency(version = "1.19.8", groupId = "org.testcontainers") {
         val containers = dependency("testcontainers")
         val jupiterRunner = dependency("junit-jupiter")
@@ -82,8 +82,3 @@ object Testdependencies {
         val api = "$groupId:$ENGINE_ARTIFACT_ID:junit-jupiter-api"
     }
 }
-/*
-2024-07-16 10:03:41: 1 outdated dependencies
-io.mockk:  1.13.11 -> 1.13.12-- Ignored dependencies --
-org.jetbrains.kotlin
-org.gradle.kotlin.kotlin-dsl
