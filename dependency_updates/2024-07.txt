@@ -23,3 +23,8 @@ org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
 org.jetbrains.kotlin:  1.8.10 -> 2.0.0
+ -----Dependency check ------
+2024-07-16 09:05:33: 1 outdated dependencies found
+io.mockk:  1.13.11 -> 1.13.12-- Ignored dependencies --
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
