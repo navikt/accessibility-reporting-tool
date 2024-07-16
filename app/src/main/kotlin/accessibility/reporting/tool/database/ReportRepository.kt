@@ -6,6 +6,7 @@ import accessibility.reporting.tool.authenitcation.User.Oid
 import accessibility.reporting.tool.rest.Rapport
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Row
 import kotliquery.queryOf
@@ -17,6 +18,7 @@ import java.time.format.DateTimeFormatter
 
 
 class ReportRepository(val database: Database) {
+    val objectmapper = jacksonObjectMapper()
 
     fun upsertReport(report: Report) = upsertReportReturning<Report>(report)
     inline fun <reified T : Report> upsertReportReturning(report: T): T {
@@ -60,6 +62,8 @@ class ReportRepository(val database: Database) {
                 mapOf("reportid" to reportId)
             ).map { row -> report<T>(row) }.asSingle
         }
+
+
 
     fun getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<Report>> =
         database.query {
