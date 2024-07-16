@@ -78,8 +78,8 @@ data class User(val email: Email, val name: String?, val oid: Oid, val groups: L
         return super.equals(other)
     }
 
+    val username: String = name ?: email.str()
     fun toAuthor() = Author(email = email.str(), oid = oid.str())
-
 }
 
 class AzureAuthContext {

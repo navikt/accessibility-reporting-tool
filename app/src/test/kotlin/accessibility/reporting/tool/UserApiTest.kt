@@ -4,36 +4,29 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
 import assert
-import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.shouldBe
-import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotliquery.queryOf
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
-class UserSummaryTest {
+class UserApiTest {
     private val database = LocalPostgresDatabase.cleanDb()
     private val repository = ReportRepository(database)
-    private val organizationRepository = OrganizationRepository(database)
     private val testOrg = OrganizationUnit(
         id = UUID.randomUUID().toString(),
         name = "DummyOrg",
         email = "test@nav.no",
         members = mutableSetOf()
     )
-    /*private val testOrg2 = OrganizationUnit(
-        id = "1234568",
-        name = "Testorganization",
-        email = "testorganization@nav.no"
-    )*/
 
     private val testOrg2 = OrganizationUnit(
         id = UUID.randomUUID().toString(),
@@ -48,9 +41,10 @@ class UserSummaryTest {
         oid = User.Oid(s = "1234568"),
         groups = listOf()
     )
+    val testReport = dummyReportV2(orgUnit = testOrg, user = testUser, descriptiveName = "report1")
     private val initialReports =
         listOf(
-            dummyReportV2(orgUnit = testOrg, user = testUser, descriptiveName = "report1"),
+            testReport,
             dummyReportV2(orgUnit = testOrg2),
             dummyReportV2(orgUnit = testOrg)
         )
@@ -62,7 +56,7 @@ class UserSummaryTest {
         database.update { queryOf("delete from organization_unit") }
         repository.upsertOrganizationUnit(testOrg)
         repository.upsertOrganizationUnit(testOrg2)
-            testOrg2.addMember(testUser.email)
+        testOrg2.addMember(testUser.email)
         repository.upsertOrganizationUnit(testOrg2)
         initialReports.forEach { report ->
             repository.upsertReport(report)
@@ -80,23 +74,27 @@ class UserSummaryTest {
             jsonResponse["email"].asText() shouldBe testUser.email.str()
             jsonResponse["reports"].toList().assert {
                 this.size shouldBe 1
-                val report = find { jsonNode -> jsonNode["descriptiveName"].asText() == "report1" }
+                val report = find { jsonNode -> jsonNode["title"].asText() == "report1" }
                 require(report != null)
+                report["title"].asText() shouldBe testReport.descriptiveName
+                report["id"].asText() shouldBe testReport.reportId
+                report["date"].asText() shouldBe "yyyy-MM-dd".today()
+                report["teamId"].asText() shouldBe testReport.organizationUnit!!.id
             }
             jsonResponse["teams"].toList().assert {
                 this.size shouldBe 1
+                first().assert {
+                    this["name"].asText() shouldBe testOrg2.name
+                    this["id"].asText() shouldBe testOrg2.id
+                    this["email"].asText() shouldBe testOrg2.email
+                }
             }
+            jsonResponse["name"].asText() shouldBe testUser.name
         }
     }
 }
-/*private fun Report.assertExists(jsonList: List<JsonNode>) {
-    val result = jsonList.find { jsonNode ->
-        val nameNode = jsonNode.get("name")
-        nameNode?.asText() == descriptiveName
-    }
-    require(result != null) { "Result is null! Available nodes: ${jsonList.map { it.toString() }}" }
-    val urlNode = result?.get("url")
-    require(urlNode != null) { "URL node is missing in the result: $result" }
-    urlNode.asText() shouldBe this.url
-}*/
 
+private fun String.today() = let {
+    val formatter = DateTimeFormatter.ofPattern(this)
+    LocalDateTime.now().format(formatter)
+}
