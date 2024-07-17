@@ -94,6 +94,8 @@ fun Route.jsonApiReports(repository: ReportRepository) {
     }
 }
 
+
+
     data class ReportWithUrl(
         val url: String,
         val navn: String,
@@ -115,6 +117,50 @@ fun Route.jsonApiReports(repository: ReportRepository) {
         val created: LocalDateTime,
         val lastChanged: LocalDateTime,
     ) : ReportContent
+
+data class SuccessCriterionWithWcag(
+    val name: String,
+    val description: String,
+    val principle: String,
+    val guideline: String,
+    val tools: String,
+    val number: String,
+    val breakingTheLaw: String,
+    val lawDoesNotApply: String,
+    val tooHardToComply: String,
+    val contentGroup: String,
+    var status: Status,
+    val wcagUrl: String? = null,
+    val helpUrl: String? = null,
+    val wcagVersion: String = "2.1",
+    var wcagLevel: WcagLevel
+)
+{
+fun toSuccessCriterion(): SuccessCriterion {
+    return SuccessCriterion(
+        name,
+        description,
+        principle,
+        guideline,
+        tools,
+        number,
+        breakingTheLaw,
+        lawDoesNotApply,
+        tooHardToComply,
+        contentGroup,
+        status,
+        wcagUrl,
+        helpUrl,
+        wcagVersion
+    ).apply {
+        this.wcagLevel = this@SuccessCriterionWithWcag.wcagLevel
+    }
+}
+    companion object {
+    fun List<SuccessCriterionWithWcag>.toSuccessCriteriaList(): List<SuccessCriterion> {
+        return this.map { it.toSuccessCriterion() }
+    }
+}}
 
 // lage en klasse som inneholder alle felter (inkludert WCAGlevel)
 // lage en metode som konvertere klassen din til SuccesssCriterion

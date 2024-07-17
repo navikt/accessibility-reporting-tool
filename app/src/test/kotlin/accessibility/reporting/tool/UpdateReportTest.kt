@@ -82,6 +82,9 @@ class UpdateReportTest {
             setBody(
                 objectmapper.writeValueAsString(updatedReport)
             )
+            contentType(
+                ContentType.Application.Json
+            )
             // legg til header ContentType -> application/json
         }
 
