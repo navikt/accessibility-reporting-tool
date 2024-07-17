@@ -115,3 +115,7 @@ fun Route.jsonApiReports(repository: ReportRepository) {
         val created: LocalDateTime,
         val lastChanged: LocalDateTime,
     ) : ReportContent
+
+// lage en klasse som inneholder alle felter (inkludert WCAGlevel)
+// lage en metode som konvertere klassen din til SuccesssCriterion
+// .map lista med dine sukksesscriterier til e liste av SuccessCriterion

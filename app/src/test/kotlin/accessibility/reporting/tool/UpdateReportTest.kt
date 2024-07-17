@@ -82,6 +82,7 @@ class UpdateReportTest {
             setBody(
                 objectmapper.writeValueAsString(updatedReport)
             )
+            // legg til header ContentType -> application/json
         }
 
         response.status shouldBe HttpStatusCode.OK
