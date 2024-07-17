@@ -5,6 +5,7 @@ import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.NavBarItem
 import accessibility.reporting.tool.microfrontends.reportListItem
 import accessibility.reporting.tool.microfrontends.respondHtmlContent
+import accessibility.reporting.tool.wcag.Report
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import kotlinx.html.a
@@ -15,7 +16,7 @@ import kotlinx.html.ul
 fun Route.userRoute(repository: ReportRepository) {
     get("user") {
 
-        val reports = repository.getReportsForUser(call.user.oid)
+        val reports = repository.getReportsForUser<Report>(call.user.oid)
             .sortedBy { it.descriptiveName?.lowercase()?:it.url }
         call.respondHtmlContent("Rapporter for: " + call.user.email, NavBarItem.BRUKER) {
             h1 { +"Dine tilgjengelighetserklæringer" }

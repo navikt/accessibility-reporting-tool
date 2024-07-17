@@ -31,8 +31,7 @@ fun Route.jsonapiteams (repository: ReportRepository) {
         get {
             val teamId =
                 call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest, "Missing or malformed id")
-            val reports = repository.getReportForOrganizationUnit(teamId).second
-                .map { report ->  ReportforTeam (id = report.reportId, name = report.descriptiveName.toString(), url = report.url )}
+            val reports = repository.getReportForOrganizationUnit<ReportListItem>(teamId).second
             call.respond(reports)
         }
     }
@@ -49,10 +48,3 @@ data class TeamSummary (
     val name: String,
     val email: String,
 )
-
-data class ReportforTeam(
-    val id: String,
-    val name: String,
-    val url: String
-)
-

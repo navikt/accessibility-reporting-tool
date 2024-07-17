@@ -3,10 +3,9 @@ package accessibility.reporting.tool.database
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.authenitcation.User.Oid
-import accessibility.reporting.tool.rest.Rapport
+import accessibility.reporting.tool.rest.ReportListItem
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Row
 import kotliquery.queryOf
@@ -63,7 +62,7 @@ class ReportRepository(val database: Database) {
             ).map { row -> report<T>(row) }.asSingle
         }
 
-    fun getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<Report>> =
+    inline fun <reified T : ReportContent> getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<T>> =
         database.query {
             queryOf(
                 """select * from organization_unit where organization_unit_id=:id""",
@@ -76,13 +75,13 @@ class ReportRepository(val database: Database) {
                     |from report
                     |where report_data -> 'organizationUnit' ->> 'id' = :id """.trimMargin(),
                     mapOf("id" to id)
-                ).map { row -> report<Report>(row) }.asList
+                ).map { row -> report<T>(row) }.asList
             }
 
             Pair(orgUnit, reports)
         }
 
-    fun getReportsForUser(oid: Oid): List<Report> = database.list {
+    inline fun <reified T : ReportContent> getReportsForUser(oid: Oid): List<T> = database.list {
         queryOf(
             """select created, last_changed, report_data ->> 'version' as version, report_data from report
                 | where report_data -> 'user'->>'oid'=:oid
@@ -90,9 +89,8 @@ class ReportRepository(val database: Database) {
             mapOf(
                 "oid" to oid.str()
             )
-        ).map { row -> report<Report>(row) }.asList
+        ).map { row -> report<T>(row) }.asList
     }
-
 
 
     inline fun <reified T> getReports(type: ReportType? = null, ids: List<String>? = null): List<T> =
@@ -153,7 +151,7 @@ class ReportRepository(val database: Database) {
             )
         }
 
-        getReportForOrganizationUnit(organizationUnit.id).second.forEach { report ->
+        getReportForOrganizationUnit<Report>(organizationUnit.id).second.forEach { report ->
             if (report.reportType == ReportType.SINGLE)
                 upsertReport(
                     report.withUpdatedMetadata(
@@ -192,11 +190,12 @@ class ReportRepository(val database: Database) {
                 .deserialize(rapportData)
 
             "ReportShortSummary" -> ReportShortSummary.fromJson(rapportData)
+            "ReportListItem" -> ReportListItem.fromJson(rapportData)
             else -> throw IllegalArgumentException("Kan ikke transformere rapport-data til $name")
         } as T
     }
 
-    private fun organizationUnit(row: Row) = OrganizationUnit(
+    fun organizationUnit(row: Row) = OrganizationUnit(
         id = row.string("organization_unit_id"),
         name = row.string("name"),
         email = row.string("email"),
