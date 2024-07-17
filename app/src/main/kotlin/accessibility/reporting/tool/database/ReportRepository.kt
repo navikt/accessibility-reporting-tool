@@ -63,8 +63,6 @@ class ReportRepository(val database: Database) {
             ).map { row -> report<T>(row) }.asSingle
         }
 
-
-
     fun getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<Report>> =
         database.query {
             queryOf(
