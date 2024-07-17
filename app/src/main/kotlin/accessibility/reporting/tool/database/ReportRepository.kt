@@ -62,7 +62,6 @@ class ReportRepository(val database: Database) {
             ).map { row -> report<T>(row) }.asSingle
         }
 
-
     inline fun <reified T : ReportContent> getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<T>> =
         database.query {
             queryOf(
