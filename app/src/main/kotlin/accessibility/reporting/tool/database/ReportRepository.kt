@@ -64,7 +64,6 @@ class ReportRepository(val database: Database) {
         }
 
 
-
     fun getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<Report>> =
         database.query {
             queryOf(
@@ -84,7 +83,7 @@ class ReportRepository(val database: Database) {
             Pair(orgUnit, reports)
         }
 
-    fun getReportsForUser(oid: Oid): List<Report> = database.list {
+    inline fun <reified T : ReportContent> getReportsForUser(oid: Oid): List<T> = database.list {
         queryOf(
             """select created, last_changed, report_data ->> 'version' as version, report_data from report
                 | where report_data -> 'user'->>'oid'=:oid
@@ -92,9 +91,8 @@ class ReportRepository(val database: Database) {
             mapOf(
                 "oid" to oid.str()
             )
-        ).map { row -> report<Report>(row) }.asList
+        ).map { row -> report<T>(row) }.asList
     }
-
 
 
     inline fun <reified T> getReports(type: ReportType? = null, ids: List<String>? = null): List<T> =

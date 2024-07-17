@@ -230,7 +230,7 @@ class ReportRepositoryTest {
         )
 
 
-        repository.getReportsForUser(testUserOid).assert {
+        repository.getReportsForUser<Report>(testUserOid).assert {
             size shouldBe 4
             withClue("Report with url http://dummyx2.test is missing") {
                 any { it.url == "http://dummyx2.test" } shouldBe true

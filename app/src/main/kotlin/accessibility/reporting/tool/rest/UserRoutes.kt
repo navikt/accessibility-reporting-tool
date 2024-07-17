@@ -20,7 +20,7 @@ fun Route.jsonApiUsers(repository: ReportRepository, repo: OrganizationRepositor
     route("users") {
         get("details") {
 
-            val reports = repository.getReportsForUser(call.user.oid)
+            val reports = repository.getReportsForUser<Report>(call.user.oid)
                 .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
                 .map { it.toReportInfo() }
             val teams = repo.getOrganizationForUser(call.user.email)
