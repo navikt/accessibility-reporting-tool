@@ -27,16 +27,14 @@ fun Route.jsonapiteams(repository: ReportRepository) {
 
         route("{id}") {
             get("reports") {
-                val teamId =
-                    call.parameters["id"] ?: return@get call.respond(
-                        HttpStatusCode.BadRequest,
-                        "Missing or malformed id"
-                    )
+                val teamId = call.parameters["id"] ?: throw BadPathParameterException("id")
                 val reports = repository.getReportForOrganizationUnit<ReportListItem>(teamId).second
                 call.respond(reports)
             }
             get("details") {
-
+                val teamId = call.parameters["id"] ?: throw BadPathParameterException("id")
+                val teamDetails = repository.getOrganizationUnit(teamId)?:throw ResourceNotFoundException("team",teamId)
+                call.respond(teamDetails)
             }
         }
     }

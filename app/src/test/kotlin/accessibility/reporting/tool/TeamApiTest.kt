@@ -75,7 +75,7 @@ class TeamApiTest {
         testOrg2.addMember(Email("tadda3@nav.no"))
         repository.upsertOrganizationUnit(testOrg2)
 
-        client.get("/api/teams/$testOrg2/details").assert {
+        client.get("/api/teams/${testOrg2.id}/details").assert {
             status shouldBe OK
             objectmapper.readTree(bodyAsText()).assert {
                 this["id"].asText() shouldBe testOrg2.id
@@ -85,7 +85,7 @@ class TeamApiTest {
             }
         }
 
-        client.get("/api/teams/$testOrg/details").assert {
+        client.get("/api/teams/${testOrg.id}/details").assert {
             status shouldBe OK
             objectmapper.readTree(bodyAsText()).assert {
                 this["id"].asText() shouldBe testOrg.id
