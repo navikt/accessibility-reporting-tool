@@ -3,6 +3,8 @@ package accessibility.reporting.tool.wcag
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 fun JsonNode.reportLastChanged() = (this["lastChanged"].toLocalDateTime()
     ?: LocalDateTimeHelper.nowAtUtc().also {
@@ -22,3 +24,7 @@ fun JsonNode.orgnaizationUnit() = this["organizationUnit"].takeIf { !it.isEmpty 
         OrganizationUnit.fromJson(organizationJson)
     }
 
+fun String.datestr(date: LocalDateTime) = let {
+    val formatter = DateTimeFormatter.ofPattern(this)
+    date.format(formatter)
+}

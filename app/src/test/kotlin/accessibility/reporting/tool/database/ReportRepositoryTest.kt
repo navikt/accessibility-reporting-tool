@@ -103,7 +103,7 @@ class ReportRepositoryTest {
         testOrg1.addMember("testMember@test.ko".toEmail())
         repository.upsertOrganizationUnit(testOrg1)
 
-        repository.getReportForOrganizationUnit(testOrg1.id).apply {
+        repository.getReportForOrganizationUnit<Report>(testOrg1.id).apply {
             first.assert {
                 require(this != null)
                 members.size shouldBe 1
@@ -190,7 +190,7 @@ class ReportRepositoryTest {
         repository.upsertReport(dummyReportV2("http://dummyurl3.test", testOrg))
         repository.upsertReport(dummyReportV2("http://dummyurl4.test", testOrg))
 
-        repository.getReportForOrganizationUnit(testOrg.id).assert {
+        repository.getReportForOrganizationUnit<Report>(testOrg.id).assert {
             require(first != null)
             second.assert {
                 size shouldBe 4

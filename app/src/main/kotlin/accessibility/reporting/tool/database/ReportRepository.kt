@@ -3,11 +3,9 @@ package accessibility.reporting.tool.database
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.authenitcation.User.Oid
-import accessibility.reporting.tool.rest.Rapport
 import accessibility.reporting.tool.rest.ReportListItem
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.Row
 import kotliquery.queryOf
@@ -65,7 +63,7 @@ class ReportRepository(val database: Database) {
         }
 
 
-    fun getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<Report>> =
+    inline fun <reified T : ReportContent> getReportForOrganizationUnit(id: String): Pair<OrganizationUnit?, List<T>> =
         database.query {
             queryOf(
                 """select * from organization_unit where organization_unit_id=:id""",
@@ -78,7 +76,7 @@ class ReportRepository(val database: Database) {
                     |from report
                     |where report_data -> 'organizationUnit' ->> 'id' = :id """.trimMargin(),
                     mapOf("id" to id)
-                ).map { row -> report<Report>(row) }.asList
+                ).map { row -> report<T>(row) }.asList
             }
 
             Pair(orgUnit, reports)
@@ -154,7 +152,7 @@ class ReportRepository(val database: Database) {
             )
         }
 
-        getReportForOrganizationUnit(organizationUnit.id).second.forEach { report ->
+        getReportForOrganizationUnit<Report>(organizationUnit.id).second.forEach { report ->
             if (report.reportType == ReportType.SINGLE)
                 upsertReport(
                     report.withUpdatedMetadata(
@@ -198,7 +196,7 @@ class ReportRepository(val database: Database) {
         } as T
     }
 
-    private fun organizationUnit(row: Row) = OrganizationUnit(
+    fun organizationUnit(row: Row) = OrganizationUnit(
         id = row.string("organization_unit_id"),
         name = row.string("name"),
         email = row.string("email"),

@@ -6,6 +6,7 @@ import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
+import accessibility.reporting.tool.wcag.Report
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -51,7 +52,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
         get("{id}") {
 
             call.parameters["id"]!!.let { unitId ->
-                val (org, reports) = repository.getReportForOrganizationUnit(unitId)
+                val (org, reports) = repository.getReportForOrganizationUnit<Report>(unitId)
 
                 org?.let { orgUnit ->
                     call.respondHtmlContent(orgUnit.name, NavBarItem.ORG_ENHETER) {

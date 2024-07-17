@@ -58,8 +58,3 @@ class ReportListItem(
 
     }
 }
-
-private fun String.datestr(date: LocalDateTime) = let {
-    val formatter = DateTimeFormatter.ofPattern(this)
-    date.format(formatter)
-}
