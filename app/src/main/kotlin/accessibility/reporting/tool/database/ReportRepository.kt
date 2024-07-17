@@ -4,6 +4,7 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.authenitcation.User.Oid
 import accessibility.reporting.tool.rest.Rapport
+import accessibility.reporting.tool.rest.ReportListItem
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
@@ -192,6 +193,7 @@ class ReportRepository(val database: Database) {
                 .deserialize(rapportData)
 
             "ReportShortSummary" -> ReportShortSummary.fromJson(rapportData)
+            "ReportListItem" -> ReportListItem.fromJson(rapportData)
             else -> throw IllegalArgumentException("Kan ikke transformere rapport-data til $name")
         } as T
     }

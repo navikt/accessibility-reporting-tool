@@ -1,15 +1,12 @@
 package accessibility.reporting.tool.rest
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.database.OrganizationRepository
-import accessibility.reporting.tool.microfrontends.reportListItem
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.microfrontends.reportListItem
-import accessibility.reporting.tool.rest.ReportInfo.Companion.toReportInfo
-import accessibility.reporting.tool.wcag.OrganizationUnit
-import io.ktor.http.*
+import accessibility.reporting.tool.wcag.*
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -20,9 +17,8 @@ fun Route.jsonApiUsers(repository: ReportRepository, repo: OrganizationRepositor
     route("users") {
         get("details") {
 
-            val reports = repository.getReportsForUser<Report>(call.user.oid)
+            val reports = repository.getReportsForUser<ReportListItem>(call.user.oid)
                 .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
-                .map { it.toReportInfo() }
             val teams = repo.getOrganizationForUser(call.user.email)
             val userDetails =
                 UserDetails(name = call.user.username, email = call.user.email.str(), reports = reports, teams = teams)
@@ -34,18 +30,32 @@ fun Route.jsonApiUsers(repository: ReportRepository, repo: OrganizationRepositor
 data class UserDetails(
     val name: String,
     val email: String,
-    val reports: List<ReportInfo>,
+    val reports: List<ReportListItem>,
     val teams: List<OrganizationUnit>
 )
 
-data class ReportInfo(val title: String, val id: String, val teamId: String, val date: String) {
+class ReportListItem(
+    @JsonProperty("id")
+    override val reportId: String,
+    @JsonProperty("title")
+    override val descriptiveName: String?,
+    @JsonIgnore
+    override val url: String,
+    val teamId: String,
+    lastChanged: LocalDateTime
+) : ReportContent {
+    val date: String = "yyyy-MM-dd".datestr(lastChanged)
+
     companion object {
-        fun Report.toReportInfo() = ReportInfo(
-            title = descriptiveName ?: this.url,
-            id = reportId,
-            teamId = organizationUnit?.id ?: "",
-            date = "yyyy-MM-dd".datestr(lastChanged)
+
+        fun fromJson(jsonNode: JsonNode) = ReportListItem(
+            reportId = jsonNode.reportId,
+            descriptiveName = jsonNode.descriptiveName,
+            url = jsonNode.url,
+            teamId = jsonNode.orgnaizationUnit()?.id ?: "",
+            lastChanged = jsonNode.reportLastChanged()
         )
+
     }
 }
 
