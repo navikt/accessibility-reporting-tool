@@ -1,6 +1,7 @@
 package accessibility.reporting.tool.rest
 
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
@@ -49,51 +50,68 @@ fun Route.jsonApiReports(repository: ReportRepository) {
 
 
 
-    post("/new") {
-        val report = call.receive<Rapport>()
-        val newReport = repository.upsertReport(
-            SucessCriteriaV1.newReport(
+        post("/new") {
+            val report = call.receive<Rapport>()
+            val newReport = repository.upsertReport(
+                SucessCriteriaV1.newReport(
 
-                organizationUnit = null,
-                reportId = UUID.randomUUID().toString(),
-                url = report.urlTilSiden,
-                user = User(
-                    email = User.Email(s = "Markia"),
-                    name = null,
-                    oid = User.Oid(s = "Taniqua"),
-                    groups = listOf()
-                ),
-                descriptiveName = report.name
+                    organizationUnit = null,
+                    reportId = UUID.randomUUID().toString(),
+                    url = report.urlTilSiden,
+                    user = User(
+                        email = User.Email(s = "Markia"),
+                        name = null,
+                        oid = User.Oid(s = "Taniqua"),
+                        groups = listOf()
+                    ),
+                    descriptiveName = report.name
+                )
             )
-        )
-        call.respondText(status = HttpStatusCode.OK, provider = {
-            """{
+            call.respondText(status = HttpStatusCode.OK, provider = {
+                """{
                 "id": "${newReport.reportId}"}
             """.trimMargin()
+            }
+            )
         }
-        )
-    }}
-}
-
-
-data class ReportWithUrl(
-    val url: String,
-    val navn: String,
-) {
-    fun List<ReportShortSummary>.toReportWithUrl() = this.map {
-        ReportWithUrl(it.url, it.descriptiveName ?: url)
+        put("/{id}/update") {
+            val id =
+                call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest, "Missing or malformed id")
+            val updatedCriteria = call.receive<List<SuccessCriterion>>()
+            try {
+                val existingReport = repository.getReport<Report>(id)
+                if (existingReport == null) {
+                    call.respond(HttpStatusCode.NotFound, "Report not found")
+                    return@put
+                }
+                val updatedReport = existingReport.updateCriteria(updatedCriteria, call.user)
+                repository.upsertReport(updatedReport)
+                call.respond(HttpStatusCode.OK, "Report criteria updated successfully")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Failed to update report criteria: ${e.message}")
+            }
+        }
     }
 }
 
-data class Rapport(val name: String, val urlTilSiden: String, val team: String)
+    data class ReportWithUrl(
+        val url: String,
+        val navn: String,
+    ) {
+        fun List<ReportShortSummary>.toReportWithUrl() = this.map {
+            ReportWithUrl(it.url, it.descriptiveName ?: url)
+        }
+    }
 
-data class FullReport(
-    override val reportId: String,
-    override val descriptiveName: String?,
-    override val url: String,
-    val team: OrganizationUnit?,
-    val author: Author,
-    val successCriteria: List<SuccessCriterion>,
-    val created: LocalDateTime,
-    val lastChanged: LocalDateTime,
-) : ReportContent
+    data class Rapport(val name: String, val urlTilSiden: String, val team: String)
+
+    data class FullReport(
+        override val reportId: String,
+        override val descriptiveName: String?,
+        override val url: String,
+        val team: OrganizationUnit?,
+        val author: Author,
+        val successCriteria: List<SuccessCriterion>,
+        val created: LocalDateTime,
+        val lastChanged: LocalDateTime,
+    ) : ReportContent
