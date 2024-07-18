@@ -3,6 +3,7 @@ package accessibility.reporting.tool.rest
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.rest.SuccessCriterionWithWcag.Companion.toSuccessCriteriaList
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -28,16 +29,8 @@ fun Route.jsonApiReports(repository: ReportRepository) {
 
             try {
                 val result = repository.getReport<Report>(id)
-                    ?.let {
-                        FullReport(
-                            it.reportId, it.descriptiveName, it.url,
-                            team = it.organizationUnit,
-                            author = it.author,
-                            successCriteria = it.successCriteria,
-                            created = it.created,
-                            lastChanged = it.lastChanged
-                        )
-                    }
+                    ?.toFullReport()
+
                 if (result != null) {
                     call.respond(result)
                 } else {
@@ -47,8 +40,6 @@ fun Route.jsonApiReports(repository: ReportRepository) {
                 call.respond(HttpStatusCode.InternalServerError, "An error occurred: ${e.message}")
             }
         }
-
-
 
         post("/new") {
             val report = call.receive<Rapport>()
@@ -77,24 +68,22 @@ fun Route.jsonApiReports(repository: ReportRepository) {
         put("/{id}/update") {
             val id =
                 call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest, "Missing or malformed id")
-            val updatedCriteria = call.receive<List<SuccessCriterion>>()
+            val updatedCriteria = call.receive<FullReport>()
             try {
                 val existingReport = repository.getReport<Report>(id)
                 if (existingReport == null) {
                     call.respond(HttpStatusCode.NotFound, "Report not found")
                     return@put
                 }
-                val updatedReport = existingReport.updateCriteria(updatedCriteria, call.user)
-                repository.upsertReport(updatedReport)
-                call.respond(HttpStatusCode.OK, "Report criteria updated successfully")
+                val updatedReport = existingReport.updateCriteria(updatedCriteria.successCriteria, call.user)
+                val result=repository.upsertReport(updatedReport).toFullReport()
+                call.respond(HttpStatusCode.OK, result)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Failed to update report criteria: ${e.message}")
             }
         }
     }
 }
-
-
 
     data class ReportWithUrl(
         val url: String,
@@ -161,6 +150,19 @@ fun toSuccessCriterion(): SuccessCriterion {
         return this.map { it.toSuccessCriterion() }
     }
 }}
+
+fun Report.toFullReport(): FullReport {
+    return FullReport(
+        reportId =this.reportId,
+        descriptiveName =this.descriptiveName,
+        url =this.url,
+        team =this.organizationUnit,
+        author =this.author,
+        successCriteria =this.successCriteria,
+        created =this.created,
+        lastChanged =this.lastChanged
+    )
+}
 
 // lage en klasse som inneholder alle felter (inkludert WCAGlevel)
 // lage en metode som konvertere klassen din til SuccesssCriterion
