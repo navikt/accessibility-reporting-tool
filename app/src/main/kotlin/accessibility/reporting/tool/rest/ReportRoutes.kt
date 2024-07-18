@@ -2,6 +2,7 @@ package accessibility.reporting.tool.rest
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.rest.SuccessCriterionWithWcag.Companion.toSuccessCriteriaList
 import accessibility.reporting.tool.wcag.*
@@ -10,10 +11,11 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.gradle.internal.impldep.org.bouncycastle.asn1.x509.X509ObjectIdentifiers.organization
 import java.time.LocalDateTime
 import java.util.UUID
 
-fun Route.jsonApiReports(repository: ReportRepository) {
+fun Route.jsonApiReports(repository: ReportRepository, repo: OrganizationRepository) {
 
     route("reports") {
         get("/list") {
@@ -43,10 +45,12 @@ fun Route.jsonApiReports(repository: ReportRepository) {
 
         post("/new") {
             val report = call.receive<Rapport>()
+            val organizationUnit = repo.getOrganizationUnitbyName(report.team)
+
             val newReport = repository.upsertReport(
                 SucessCriteriaV1.newReport(
 
-                    organizationUnit = null,
+                    organizationUnit = organizationUnit,
                     reportId = UUID.randomUUID().toString(),
                     url = report.urlTilSiden,
                     user = User(
@@ -69,43 +73,38 @@ fun Route.jsonApiReports(repository: ReportRepository) {
             val id =
                 call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest, "Missing or malformed id")
             val updatedCriteria = call.receive<FullReport>()
-            try {
+
                 val existingReport = repository.getReport<Report>(id)
                 if (existingReport == null) {
                     call.respond(HttpStatusCode.NotFound, "Report not found")
                     return@put
                 }
+
                 val updatedReport = existingReport.updateCriteria(updatedCriteria.successCriteria, call.user)
-                val result=repository.upsertReport(updatedReport).toFullReport()
+                val result = repository.upsertReport(updatedReport).toFullReport()
                 call.respond(HttpStatusCode.OK, result)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Failed to update report criteria: ${e.message}")
-            }
+
         }
     }
 }
 
-    data class ReportWithUrl(
-        val url: String,
-        val navn: String,
-    ) {
-        fun List<ReportShortSummary>.toReportWithUrl() = this.map {
-            ReportWithUrl(it.url, it.descriptiveName ?: url)
-        }
-    }
+data class ReportWithUrl(
+    val url: String,
+    val navn: String,
+)
 
-    data class Rapport(val name: String, val urlTilSiden: String, val team: String)
+data class Rapport(val name: String, val urlTilSiden: String, val team: String)
 
-    data class FullReport(
-        override val reportId: String,
-        override val descriptiveName: String?,
-        override val url: String,
-        val team: OrganizationUnit?,
-        val author: Author,
-        val successCriteria: List<SuccessCriterion>,
-        val created: LocalDateTime,
-        val lastChanged: LocalDateTime,
-    ) : ReportContent
+data class FullReport(
+    override val reportId: String,
+    override val descriptiveName: String?,
+    override val url: String,
+    val team: OrganizationUnit?,
+    val author: Author,
+    val successCriteria: List<SuccessCriterion>,
+    val created: LocalDateTime,
+    val lastChanged: LocalDateTime,
+) : ReportContent
 
 data class SuccessCriterionWithWcag(
     val name: String,
@@ -123,44 +122,45 @@ data class SuccessCriterionWithWcag(
     val helpUrl: String? = null,
     val wcagVersion: String = "2.1",
     var wcagLevel: WcagLevel
-)
-{
-fun toSuccessCriterion(): SuccessCriterion {
-    return SuccessCriterion(
-        name,
-        description,
-        principle,
-        guideline,
-        tools,
-        number,
-        breakingTheLaw,
-        lawDoesNotApply,
-        tooHardToComply,
-        contentGroup,
-        status,
-        wcagUrl,
-        helpUrl,
-        wcagVersion
-    ).apply {
-        this.wcagLevel = this@SuccessCriterionWithWcag.wcagLevel
+) {
+    fun toSuccessCriterion(): SuccessCriterion {
+        return SuccessCriterion(
+            name,
+            description,
+            principle,
+            guideline,
+            tools,
+            number,
+            breakingTheLaw,
+            lawDoesNotApply,
+            tooHardToComply,
+            contentGroup,
+            status,
+            wcagUrl,
+            helpUrl,
+            wcagVersion
+        ).apply {
+            this.wcagLevel = this@SuccessCriterionWithWcag.wcagLevel
+        }
+    }
+
+    companion object {
+        fun List<SuccessCriterionWithWcag>.toSuccessCriteriaList(): List<SuccessCriterion> {
+            return this.map { it.toSuccessCriterion() }
+        }
     }
 }
-    companion object {
-    fun List<SuccessCriterionWithWcag>.toSuccessCriteriaList(): List<SuccessCriterion> {
-        return this.map { it.toSuccessCriterion() }
-    }
-}}
 
 fun Report.toFullReport(): FullReport {
     return FullReport(
-        reportId =this.reportId,
-        descriptiveName =this.descriptiveName,
-        url =this.url,
-        team =this.organizationUnit,
-        author =this.author,
-        successCriteria =this.successCriteria,
-        created =this.created,
-        lastChanged =this.lastChanged
+        reportId = this.reportId,
+        descriptiveName = this.descriptiveName,
+        url = this.url,
+        team = this.organizationUnit,
+        author = this.author,
+        successCriteria = this.successCriteria,
+        created = this.created,
+        lastChanged = this.lastChanged
     )
 }
 
