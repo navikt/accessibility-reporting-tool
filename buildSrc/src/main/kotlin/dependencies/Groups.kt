@@ -82,3 +82,11 @@ object Testdependencies {
         val api = "$groupId:$ENGINE_ARTIFACT_ID:junit-jupiter-api"
     }
 }
+/*
+2024-07-18 06:14:07: 3 outdated dependencies
+org.testcontainers:  1.19.8 -> 1.20.0
+org.testcontainers:  1.19.8 -> 1.20.0
+org.testcontainers:  1.19.8 -> 1.20.0
+**Ignored dependencies
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
