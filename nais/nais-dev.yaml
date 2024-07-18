@@ -24,6 +24,12 @@ spec:
   prometheus:
     enabled: true
     path: /open/metrics
+  accessPolicy:
+    inbound:
+      rules:
+      - "*a11y-statement-ny.ansatt.dev.nav.no*"
+      - "https://a11y-statement-ny.ansatt.dev.nav.no"
+      - "https://a11y-statement-ny.ansatt.dev.nav.no"
   azure:
     application:
       enabled: true
