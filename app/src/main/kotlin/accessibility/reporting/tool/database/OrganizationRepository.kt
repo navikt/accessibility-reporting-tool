@@ -1,24 +1,13 @@
 package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.authenitcation.User.Email
+import accessibility.reporting.tool.wcag.OrganizationUnit
 import kotliquery.queryOf
 
 class OrganizationRepository(val database: Database) {
-    fun getOrganizationForUser(email: Email): List<String> = database.list {
+    fun getOrganizationForUser(email: Email): List<OrganizationUnit> = database.list {
         queryOf(
-            /*"""SELECT DISTINCT ou.name
-                       FROM report r
-                       JOIN organization_unit ou ON r.organization_unit_id = ou.organization_unit_id = ou.organization_unit_id
-                       WHERE r.report_data -> 'user' ->> 'email' = :email
-                          OR r.report_data -> 'author' ->> 'email' = :email""",*/
-
-            /*"""SELECT ou.name
-           FROM organization_unit ou
-           WHERE ou.email = :email""",
-            mapOf(
-                "email" to email.str()
-            )*/
-            """SELECT ou.name
+            """SELECT *
                FROM organization_unit ou
                WHERE LOWER(ou.email) = LOWER(:email) OR LOWER(:email) = ANY(string_to_array(LOWER(ou.member), ','))         
 
@@ -26,6 +15,12 @@ class OrganizationRepository(val database: Database) {
             mapOf(
                 "email" to email.str()
             )
-        ).map { row -> row.string("name") }.asList
+        ).map { row ->
+            OrganizationUnit(
+                id = row.string("organization_unit_id"),
+                name = row.string("name"),
+                email = row.string("email")
+            )
+        }.asList
     }
 }

@@ -6,14 +6,13 @@ import accessibility.reporting.tool.wcag.OrganizationUnit
 import kotliquery.queryOf
 import org.junit.jupiter.api.*
 import java.util.*
+import kotlin.collections.List
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OrganizationRepositoryTest {
     private val database = LocalPostgresDatabase.cleanDb()
     private val repository = OrganizationRepository(database)
     private val testUserEmail = Email("test@nav.no")
-    private val testUserName = "Tadda Taddasen"
-    private val testUserOid = User.Oid(UUID.randomUUID().toString())
     private val testOrg = OrganizationUnit(
         id = UUID.randomUUID().toString(),
         name = "DummyOrg",
@@ -62,13 +61,13 @@ class OrganizationRepositoryTest {
     fun getOrganizationForUser() {
         val result = repository.getOrganizationForUser(testUserEmail)
         Assertions.assertEquals(2, result.size)
-        assert(result.contains("DummyOrg"))
-        assert(result.contains("DummyOrg1"))
+        assert(result.names.contains("DummyOrg"))
+        assert(result.names.contains("DummyOrg1"))
     }
 
 
     @Test
-    fun `finner organisasjonseneter uavhengig av upper eller lower case`(){
+    fun `finner organisasjonseneter uavhengig av upper eller lower case`() {
 
         val bruker1 = Email("test.test@nav.no")
         val bruker2 = Email("Test.Test@nav.no")
@@ -102,29 +101,15 @@ class OrganizationRepositoryTest {
         }
         val resultLower = repository.getOrganizationForUser(bruker1)
         Assertions.assertEquals(2, resultLower.size)
-        assert(resultLower.contains("DummyOrg2"))
-        assert(resultLower.contains("DummyOrg3"))
+        assert(resultLower.names.contains("DummyOrg2"))
+        assert(resultLower.names.contains("DummyOrg3"))
 
         val resultUpper = repository.getOrganizationForUser(bruker2)
         Assertions.assertEquals(2, resultUpper.size)
-        assert(resultUpper.contains("DummyOrg2"))
-        assert(resultUpper.contains("DummyOrg3"))
-
-
-    //Legge inn en bruker i en organisasjon som har email test.test@nav.no
-        // addMemeber
-        //database upsert
-
-        //Legge inn en bruker i en annen organisasjon som har email Test.Test@nav.no
-        // addMemeber
-        //database upsert
-
-
-        //repository.getOrganizationFor User(test.test@nav.no)
-        //teste på at size er 2
-        //repository.getOrganizationFor User(Test.Test@nav.no)
-        //teste på at size er 2
+        assert(resultUpper.names.contains("DummyOrg2"))
+        assert(resultUpper.names.contains("DummyOrg3"))
     }
-
-
 }
+
+private val List<OrganizationUnit>.names
+    get() = this.map { it.name }
