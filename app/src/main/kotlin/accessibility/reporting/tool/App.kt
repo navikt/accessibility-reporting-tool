@@ -7,10 +7,12 @@ import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.faqRoute
+import accessibility.reporting.tool.rest.RequestException
 import accessibility.reporting.tool.rest.jsonApiReports
 import accessibility.reporting.tool.rest.jsonapiteams
 import accessibility.reporting.tool.rest.jsonApiUsers
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -90,6 +92,11 @@ fun Application.api(
                 is BadRequestException -> {
                     log.debug(cause.message)
                     call.respondText(status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad request")
+                }
+
+                is RequestException -> {
+                    log.info(cause) { cause.message }
+                    call.respondText(status = cause.responseStatus, text = cause.message!!)
                 }
 
                 else -> {

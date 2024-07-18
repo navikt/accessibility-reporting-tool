@@ -1,15 +1,20 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.datestr
 import assert
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.http.HttpStatusCode.Companion.NotFound
+import io.ktor.http.HttpStatusCode.Companion.OK
 import kotliquery.queryOf
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,10 +32,11 @@ class TeamApiTest {
         email = "testorganisation@nav.no"
     )
     private val testOrg2 = OrganizationUnit(
-        id = "1234568",
+        id = "one-two-three",
         name = "Testorganization",
         email = "testorganization@nav.no"
     )
+
     private val testorgsReports = listOf(dummyReportV2(orgUnit = testOrg), dummyReportV2(orgUnit = testOrg))
 
     @BeforeEach()
@@ -52,7 +58,6 @@ class TeamApiTest {
             status shouldBe HttpStatusCode.OK
             val responseBody = bodyAsText()
             val jsonResponse = objectmapper.readTree(responseBody)
-            println("Response JSON: $jsonResponse")
             jsonResponse.toList().assert {
                 this.size shouldBe 2
                 testorgsReports.forEach {
@@ -60,6 +65,37 @@ class TeamApiTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun `Returns the details of a team`() = setupTestApi(database, true) {
+        testOrg2.addMember(Email("tadda@nav.no"))
+        testOrg2.addMember(Email("tadda1@nav.no"))
+        testOrg2.addMember(Email("tadda2@nav.no"))
+        testOrg2.addMember(Email("tadda3@nav.no"))
+        repository.upsertOrganizationUnit(testOrg2)
+
+        client.get("/api/teams/${testOrg2.id}/details").assert {
+            status shouldBe OK
+            objectmapper.readTree(bodyAsText()).assert {
+                this["id"].asText() shouldBe testOrg2.id
+                this["name"].asText() shouldBe testOrg2.name
+                this["email"].asText() shouldBe testOrg2.email
+                this["members"].toList().map { it.asText() } shouldContainAll testOrg2.members
+            }
+        }
+
+        client.get("/api/teams/${testOrg.id}/details").assert {
+            status shouldBe OK
+            objectmapper.readTree(bodyAsText()).assert {
+                this["id"].asText() shouldBe testOrg.id
+                this["name"].asText() shouldBe testOrg.name
+                this["email"].asText() shouldBe testOrg.email
+                this["members"].toList().size shouldBe 0
+            }
+        }
+
+        client.get("/api/teams/no-exists/details").status shouldBe NotFound
     }
 }
 
