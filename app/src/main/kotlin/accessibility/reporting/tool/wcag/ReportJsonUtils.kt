@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-fun JsonNode.reportLastChanged() = (this["lastChanged"].toLocalDateTime()
+fun JsonNode.lastChangedOrDefault() = (this["lastChanged"].toLocalDateTime()
     ?: LocalDateTimeHelper.nowAtUtc().also {
         log.warn { "Fant ikke lastChanged-dato for rapport med id ${this["reportId"].asText()}, bruker default" }
     })

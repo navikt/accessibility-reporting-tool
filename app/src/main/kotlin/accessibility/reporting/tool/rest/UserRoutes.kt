@@ -51,7 +51,7 @@ class ReportListItem(
             descriptiveName = jsonNode.descriptiveName,
             url = jsonNode.url,
             teamId = jsonNode.orgnaizationUnit()?.id ?: "",
-            lastChanged = jsonNode.reportLastChanged()
+            lastChanged = jsonNode.lastChangedOrDefault()
         )
     }
 }
