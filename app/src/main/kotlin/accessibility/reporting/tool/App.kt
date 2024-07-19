@@ -118,7 +118,7 @@ fun Application.api(
             adminRoutes(repository)
             faqRoute()
             route("api") {
-                jsonApiReports(repository)
+                jsonApiReports(repo = organizationRepository, repository = repository)
                 jsonapiteams(repository)
                 jsonApiUsers(repo = organizationRepository, repository = repository)
             }
