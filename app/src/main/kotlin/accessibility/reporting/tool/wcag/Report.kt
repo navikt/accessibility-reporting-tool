@@ -4,9 +4,6 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.rest.NewTeam
-import accessibility.reporting.tool.wcag.Status.*
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -81,17 +78,6 @@ open class Report(
     open fun toJson(): String =
         objectMapper.writeValueAsString(this)
 
-    fun statusString(): String = when {
-        successCriteria.any { it.status == NOT_TESTED } -> "Ikke ferdig"
-        successCriteria.deviationCount() != 0 ->
-            "${successCriteria.deviationCount()} avvik, ${successCriteria.disputedDeviationCount().punkter} med merknad"
-
-        successCriteria.deviationCount() == 0 ->
-            "Ingen avvik, ${successCriteria.disputedDeviationCount().punkter} med merknad"
-
-        else -> "Ukjent"
-    }
-
     fun updateCriterion(
         criterionNumber: String,
         statusString: String,
@@ -135,11 +121,6 @@ open class Report(
     fun isOwner(callUser: User): Boolean =
         author.oid == callUser.oid.str()
 
-    fun h1() = when (reportType) {
-        ReportType.AGGREGATED -> "Tilgjengelighetserklæring (Samlerapport)"
-        ReportType.SINGLE -> "Tilgjengelighetserklæring"
-    }
-
     fun writeAccess(user: User?): Boolean = when {
         user == null -> false
         Admins.isAdmin(user) -> true
@@ -149,11 +130,6 @@ open class Report(
     }
 
 }
-
-private val Int.punkter: String
-    get() = if (this == 1) {
-        "1 punkt"
-    } else "$this punkter"
 
 data class OrganizationUnit(
     val id: String,
