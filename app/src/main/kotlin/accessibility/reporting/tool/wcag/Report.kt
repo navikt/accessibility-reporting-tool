@@ -3,9 +3,7 @@ package accessibility.reporting.tool.wcag
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.LocalDateTimeHelper
-import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
 import accessibility.reporting.tool.rest.NewTeam
-import accessibility.reporting.tool.wcag.OrganizationUnit.Companion.toOrgUnitId
 import accessibility.reporting.tool.wcag.Status.*
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
@@ -28,13 +26,11 @@ open class Report(
     override val descriptiveName: String?,
     val organizationUnit: OrganizationUnit?,
     val version: Version,
-    val testData: TestData?,
     val author: Author,
     val successCriteria: List<SuccessCriterion>,
-    val filters: MutableList<String> = mutableListOf(),
     val created: LocalDateTime,
     val lastChanged: LocalDateTime,
-    val contributers: MutableList<Author> = mutableListOf(),
+    val contributors: MutableList<Author> = mutableListOf(),
     val lastUpdatedBy: Author?,
     val reportType: ReportType,
 ) : ReportContent {
@@ -53,10 +49,9 @@ open class Report(
         version: Version? = null,
         author: Author? = null,
         successCriteria: List<SuccessCriterion>? = null,
-        filters: MutableList<String>? = null,
         created: LocalDateTime? = null,
         lastChanged: LocalDateTime? = null,
-        contributers: MutableList<Author>? = null,
+        contributors: MutableList<Author>? = null,
         lastUpdatedBy: Author? = null,
         reportType: ReportType? = null,
     ) = Report(
@@ -65,13 +60,11 @@ open class Report(
         descriptiveName = descriptiveName ?: this.descriptiveName,
         organizationUnit = organizationUnit ?: this.organizationUnit,
         version = version ?: this.version,
-        testData = null,
         author = author ?: this.author,
         successCriteria = successCriteria ?: this.successCriteria,
-        filters = filters ?: this.filters,
         created = created ?: this.created,
         lastChanged = lastChanged ?: this.lastChanged,
-        contributers = contributers ?: this.contributers,
+        contributors = contributors ?: this.contributors,
         lastUpdatedBy = lastUpdatedBy ?: this.lastUpdatedBy,
         reportType = reportType ?: this.reportType
     )
@@ -81,7 +74,7 @@ open class Report(
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = updateBy.toAuthor()
     ).apply {
-        if (!isOwner(updateBy)) contributers.add(updateBy.toAuthor())
+        if (!isOwner(updateBy)) contributors.add(updateBy.toAuthor())
     }
 
     open fun toJson(): String =
@@ -122,7 +115,7 @@ open class Report(
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = updateBy.toAuthor()
     ).apply {
-        if (!isOwner(updateBy)) contributers.add(updateBy.toAuthor())
+        if (!isOwner(updateBy)) contributors.add(updateBy.toAuthor())
     }
 
     open fun withUpdatedMetadata(
@@ -136,7 +129,7 @@ open class Report(
         organizationUnit = organizationUnit ?: this.organizationUnit,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = updateBy.toAuthor(),
-    ).apply { if (!isOwner(updateBy)) contributers.add(updateBy.toAuthor()) }
+    ).apply { if (!isOwner(updateBy)) contributors.add(updateBy.toAuthor()) }
 
     fun isOwner(callUser: User): Boolean =
         author.oid == callUser.oid.str()
@@ -161,7 +154,6 @@ private val Int.punkter: String
         "1 punkt"
     } else "$this punkter"
 
-class TestData(val ident: String, val url: String)
 data class OrganizationUnit(
     val id: String,
     val name: String,

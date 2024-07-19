@@ -50,7 +50,7 @@ class ReportListItem(
             reportId = jsonNode.reportId,
             descriptiveName = jsonNode.descriptiveName,
             url = jsonNode.url,
-            teamId = jsonNode.orgnaizationUnit()?.id ?: "",
+            teamId = jsonNode.organizationUnit()?.id ?: "",
             lastChanged = jsonNode.lastChangedOrDefault()
         )
     }

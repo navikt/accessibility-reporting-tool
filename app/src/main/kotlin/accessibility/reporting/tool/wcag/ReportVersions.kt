@@ -1,70 +1,64 @@
 package accessibility.reporting.tool.wcag
 
-import accessibility.reporting.tool.database.LocalDateTimeHelper
-import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
 import com.fasterxml.jackson.databind.JsonNode
 
 
 object ReportVersions {
+    /**
+     * Changelog:
+     * v1 -> V2
+     * field[user -> author]
+     * V2 -> V3 field
+     * deleted[filters] field deleted[testData] (fields not in use)
+     * Assumptions v3: fields descriptiveName, and created always present
+     */
     fun migrateFromJsonVersion1(jsonNode: JsonNode): Report {
         val lastChanged = jsonNode.lastChangedOrDefault()
         return Report(
-            reportId = jsonNode["reportId"].asText(),
-            url = jsonNode["url"].asText(),
-            descriptiveName = jsonNode["descriptiveName"]?.takeIf { !it.isNull }?.asText(),
-            organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }
-                ?.let { organizationJson ->
-                    OrganizationUnit.fromJson(organizationJson)
-                },
+            reportId = jsonNode.reportId,
+            url = jsonNode.url,
+            descriptiveName = jsonNode.descriptiveNameOrDefault,
+            organizationUnit = jsonNode.organizationUnit(),
             version = Version.V2,
-            reportType = ReportType.valueFromJson(jsonNode),
-            testData = jsonNode["testData"].takeIf { !it.isEmpty }?.let { testDataJson ->
-                TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
-            },
+            reportType = jsonNode.reportType,
             author = Author.fromJson(jsonNode, "user")!!,
-            successCriteria = jsonNode["successCriteria"].map {
-                SuccessCriterion.fromJson(
-                    it,
-                    Version.V2,
-                    lastChanged.isBefore(SucessCriteriaV1.lastTextUpdate)
-                )
-            },
-            filters = jsonNode["filters"].map { it.asText() }.toMutableList(),
+            successCriteria = jsonNode.mapCriteria(lastChanged),
             lastChanged = lastChanged,
-            created = jsonNode["created"].toLocalDateTime() ?: LocalDateTimeHelper.nowAtUtc().also {
-                log.error { "Fant ikke created-dato for rapport med id ${jsonNode["reportId"].asText()}, bruker default" }
-            },
-            lastUpdatedBy = Author.fromJson(jsonNode, "lastUpdatedBy")
+            created = jsonNode.createdOrDefault(),
+            lastUpdatedBy = jsonNode.lastUpdatedBy
         )
     }
 
     fun fromJsonVersion2(jsonNode: JsonNode): Report {
         val lastChanged = jsonNode.lastChangedOrDefault()
         return Report(
-            reportId = jsonNode["reportId"].asText(),
-            url = jsonNode["url"].asText(),
-            descriptiveName = jsonNode["descriptiveName"]?.takeIf { !it.isNull }?.asText(),
-            organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }
-                ?.let { organizationJson ->
-                    OrganizationUnit.fromJson(organizationJson)
-                },
+            reportId = jsonNode.reportId,
+            url = jsonNode.url,
+            descriptiveName = jsonNode.descriptiveNameOrDefault,
+            organizationUnit = jsonNode.organizationUnit(),
             version = Version.V2,
-            testData = null,
             author = Author.fromJson(jsonNode, "author")!!,
-            successCriteria = jsonNode["successCriteria"].map {
-                SuccessCriterion.fromJson(
-                    it,
-                    Version.V2,
-                    lastChanged.isBefore(SucessCriteriaV1.lastTextUpdate)
-                )
-            },
-            filters = jsonNode["filters"].map { it.asText() }.toMutableList(),
+            successCriteria = jsonNode.mapCriteria(lastChanged),
             lastChanged = lastChanged,
-            created = jsonNode["created"].toLocalDateTime() ?: LocalDateTimeHelper.nowAtUtc().also {
-                log.error { "Fant ikke created-dato for rapport med id ${jsonNode["reportId"].asText()}, bruker default" }
-            },
-            lastUpdatedBy = Author.fromJson(jsonNode, "lastUpdatedBy"),
-            reportType = ReportType.valueFromJson(jsonNode)
+            created = jsonNode.createdOrDefault(),
+            lastUpdatedBy = jsonNode.lastUpdatedBy,
+            reportType = jsonNode.reportType
+        )
+    }
+    fun fromJsonVersion3(jsonNode: JsonNode): Report {
+        val lastChanged = jsonNode.lastChangedOrDefault()
+        return Report(
+            reportId = jsonNode.reportId,
+            url = jsonNode.url,
+            descriptiveName = jsonNode.descriptiveName,
+            organizationUnit = jsonNode.organizationUnit(),
+            version = Version.V2,
+            author = Author.fromJson(jsonNode, "author")!!,
+            successCriteria = jsonNode.mapCriteria(lastChanged),
+            lastChanged = lastChanged,
+            created = jsonNode.created,
+            lastUpdatedBy = jsonNode.lastUpdatedBy,
+            reportType = jsonNode.reportType
         )
     }
 }

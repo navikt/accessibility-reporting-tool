@@ -36,7 +36,6 @@ class updateCriteriaTest {
             descriptiveName ="tull",
             organizationUnit =testOrg,
             version =Version.V2,
-            testData = TestData("TULL","TULL"),
             author =testUser.toAuthor(),
             successCriteria = listOf(
                 SuccessCriterion(

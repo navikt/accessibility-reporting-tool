@@ -29,7 +29,6 @@ class AggregatedReport : Report {
         descriptiveName = descriptiveName,
         organizationUnit = organizationUnit,
         version = Version.V2,
-        testData = null,
         author = user.toAuthor(),
         successCriteria = reports.map { report ->
             report.successCriteria.map { criterion ->
@@ -41,10 +40,9 @@ class AggregatedReport : Report {
             }
 
         }.flatten().aggregate(),
-        filters = mutableListOf(),
         created = LocalDateTimeHelper.nowAtUtc(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
-        contributers = reports.map { it.contributers }.flatten().toMutableList(),
+        contributors = reports.map { it.contributors }.flatten().toMutableList(),
         lastUpdatedBy = null,
         reportType = AGGREGATED
     ) {
@@ -64,13 +62,11 @@ class AggregatedReport : Report {
         descriptiveName = report.descriptiveName,
         organizationUnit = report.organizationUnit,
         version = report.version,
-        testData = report.testData,
         author = report.author,
         successCriteria = report.successCriteria,
-        filters = mutableListOf(),
         created = report.created,
         lastChanged = report.lastChanged,
-        contributers = report.contributers,
+        contributors = report.contributors,
         lastUpdatedBy = report.lastUpdatedBy,
         reportType = AGGREGATED
     ) {

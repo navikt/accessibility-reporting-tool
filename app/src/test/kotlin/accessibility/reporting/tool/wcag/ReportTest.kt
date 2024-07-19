@@ -80,8 +80,8 @@ class ReportTest {
             )
         updatedReport.withUpdatedCriterion(testUpdatedCriterion2, contributor).assert {
             successCriteria.count { it.status != Status.NOT_TESTED } shouldBe 2
-            contributers.size shouldBe 1
-            contributers.first().assert {
+            contributors.size shouldBe 1
+            contributors.first().assert {
                 oid shouldBe contributor.oid.str()
                 email shouldBe contributor.email.str()
             }

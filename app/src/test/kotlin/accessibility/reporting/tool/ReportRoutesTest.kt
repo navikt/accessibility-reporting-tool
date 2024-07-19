@@ -35,7 +35,6 @@ class ReportRoutesTest {
                 url = "tadda",
                 organizationUnit = null,
                 version = Version.V2,
-                testData = null,
                 author = User(
                     email = Email("tadda"),
                     name = "tadda",
@@ -43,7 +42,6 @@ class ReportRoutesTest {
                     groups = listOf()
                 ).toAuthor(),
                 successCriteria = Version.V2.criteria,
-                filters = mutableListOf(),
                 created = LocalDateTimeHelper.nowAtUtc(),
                 lastChanged = LocalDateTimeHelper.nowAtUtc(),
                 lastUpdatedBy = null,
