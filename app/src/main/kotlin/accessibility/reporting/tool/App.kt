@@ -117,9 +117,9 @@ fun Application.api(
             adminRoutes(reportRepository =reportRepository, organizationRepository =organizationRepository)
             faqRoute()
             route("api") {
-                jsonApiReports(repo = organizationRepository, repository = reportRepository)
+                jsonApiReports(organizationRepository = organizationRepository, reportRepository = reportRepository)
                 jsonapiteams(organizationRepository = organizationRepository, reportRepository = reportRepository)
-                jsonApiUsers(repo = organizationRepository, repository = reportRepository)
+                jsonApiUsers(organizationRepository = organizationRepository, reportRepository = reportRepository)
             }
         }
         meta(prometehusRegistry)

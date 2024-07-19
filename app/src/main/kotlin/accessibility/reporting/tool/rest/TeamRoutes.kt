@@ -20,7 +20,6 @@ fun Route.jsonapiteams(reportRepository: ReportRepository,organizationRepository
 
         post("new") {
             val newTeam = call.receive<NewTeam>()
-            println(call.user)
             reportRepository.upsertOrganizationUnit(OrganizationUnit.createNew(newTeam))
             call.respond(HttpStatusCode.OK)
         }

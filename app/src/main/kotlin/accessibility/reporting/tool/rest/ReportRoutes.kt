@@ -14,12 +14,12 @@ import io.ktor.server.routing.*
 import java.time.LocalDateTime
 import java.util.UUID
 
-fun Route.jsonApiReports(repository: ReportRepository, repo: OrganizationRepository) {
+fun Route.jsonApiReports(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
 
     route("reports") {
         get("/list") {
             call.respond(
-                repository.getReports<ReportShortSummary>()
+                reportRepository.getReports<ReportShortSummary>()
                     .map { ReportWithUrl(it.url, it.descriptiveName ?: it.url) })
         }
 
@@ -28,7 +28,7 @@ fun Route.jsonApiReports(repository: ReportRepository, repo: OrganizationReposit
             val id =
                 call.parameters["id"] ?: throw BadRequestException("Missing id")
 
-            val result = repository.getReport<Report>(id)
+            val result = reportRepository.getReport<Report>(id)
                 ?.toFullReport()
 
             if (result != null) {
@@ -41,9 +41,9 @@ fun Route.jsonApiReports(repository: ReportRepository, repo: OrganizationReposit
 
         post("/new") {
             val report = call.receive<Rapport>()
-            val organizationUnit = repo.getOrganizationUnit(report.teamId)
+            val organizationUnit = organizationRepository.getOrganizationUnit(report.teamId)
 
-            val newReport = repository.upsertReport(
+            val newReport = reportRepository.upsertReport(
                 SucessCriteriaV1.newReport(
 
                     organizationUnit = organizationUnit,
@@ -71,10 +71,10 @@ fun Route.jsonApiReports(repository: ReportRepository, repo: OrganizationReposit
             val updatedCriteria = call.receive<FullReport>()
 
             val existingReport =
-                repository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
+                reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
 
             val updatedReport = existingReport.updateCriteria(updatedCriteria.successCriteria, call.user)
-            val result = repository.upsertReport(updatedReport).toFullReport()
+            val result = reportRepository.upsertReport(updatedReport).toFullReport()
             call.respond(HttpStatusCode.OK, result)
 
         }
