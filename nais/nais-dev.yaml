@@ -24,6 +24,8 @@ spec:
   prometheus:
     enabled: true
     path: /open/metrics
+  tokenx:
+    enabled: true
   accessPolicy:
     inbound:
       rules:
