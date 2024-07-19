@@ -100,11 +100,7 @@ class UpdateReportTest {
             contentType(
                 ContentType.Application.Json
             )
-            // legg til header ContentType -> application/json
         }
-
-        println("Response Status: ${response.status}")
-        println("Response Body: ${response.bodyAsText()}")
 
         response.status shouldBe HttpStatusCode.OK
         val responseBody = response.bodyAsText()
@@ -135,6 +131,16 @@ class UpdateReportTest {
             criterion ["wcagLevel"].asText() shouldBe "AA"
 
         }
+    }
+
+    @Test
+    fun `partial updates`(){
+         //Tester for:
+        // oppdatere kun metada
+        // oppdatere kun 1 criterion (i liste)
+        // oppdatere kun flere criteria (ikke metadata)
+        // oppdatere både metadata og criteria?
+        //NB! bruke jsonstrings, ikke objectmapper i request
     }
 
     private fun Report.assertExists(jsonNode: JsonNode) {
