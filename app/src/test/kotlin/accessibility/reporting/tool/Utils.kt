@@ -61,7 +61,7 @@ fun setupTestApi(
 ) = testApplication {
     application {
         api(
-            repository = ReportRepository(database),
+            reportRepository = ReportRepository(database),
             organizationRepository = OrganizationRepository(database),
             corsAllowedOrigins = listOf("*"),
             corsAllowedSchemes = listOf("http", "https")

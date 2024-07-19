@@ -4,50 +4,46 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.rest.SuccessCriterionWithWcag.Companion.toSuccessCriteriaList
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.gradle.internal.impldep.org.bouncycastle.asn1.x509.X509ObjectIdentifiers.organization
 import java.time.LocalDateTime
 import java.util.UUID
 
-fun Route.jsonApiReports(repository: ReportRepository, repo: OrganizationRepository) {
+fun Route.jsonApiReports(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
 
     route("reports") {
         get("/list") {
             call.respond(
-                repository.getReports<ReportShortSummary>()
+                reportRepository.getReports<ReportShortSummary>()
                     .map { ReportWithUrl(it.url, it.descriptiveName ?: it.url) })
         }
 
         get("/{id}") {
 
             val id =
-                call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest, "Missing or malformed id")
+                call.parameters["id"] ?: throw BadRequestException("Missing id")
 
-            try {
-                val result = repository.getReport<Report>(id)
-                    ?.toFullReport()
+            val result = reportRepository.getReport<Report>(id)
+                ?.toFullReport()
 
-                if (result != null) {
-                    call.respond(result)
-                } else {
-                    call.respond(HttpStatusCode.NotFound, "Report not found")
-                }
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "An error occurred: ${e.message}")
+            if (result != null) {
+                call.respond(result)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "Report not found")
             }
+
         }
 
         post("/new") {
             val report = call.receive<Rapport>()
-            val organizationUnit = repo.getOrganizationUnitbyName(report.team)
+            val organizationUnit = organizationRepository.getOrganizationUnit(report.teamId)
 
-            val newReport = repository.upsertReport(
+            val newReport = reportRepository.upsertReport(
                 SucessCriteriaV1.newReport(
 
                     organizationUnit = organizationUnit,
@@ -71,18 +67,15 @@ fun Route.jsonApiReports(repository: ReportRepository, repo: OrganizationReposit
         }
         put("/{id}/update") {
             val id =
-                call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest, "Missing or malformed id")
+                call.parameters["id"] ?: throw BadPathParameterException("Missing id")
             val updatedCriteria = call.receive<FullReport>()
 
-                val existingReport = repository.getReport<Report>(id)
-                if (existingReport == null) {
-                    call.respond(HttpStatusCode.NotFound, "Report not found")
-                    return@put
-                }
+            val existingReport =
+                reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
 
-                val updatedReport = existingReport.updateCriteria(updatedCriteria.successCriteria, call.user)
-                val result = repository.upsertReport(updatedReport).toFullReport()
-                call.respond(HttpStatusCode.OK, result)
+            val updatedReport = existingReport.updateCriteria(updatedCriteria.successCriteria, call.user)
+            val result = reportRepository.upsertReport(updatedReport).toFullReport()
+            call.respond(HttpStatusCode.OK, result)
 
         }
     }
@@ -93,7 +86,7 @@ data class ReportWithUrl(
     val navn: String,
 )
 
-data class Rapport(val name: String, val urlTilSiden: String, val team: String)
+data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
 
 data class FullReport(
     override val reportId: String,
@@ -105,51 +98,6 @@ data class FullReport(
     val created: LocalDateTime,
     val lastChanged: LocalDateTime,
 ) : ReportContent
-
-data class SuccessCriterionWithWcag(
-    val name: String,
-    val description: String,
-    val principle: String,
-    val guideline: String,
-    val tools: String,
-    val number: String,
-    val breakingTheLaw: String,
-    val lawDoesNotApply: String,
-    val tooHardToComply: String,
-    val contentGroup: String,
-    var status: Status,
-    val wcagUrl: String? = null,
-    val helpUrl: String? = null,
-    val wcagVersion: String = "2.1",
-    var wcagLevel: WcagLevel
-) {
-    fun toSuccessCriterion(): SuccessCriterion {
-        return SuccessCriterion(
-            name,
-            description,
-            principle,
-            guideline,
-            tools,
-            number,
-            breakingTheLaw,
-            lawDoesNotApply,
-            tooHardToComply,
-            contentGroup,
-            status,
-            wcagUrl,
-            helpUrl,
-            wcagVersion
-        ).apply {
-            this.wcagLevel = this@SuccessCriterionWithWcag.wcagLevel
-        }
-    }
-
-    companion object {
-        fun List<SuccessCriterionWithWcag>.toSuccessCriteriaList(): List<SuccessCriterion> {
-            return this.map { it.toSuccessCriterion() }
-        }
-    }
-}
 
 fun Report.toFullReport(): FullReport {
     return FullReport(
@@ -164,6 +112,3 @@ fun Report.toFullReport(): FullReport {
     )
 }
 
-// lage en klasse som inneholder alle felter (inkludert WCAGlevel)
-// lage en metode som konvertere klassen din til SuccesssCriterion
-// .map lista med dine sukksesscriterier til e liste av SuccessCriterion

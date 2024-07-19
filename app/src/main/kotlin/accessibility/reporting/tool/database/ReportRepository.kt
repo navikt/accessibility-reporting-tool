@@ -168,11 +168,7 @@ class ReportRepository(val database: Database) {
     }
 
 
-    fun getOrganizationUnit(id: String): OrganizationUnit? = database.query {
-        queryOf("select * from organization_unit where organization_unit_id=:id", mapOf("id" to id)).map { row ->
-            organizationUnit(row)
-        }.asSingle
-    }
+
 
     fun getAllOrganizationUnits(): List<OrganizationUnit> = database.list {
         queryOf("select * from organization_unit")

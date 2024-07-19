@@ -1235,7 +1235,7 @@ components:
           type: "string"
         urlTilSiden:
           type: "string"
-        team:
+        teamId:
           type: "string"
     TeamSummary:
       type: "object"

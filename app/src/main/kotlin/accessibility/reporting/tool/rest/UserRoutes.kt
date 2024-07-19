@@ -11,15 +11,13 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
-fun Route.jsonApiUsers(repository: ReportRepository, repo: OrganizationRepository) {
+fun Route.jsonApiUsers(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
     route("users") {
         get("details") {
-
-            val reports = repository.getReportsForUser<ReportListItem>(call.user.oid)
+            val reports = reportRepository.getReportsForUser<ReportListItem>(call.user.oid)
                 .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
-            val teams = repo.getOrganizationForUser(call.user.email)
+            val teams = organizationRepository.getOrganizationForUser(call.user.email)
             val userDetails =
                 UserDetails(name = call.user.username, email = call.user.email.str(), reports = reports, teams = teams)
             call.respond(userDetails)
@@ -55,6 +53,5 @@ class ReportListItem(
             teamId = jsonNode.orgnaizationUnit()?.id ?: "",
             lastChanged = jsonNode.reportLastChanged()
         )
-
     }
 }
