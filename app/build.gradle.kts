@@ -50,7 +50,6 @@ dependencies {
     implementation(Ktor.serverCors)
     implementation(Ktor.serverContentNegotiation)
     implementation(Ktor.clientContentNegotiation)
-    //implementation(Ktor.ktorOpenApi)
     implementation(Flyway.core)
     implementation(Flyway.postgres)
     implementation(Database.HIKARI)
