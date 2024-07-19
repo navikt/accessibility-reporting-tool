@@ -2,7 +2,7 @@ package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
-import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
+import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTimeOrNull
 import accessibility.reporting.tool.wcag.ReportType.AGGREGATED
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
 import com.fasterxml.jackson.databind.JsonNode
@@ -166,7 +166,7 @@ class ReportShortSummary(
             jsonNode["descriptiveName"].asText("Ikke tilgjengelig") ?: jsonNode["url"].asText(),
             jsonNode["url"].asText(),
             ReportType.valueFromJson(jsonNode),
-            jsonNode["lastChanged"].takeIf { it != null }?.toLocalDateTime() ?: LocalDateTimeHelper.nowAtUtc()
+            jsonNode["lastChanged"].takeIf { it != null }?.toLocalDateTimeOrNull() ?: LocalDateTimeHelper.nowAtUtc()
                 .minusDays(30),
 
             )

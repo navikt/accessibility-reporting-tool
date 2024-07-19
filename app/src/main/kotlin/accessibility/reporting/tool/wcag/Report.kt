@@ -39,6 +39,7 @@ open class Report(
             registerModule(JavaTimeModule())
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
         }
+        val currentVersion = Version.V3
     }
 
     fun copy(
@@ -215,8 +216,11 @@ enum class ReportType {
 
 class Author(val email: String, val oid: String) {
     companion object {
-        fun fromJson(jsonNode: JsonNode?, fieldName: String): Author? =
+        fun fromJsonOrNull(jsonNode: JsonNode?, fieldName: String): Author? =
             jsonNode?.get(fieldName)?.takeIf { !it.isNull && !it.isEmpty }
                 ?.let { Author(email = it["email"].asText(), oid = it["oid"].asText()) }
+
+        fun fromJson(jsonNode: JsonNode, fieldName: String): Author =
+            jsonNode[fieldName].let { Author(email = it["email"].asText(), oid = it["oid"].asText()) }
     }
 }

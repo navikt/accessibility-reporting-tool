@@ -1,12 +1,12 @@
 package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.database.LocalDateTimeHelper
-import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
+import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTimeOrNull
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-fun JsonNode.lastChangedOrDefault() = (this["lastChanged"].toLocalDateTime()
+fun JsonNode.lastChangedOrDefault() = (this["lastChanged"].toLocalDateTimeOrNull()
     ?: LocalDateTimeHelper.nowAtUtc().also {
         log.warn { "Fant ikke lastChanged-dato for rapport med id ${this["reportId"].asText()}, bruker default" }
     })
@@ -27,20 +27,13 @@ fun JsonNode.organizationUnit() = this["organizationUnit"].takeIf { !it.isEmpty 
         OrganizationUnit.fromJson(organizationJson)
     }
 
-val JsonNode.reportType
-    get() = ReportType.valueFromJson(this)
-
-fun JsonNode.createdOrDefault() = this["created"].toLocalDateTime() ?: LocalDateTimeHelper.nowAtUtc().also {
+fun JsonNode.createdOrDefault() = this["created"].toLocalDateTimeOrNull() ?: LocalDateTimeHelper.nowAtUtc().also {
     log.error { "Fant ikke created-dato for rapport med id ${this.reportId}, bruker default" }
 }
-val JsonNode.created
-    get() = this["created"].toLocalDateTime()!!
-val JsonNode.lastUpdatedBy
-    get() = Author.fromJson(this, "lastUpdatedBy")
-fun JsonNode.mapCriteria(lastChanged: LocalDateTime) = this["successCriteria"].map {
+fun JsonNode.mapCriteria(lastChanged: LocalDateTime, reportVersion: Version) = this["successCriteria"].map {
     SuccessCriterion.fromJson(
         it,
-        Version.V2,
+        reportVersion,
         lastChanged.isBefore(SucessCriteriaV1.lastTextUpdate)
     )
 }
