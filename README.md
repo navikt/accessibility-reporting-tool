@@ -34,6 +34,6 @@ Apiet er beskrevet i filen [documentation.yaml](app/src/main/resources/static/op
 Du kan oppdatere manuelt eller bruke en plugin (f.eks openapi generator for ktor i intellij)
 
 ## Troubleshooting
-###Unresolved Network Adress når du prøver å starte appen (mac)
+### Unresolved Network Adress når du prøver å starte appen (mac)
 1. Åpne /etc/host `open /etc/hosts`
 2. Legg inn på ny linje: `127.0.0.1 host.docker.internal``
