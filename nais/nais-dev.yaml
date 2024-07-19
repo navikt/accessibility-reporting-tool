@@ -27,9 +27,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
-      - "*a11y-statement-ny.ansatt.dev.nav.no*"
-      - "https://a11y-statement-ny.ansatt.dev.nav.no"
-      - "https://a11y-statement-ny.ansatt.dev.nav.no"
+        - application: "accessibility-reporting-tool-frontend-beta"
+        - application: "accessibility-reporting-tool-frontend"
+
   azure:
     application:
       enabled: true
