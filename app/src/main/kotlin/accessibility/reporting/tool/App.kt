@@ -12,7 +12,6 @@ import accessibility.reporting.tool.rest.jsonApiReports
 import accessibility.reporting.tool.rest.jsonapiteams
 import accessibility.reporting.tool.rest.jsonApiUsers
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -45,7 +44,7 @@ fun main() {
         module = {
             this.api(
                 corsAllowedOrigins = environment.corsAllowedOrigin,
-                repository = repository,
+                reportRepository = repository,
                 organizationRepository = organizationRepository,
             ) { installAuthentication(authContext) }
         }).start(
@@ -57,7 +56,7 @@ fun main() {
 fun Application.api(
     corsAllowedOrigins: List<String>,
     corsAllowedSchemes: List<String> = listOf("https"),
-    repository: ReportRepository,
+    reportRepository: ReportRepository,
     organizationRepository: OrganizationRepository,
     authInstaller: Application.() -> Unit
 ) {
@@ -95,7 +94,7 @@ fun Application.api(
                 }
 
                 is RequestException -> {
-                    log.info(cause) { cause.message }
+                    log.error(cause) { cause.message }
                     call.respondText(status = cause.responseStatus, text = cause.message!!)
                 }
 
@@ -111,20 +110,20 @@ fun Application.api(
     }
     routing {
         authenticate {
-            organizationUnits(repository)
-            userRoute(repository)
-            reports(repository)
-            landingPage(repository)
-            adminRoutes(repository)
+            organizationUnits(reportRepository =reportRepository, organizationRepository =organizationRepository)
+            userRoute(reportRepository)
+            reports(reportRepository =reportRepository, organizationRepository =organizationRepository)
+            landingPage(reportRepository)
+            adminRoutes(reportRepository =reportRepository, organizationRepository =organizationRepository)
             faqRoute()
             route("api") {
-                jsonApiReports(repo = organizationRepository, repository = repository)
-                jsonapiteams(repository)
-                jsonApiUsers(repo = organizationRepository, repository = repository)
+                jsonApiReports(repo = organizationRepository, repository = reportRepository)
+                jsonapiteams(organizationRepository = organizationRepository, reportRepository = reportRepository)
+                jsonApiUsers(repo = organizationRepository, repository = reportRepository)
             }
         }
         meta(prometehusRegistry)
-        openReportRoute(repository)
+        openReportRoute(reportRepository)
         staticResources("/static", "static") {
             preCompressed(CompressedFileType.GZIP)
         }
