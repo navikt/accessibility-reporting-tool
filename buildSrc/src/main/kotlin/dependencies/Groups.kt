@@ -82,3 +82,11 @@ object Testdependencies {
         val api = "$groupId:$ENGINE_ARTIFACT_ID:junit-jupiter-api"
     }
 }
+
+/*
+2024-07-21 10:03:58: 2 outdated dependencies
+org.flywaydb:  10.15.2 -> 10.16.0
+org.flywaydb:  10.15.2 -> 10.16.0
+**Ignored dependencies
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
