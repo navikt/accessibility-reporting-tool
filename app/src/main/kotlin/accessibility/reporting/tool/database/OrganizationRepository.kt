@@ -2,6 +2,7 @@ package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.wcag.OrganizationUnit
+import kotliquery.Row
 import kotliquery.queryOf
 
 class OrganizationRepository(val database: Database) {
@@ -23,4 +24,19 @@ class OrganizationRepository(val database: Database) {
             )
         }.asList
     }
+
+    fun getOrganizationUnit(id: String): OrganizationUnit? = database.query {
+        queryOf("select * from organization_unit where organization_unit_id=:id", mapOf("id" to id)).map { row ->
+            organizationUnit(row)
+        }.asSingle
+    }
+    fun organizationUnit(row: Row): OrganizationUnit {
+        return OrganizationUnit(
+            id = row.string("organization_unit_id"),
+            name = row.string("name"),
+            email = row.string("email"),
+            members = row.stringOrNull("member")?.split(",")?.toMutableSet() ?: mutableSetOf()
+        )
+    }
+
 }

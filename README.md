@@ -1,6 +1,6 @@
 # accessibility-reporting-tool
 
-App for rapportering av tilgjengelighet fra team på NAV sine sider.
+App for rapportering av tilgjengelighet fra team på NAV sine sider. For api docs se /static/openapi
 
 ## Utvikling
 
@@ -29,8 +29,11 @@ Default verdi på dev-logging er DEBUG, kan endres i [logback-dev.xml](app/src/m
 2. Kommenter inn awesomepossum i docker-compose.yml (fra linje 82)
 3. start docker-compose `docker-compose up`
 
+### Oppdatere apidocs
+Apiet er beskrevet i filen [documentation.yaml](app/src/main/resources/static/openapi/documentation.yaml)
+Du kan oppdatere manuelt eller bruke en plugin (f.eks openapi generator for ktor i intellij)
 
 ## Troubleshooting
-###Unresolved Network Adress når du prøver å starte appen (mac)
+### Unresolved Network Adress når du prøver å starte appen (mac)
 1. Åpne /etc/host `open /etc/hosts`
 2. Legg inn på ny linje: `127.0.0.1 host.docker.internal``

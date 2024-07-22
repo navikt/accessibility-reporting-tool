@@ -72,7 +72,7 @@ fun BODY.reportContainer(
                                 hxId = "metadata-oppdatert-av"
                             )
 
-                            report.contributers.let {
+                            report.contributors.let {
                                 if (it.isNotEmpty())
                                     StatementMetadata("Bidragsytere", it.joinToString { "," })
                             }

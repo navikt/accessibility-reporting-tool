@@ -69,3 +69,9 @@ suspend fun HttpClient.postWithJwtUser(user: User, urlString: String, block: Htt
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }
+
+suspend fun HttpClient.putWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    put(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+    }

@@ -3,6 +3,7 @@ package accessibility.reporting.tool
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.Admins
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
@@ -16,7 +17,7 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 
 
-fun Route.organizationUnits(repository: ReportRepository) {
+fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
     route("orgunit") {
 
         get {
@@ -28,7 +29,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 }
                 ul {
                     id = "orgunit-list"
-                    repository.getAllOrganizationUnits().forEach { orgUnit ->
+                    reportRepository.getAllOrganizationUnits().forEach { orgUnit ->
                         li {
                             a {
                                 href = "orgunit/${orgUnit.id}"
@@ -52,7 +53,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
         get("{id}") {
 
             call.parameters["id"]!!.let { unitId ->
-                val (org, reports) = repository.getReportForOrganizationUnit<Report>(unitId)
+                val (org, reports) = reportRepository.getReportForOrganizationUnit<Report>(unitId)
 
                 org?.let { orgUnit ->
                     call.respondHtmlContent(orgUnit.name, NavBarItem.ORG_ENHETER) {
@@ -74,7 +75,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
 
         delete("{id}") {
             val newOrgList =
-                repository.deleteOrgUnit(call.parameters["id"] ?: throw IllegalArgumentException("orgid mangler"))
+                reportRepository.deleteOrgUnit(call.parameters["id"] ?: throw IllegalArgumentException("orgid mangler"))
 
             fun response() = createHTML().ul {
                 id = "orgunit-list"
@@ -101,11 +102,11 @@ fun Route.organizationUnits(repository: ReportRepository) {
         post("{id}/owner") {
             val params = call.receiveParameters()
             val orgUnit = call.parameters["id"]?.let {
-                repository.getOrganizationUnit(it)
+                organizationRepository.getOrganizationUnit(it)
             } ?: throw IllegalArgumentException("Ukjent organisasjonenhetsid")
             val newOwnerEmail =
                 params["orgunit-email"] ?: throw IllegalArgumentException("Mangler email til ny eier")
-            repository.upsertOrganizationUnit(orgUnit.copy(email = newOwnerEmail))
+            reportRepository.upsertOrganizationUnit(orgUnit.copy(email = newOwnerEmail))
 
             call.respondText(status = HttpStatusCode.OK) {
                 createHTML().div {
@@ -118,13 +119,13 @@ fun Route.organizationUnits(repository: ReportRepository) {
         route("member") {
             post() {
                 val formParameters = call.receiveParameters()
-                val orgUnit = repository
+                val orgUnit = organizationRepository
                     .getOrganizationUnit(
                         formParameters["orgunit"] ?: throw IllegalArgumentException("organisasjonsenhet-id mangler")
                     )
                     ?.apply {
                         addMember(formParameters["member"].toEmail())
-                        repository.upsertOrganizationUnit(this)
+                        reportRepository.upsertOrganizationUnit(this)
                     }
                     ?: throw IllegalArgumentException("organisasjonsenhet finnes ikke")
 
@@ -134,14 +135,14 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 ) { createHTML().div { orgUnitMembersSection(orgUnit, call.user) } }
             }
             delete {
-                val organizationUnit = repository.getOrganizationUnit(
+                val organizationUnit = organizationRepository.getOrganizationUnit(
                     call.parameters["orgunit"] ?: throw IllegalArgumentException("Mangler organisasjonsenhet-id")
                 )
                     ?.apply {
                         removeMember(
                             call.parameters["email"] ?: throw IllegalArgumentException("Mangler brukers email")
                         )
-                        repository.upsertOrganizationUnit(this)
+                        reportRepository.upsertOrganizationUnit(this)
                     }
                     ?: throw IllegalArgumentException("Fant ikke organisasjon")
 
@@ -192,7 +193,7 @@ fun Route.organizationUnits(repository: ReportRepository) {
                 val email = params["unit-email"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha en email")
                 val name = params["unit-name"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha ett navn")
 
-                repository.upsertOrganizationUnit(
+                reportRepository.upsertOrganizationUnit(
                     OrganizationUnit.createNew(
                         name = name,
                         email = email

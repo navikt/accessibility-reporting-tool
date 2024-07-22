@@ -63,7 +63,7 @@ object Ktor : Dependency("2.3.12", groupId = "io.ktor") {
 object Testdependencies {
 
     const val MOCKK = "io.mockk:mockk:1.13.12"
-    object TestContainers : Dependency(version = "1.19.8", groupId = "org.testcontainers") {
+    object TestContainers : Dependency(version = "1.20.0", groupId = "org.testcontainers") {
         val containers = dependency("testcontainers")
         val jupiterRunner = dependency("junit-jupiter")
         val postgres = dependency("postgresql")
