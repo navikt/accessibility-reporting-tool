@@ -50,8 +50,8 @@ class ReportListItem(
             reportId = jsonNode.reportId,
             descriptiveName = jsonNode.descriptiveName,
             url = jsonNode.url,
-            teamId = jsonNode.orgnaizationUnit()?.id ?: "",
-            lastChanged = jsonNode.reportLastChanged()
+            teamId = jsonNode.organizationUnit()?.id ?: "",
+            lastChanged = jsonNode.lastChangedOrDefault()
         )
     }
 }

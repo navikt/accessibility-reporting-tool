@@ -3,12 +3,7 @@ package accessibility.reporting.tool.wcag
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.LocalDateTimeHelper
-import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
 import accessibility.reporting.tool.rest.NewTeam
-import accessibility.reporting.tool.wcag.OrganizationUnit.Companion.toOrgUnitId
-import accessibility.reporting.tool.wcag.Status.*
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -22,27 +17,17 @@ interface ReportContent {
     val url: String
 }
 
-class Author(val email: String, val oid: String) {
-    companion object {
-        fun fromJson(jsonNode: JsonNode?, fieldName: String): Author? =
-            jsonNode?.get(fieldName)?.takeIf { !it.isNull && !it.isEmpty }
-                ?.let { Author(email = it["email"].asText(), oid = it["oid"].asText()) }
-    }
-}
-
 open class Report(
     override val reportId: String,
     override val url: String,
     override val descriptiveName: String?,
     val organizationUnit: OrganizationUnit?,
     val version: Version,
-    val testData: TestData?,
     val author: Author,
     val successCriteria: List<SuccessCriterion>,
-    val filters: MutableList<String> = mutableListOf(),
     val created: LocalDateTime,
     val lastChanged: LocalDateTime,
-    val contributers: MutableList<Author> = mutableListOf(),
+    val contributors: MutableList<Author> = mutableListOf(),
     val lastUpdatedBy: Author?,
     val reportType: ReportType,
 ) : ReportContent {
@@ -51,78 +36,7 @@ open class Report(
             registerModule(JavaTimeModule())
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
         }
-
-        fun migrateFromJsonVersion1(jsonNode: JsonNode): Report =
-            (jsonNode["lastChanged"].toLocalDateTime()
-                ?: LocalDateTimeHelper.nowAtUtc().also {
-                    log.warn { "Fant ikke lastChanged-dato for rapport med id ${jsonNode["reportId"].asText()}, bruker default" }
-                })
-                .let { lastChanged ->
-                    Report(
-                        reportId = jsonNode["reportId"].asText(),
-                        url = jsonNode["url"].asText(),
-                        descriptiveName = jsonNode["descriptiveName"]?.takeIf { !it.isNull }?.asText(),
-                        organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }
-                            ?.let { organizationJson ->
-                                OrganizationUnit.fromJson(organizationJson)
-                            },
-                        version = Version.V2,
-                        reportType = ReportType.valueFromJson(jsonNode),
-                        testData = jsonNode["testData"].takeIf { !it.isEmpty }?.let { testDataJson ->
-                            TestData(ident = testDataJson["ident"].asText(), url = testDataJson["url"].asText())
-                        },
-                        author = Author.fromJson(jsonNode, "user")!!,
-                        successCriteria = jsonNode["successCriteria"].map {
-                            SuccessCriterion.fromJson(
-                                it,
-                                Version.V2,
-                                lastChanged.isBefore(SucessCriteriaV1.lastTextUpdate)
-                            )
-                        },
-                        filters = jsonNode["filters"].map { it.asText() }.toMutableList(),
-                        lastChanged = lastChanged,
-                        created = jsonNode["created"].toLocalDateTime() ?: LocalDateTimeHelper.nowAtUtc().also {
-                            log.error { "Fant ikke created-dato for rapport med id ${jsonNode["reportId"].asText()}, bruker default" }
-                        },
-                        lastUpdatedBy = Author.fromJson(jsonNode, "lastUpdatedBy")
-                    )
-                }
-
-        fun fromJsonVersion2(jsonNode: JsonNode) =
-            (jsonNode["lastChanged"].toLocalDateTime()
-                ?: LocalDateTimeHelper.nowAtUtc().also {
-                    log.warn { "Fant ikke lastChanged-dato for rapport med id ${jsonNode["reportId"].asText()}, bruker default" }
-                })
-                .let { lastChanged ->
-                    Report(
-                        reportId = jsonNode["reportId"].asText(),
-                        url = jsonNode["url"].asText(),
-                        descriptiveName = jsonNode["descriptiveName"]?.takeIf { !it.isNull }?.asText(),
-                        organizationUnit = jsonNode["organizationUnit"].takeIf { !it.isEmpty }
-                            ?.let { organizationJson ->
-                                OrganizationUnit.fromJson(organizationJson)
-                            },
-                        version = Version.V2,
-                        testData = null,
-                        author = Author.fromJson(jsonNode, "author")!!,
-                        successCriteria = jsonNode["successCriteria"].map {
-                            SuccessCriterion.fromJson(
-                                it,
-                                Version.V2,
-                                lastChanged.isBefore(SucessCriteriaV1.lastTextUpdate)
-                            )
-                        },
-                        filters = jsonNode["filters"].map { it.asText() }.toMutableList(),
-                        lastChanged = lastChanged,
-                        created = jsonNode["created"].toLocalDateTime() ?: LocalDateTimeHelper.nowAtUtc().also {
-                            log.error { "Fant ikke created-dato for rapport med id ${jsonNode["reportId"].asText()}, bruker default" }
-                        },
-                        lastUpdatedBy = Author.fromJson(jsonNode, "lastUpdatedBy"),
-                        reportType = ReportType.valueFromJson(jsonNode)
-
-
-                    )
-                }
+        val currentVersion = Version.V3
     }
 
     fun copy(
@@ -133,10 +47,9 @@ open class Report(
         version: Version? = null,
         author: Author? = null,
         successCriteria: List<SuccessCriterion>? = null,
-        filters: MutableList<String>? = null,
         created: LocalDateTime? = null,
         lastChanged: LocalDateTime? = null,
-        contributers: MutableList<Author>? = null,
+        contributors: MutableList<Author>? = null,
         lastUpdatedBy: Author? = null,
         reportType: ReportType? = null,
     ) = Report(
@@ -145,38 +58,25 @@ open class Report(
         descriptiveName = descriptiveName ?: this.descriptiveName,
         organizationUnit = organizationUnit ?: this.organizationUnit,
         version = version ?: this.version,
-        testData = null,
         author = author ?: this.author,
         successCriteria = successCriteria ?: this.successCriteria,
-        filters = filters ?: this.filters,
         created = created ?: this.created,
         lastChanged = lastChanged ?: this.lastChanged,
-        contributers = contributers ?: this.contributers,
+        contributors = contributors ?: this.contributors,
         lastUpdatedBy = lastUpdatedBy ?: this.lastUpdatedBy,
         reportType = reportType ?: this.reportType
     )
 
-    fun updateCriteria  (criteria: List<SuccessCriterion>, updateBy: User): Report = copy(
-    successCriteria = criteria,
-    lastChanged = LocalDateTimeHelper.nowAtUtc(),
-    lastUpdatedBy = updateBy.toAuthor()
+    fun updateCriteria(criteria: List<SuccessCriterion>, updateBy: User): Report = copy(
+        successCriteria = criteria,
+        lastChanged = LocalDateTimeHelper.nowAtUtc(),
+        lastUpdatedBy = updateBy.toAuthor()
     ).apply {
-        if (!isOwner(updateBy)) contributers.add(updateBy.toAuthor())
+        if (!isOwner(updateBy)) contributors.add(updateBy.toAuthor())
     }
 
     open fun toJson(): String =
         objectMapper.writeValueAsString(this)
-
-    fun statusString(): String = when {
-        successCriteria.any { it.status == NOT_TESTED } -> "Ikke ferdig"
-        successCriteria.deviationCount() != 0 ->
-            "${successCriteria.deviationCount()} avvik, ${successCriteria.disputedDeviationCount().punkter} med merknad"
-
-        successCriteria.deviationCount() == 0 ->
-            "Ingen avvik, ${successCriteria.disputedDeviationCount().punkter} med merknad"
-
-        else -> "Ukjent"
-    }
 
     fun updateCriterion(
         criterionNumber: String,
@@ -202,7 +102,7 @@ open class Report(
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = updateBy.toAuthor()
     ).apply {
-        if (!isOwner(updateBy)) contributers.add(updateBy.toAuthor())
+        if (!isOwner(updateBy)) contributors.add(updateBy.toAuthor())
     }
 
     open fun withUpdatedMetadata(
@@ -216,15 +116,10 @@ open class Report(
         organizationUnit = organizationUnit ?: this.organizationUnit,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = updateBy.toAuthor(),
-    ).apply { if (!isOwner(updateBy)) contributers.add(updateBy.toAuthor()) }
+    ).apply { if (!isOwner(updateBy)) contributors.add(updateBy.toAuthor()) }
 
     fun isOwner(callUser: User): Boolean =
         author.oid == callUser.oid.str()
-
-    fun h1() = when (reportType) {
-        ReportType.AGGREGATED -> "Tilgjengelighetserklæring (Samlerapport)"
-        ReportType.SINGLE -> "Tilgjengelighetserklæring"
-    }
 
     fun writeAccess(user: User?): Boolean = when {
         user == null -> false
@@ -236,12 +131,6 @@ open class Report(
 
 }
 
-private val Int.punkter: String
-    get() = if (this == 1) {
-        "1 punkt"
-    } else "$this punkter"
-
-class TestData(val ident: String, val url: String)
 data class OrganizationUnit(
     val id: String,
     val name: String,
@@ -259,8 +148,9 @@ data class OrganizationUnit(
             email = email,
             members = mutableSetOf()
         )
-        fun createNew (newTeam: NewTeam)= OrganizationUnit(
-            id =  newTeam.name.toOrgUnitId(),
+
+        fun createNew(newTeam: NewTeam) = OrganizationUnit(
+            id = newTeam.name.toOrgUnitId(),
             name = newTeam.name,
             email = newTeam.email,
             members = newTeam.members.toMutableSet()
@@ -286,17 +176,6 @@ data class OrganizationUnit(
         user.email.str() == email || Admins.isAdmin(user) || members.any { it == user.email.str() }
 }
 
-
-enum class Version(
-    val deserialize: (JsonNode) -> Report,
-    val criteria: List<SuccessCriterion>,
-    val updateCriteria: (SuccessCriterion) -> SuccessCriterion
-) {
-    V1(Report::migrateFromJsonVersion1, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion),
-    V2(Report::fromJsonVersion2, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion);
-
-}
-
 enum class ReportType {
     AGGREGATED, SINGLE;
 
@@ -308,5 +187,16 @@ enum class ReportType {
                     else -> valueOf(it.asText("SINGLE"))
                 }
             }
+    }
+}
+
+class Author(val email: String, val oid: String) {
+    companion object {
+        fun fromJsonOrNull(jsonNode: JsonNode?, fieldName: String): Author? =
+            jsonNode?.get(fieldName)?.takeIf { !it.isNull && !it.isEmpty }
+                ?.let { Author(email = it["email"].asText(), oid = it["oid"].asText()) }
+
+        fun fromJson(jsonNode: JsonNode, fieldName: String): Author =
+            jsonNode[fieldName].let { Author(email = it["email"].asText(), oid = it["oid"].asText()) }
     }
 }

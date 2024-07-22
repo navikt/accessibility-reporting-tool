@@ -2,7 +2,7 @@ package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
-import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTime
+import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTimeOrNull
 import accessibility.reporting.tool.wcag.ReportType.AGGREGATED
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
 import com.fasterxml.jackson.databind.JsonNode
@@ -29,7 +29,6 @@ class AggregatedReport : Report {
         descriptiveName = descriptiveName,
         organizationUnit = organizationUnit,
         version = Version.V2,
-        testData = null,
         author = user.toAuthor(),
         successCriteria = reports.map { report ->
             report.successCriteria.map { criterion ->
@@ -41,10 +40,9 @@ class AggregatedReport : Report {
             }
 
         }.flatten().aggregate(),
-        filters = mutableListOf(),
         created = LocalDateTimeHelper.nowAtUtc(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
-        contributers = reports.map { it.contributers }.flatten().toMutableList(),
+        contributors = reports.map { it.contributors }.flatten().toMutableList(),
         lastUpdatedBy = null,
         reportType = AGGREGATED
     ) {
@@ -64,13 +62,11 @@ class AggregatedReport : Report {
         descriptiveName = report.descriptiveName,
         organizationUnit = report.organizationUnit,
         version = report.version,
-        testData = report.testData,
         author = report.author,
         successCriteria = report.successCriteria,
-        filters = mutableListOf(),
         created = report.created,
         lastChanged = report.lastChanged,
-        contributers = report.contributers,
+        contributors = report.contributors,
         lastUpdatedBy = report.lastUpdatedBy,
         reportType = AGGREGATED
     ) {
@@ -170,7 +166,7 @@ class ReportShortSummary(
             jsonNode["descriptiveName"].asText("Ikke tilgjengelig") ?: jsonNode["url"].asText(),
             jsonNode["url"].asText(),
             ReportType.valueFromJson(jsonNode),
-            jsonNode["lastChanged"].takeIf { it != null }?.toLocalDateTime() ?: LocalDateTimeHelper.nowAtUtc()
+            jsonNode["lastChanged"].takeIf { it != null }?.toLocalDateTimeOrNull() ?: LocalDateTimeHelper.nowAtUtc()
                 .minusDays(30),
 
             )

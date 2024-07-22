@@ -45,7 +45,6 @@ object SucessCriteriaV1 {
         organizationUnit = organizationUnit,
         reportId = reportId,
         successCriteria = criteriaTemplate,
-        testData = null,
         url = url,
         author = user.toAuthor(),
         version = Version.V2,
