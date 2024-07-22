@@ -2,6 +2,7 @@ package accessibility.reporting.tool
 
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
@@ -20,7 +21,8 @@ import org.junit.jupiter.api.TestInstance
 class ApiTest {
 
     private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = ReportRepository(database)
+    private val reportRepository = ReportRepository(database)
+    private val organizationRepository = OrganizationRepository(database)
     private val testOrg = OrganizationUnit(
         id = "1234567",
         name = "Testorganisation",
@@ -48,10 +50,10 @@ class ApiTest {
         database.update { queryOf("delete from changelog") }
         database.update { queryOf("delete from report") }
         database.update { queryOf("delete from organization_unit") }
-        repository.upsertOrganizationUnit(testOrg)
-        repository.upsertOrganizationUnit(testOrg2)
+        organizationRepository.upsertOrganizationUnit(testOrg)
+        organizationRepository.upsertOrganizationUnit(testOrg2)
         initialReports.forEach { report ->
-            repository.upsertReport(report)
+            reportRepository.upsertReport(report)
         }
     }
 

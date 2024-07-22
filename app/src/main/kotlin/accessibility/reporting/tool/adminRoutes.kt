@@ -9,7 +9,6 @@ import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -68,7 +67,7 @@ fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository
                 reportRepository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException("Ukjent rapport")
             val srcReports = reportRepository.getReports<ReportShortSummary>(null, report.fromReports.map { it.reportId })
                 .sortedBy { it.title.lowercase() }
-            val organizations = reportRepository.getAllOrganizationUnits()
+            val organizations = organizationRepository.getAllOrganizationUnits()
 
             call.respondHtmlContent("Tilgjengelighetserklæring", NavBarItem.NONE) {
                 reportContainer(
@@ -139,7 +138,7 @@ fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository
         route("new") {
             get {
                 val reports = reportRepository.getReports<ReportShortSummary>(ReportType.SINGLE)
-                val organizationUnits = reportRepository.getAllOrganizationUnits()
+                val organizationUnits = organizationRepository.getAllOrganizationUnits()
 
                 call.respondHtmlContent("Admin – Generer rapport", NavBarItem.ADMIN) {
                     h1 { +"Generer ny rapport" }
@@ -242,11 +241,12 @@ fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository
         reportRepository.upsertReportReturning<AggregatedReport>(oldReport.withUpdatedCriterion(criterion, call.user))
     }
     updateMetdataRoute(
-        repository = reportRepository,
+        reportRepository = reportRepository,
         routingPath = updateMetadataPath,
         upsertReportFunction = { report -> upsertReportReturning<Report>(report) },
         getReportFunction = { id -> getReport<AggregatedReport>(id) },
-        validateAccess = ApplicationCall::unahtorizedIfNotAdmin
+        validateAccess = ApplicationCall::unahtorizedIfNotAdmin,
+        organizationRepository = organizationRepository
     )
 }
 

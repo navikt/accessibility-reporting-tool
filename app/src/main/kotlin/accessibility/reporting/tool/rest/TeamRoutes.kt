@@ -10,24 +10,24 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.jsonapiteams(reportRepository: ReportRepository,organizationRepository: OrganizationRepository) {
+fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
     route("teams") {
         get {
-            val teams = reportRepository.getAllOrganizationUnits()
+            val teams = organizationRepository.getAllOrganizationUnits()
                 .map { org -> TeamSummary(id = org.id, name = org.name, email = org.email) }
             call.respond(teams)
         }
 
         post("new") {
             val newTeam = call.receive<NewTeam>()
-            reportRepository.upsertOrganizationUnit(OrganizationUnit.createNew(newTeam))
+            organizationRepository.upsertOrganizationUnit(OrganizationUnit.createNew(newTeam))
             call.respond(HttpStatusCode.OK)
         }
 
         route("{id}") {
             get("reports") {
                 val teamId = call.parameters["id"] ?: throw BadPathParameterException("id")
-                val reports = reportRepository.getReportForOrganizationUnit<ReportListItem>(teamId).second
+                val reports = organizationRepository.getReportForOrganizationUnit<ReportListItem>(teamId).second
                 call.respond(reports)
             }
             get("details") {

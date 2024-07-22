@@ -110,7 +110,7 @@ fun Application.api(
     }
     routing {
         authenticate {
-            organizationUnits(reportRepository =reportRepository, organizationRepository =organizationRepository)
+            organizationUnits(organizationRepository =organizationRepository)
             userRoute(reportRepository)
             reports(reportRepository =reportRepository, organizationRepository =organizationRepository)
             landingPage(reportRepository)
@@ -118,7 +118,7 @@ fun Application.api(
             faqRoute()
             route("api") {
                 jsonApiReports(organizationRepository = organizationRepository, reportRepository = reportRepository)
-                jsonapiteams(organizationRepository = organizationRepository, reportRepository = reportRepository)
+                jsonapiteams(organizationRepository = organizationRepository)
                 jsonApiUsers(organizationRepository = organizationRepository, reportRepository = reportRepository)
             }
         }
