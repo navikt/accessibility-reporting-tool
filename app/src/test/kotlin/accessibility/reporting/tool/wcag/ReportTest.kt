@@ -2,7 +2,7 @@ package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
-import accessibility.reporting.tool.toEmail
+import accessibility.reporting.tool.html.toEmail
 import assert
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.date.shouldBeAfter

@@ -2,7 +2,7 @@ package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.dummyReportV2
-import accessibility.reporting.tool.toEmail
+import accessibility.reporting.tool.html.toEmail
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import assert

@@ -3,11 +3,9 @@ package accessibility.reporting.tool.database
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
-import accessibility.reporting.tool.toEmail
 import accessibility.reporting.tool.wcag.*
 import assert
 import io.kotest.assertions.withClue
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import kotliquery.queryOf
 import org.junit.jupiter.api.Test

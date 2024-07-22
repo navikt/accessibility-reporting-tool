@@ -6,6 +6,7 @@ import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.html.*
 import accessibility.reporting.tool.microfrontends.faqRoute
 import accessibility.reporting.tool.rest.RequestException
 import accessibility.reporting.tool.rest.jsonApiReports

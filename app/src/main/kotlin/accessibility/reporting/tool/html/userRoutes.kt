@@ -1,4 +1,4 @@
-package accessibility.reporting.tool
+package accessibility.reporting.tool.html
 
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
