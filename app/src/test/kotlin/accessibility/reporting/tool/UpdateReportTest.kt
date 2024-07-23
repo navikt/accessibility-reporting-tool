@@ -109,7 +109,7 @@ class UpdateReportTest {
         val jsonResponse = objectmapper.readTree(responseBody)
         jsonResponse["reportId"].asText() shouldBe dummyreport.reportId
 
-        val updatedResponse = client.get("api/reports/${dummyreport.reportId}")
+        val updatedResponse = client.getWithJwtUser(testUser,"api/reports/${dummyreport.reportId}")
         updatedResponse.status shouldBe HttpStatusCode.OK
         val updatedResponseBody = updatedResponse.bodyAsText()
         val updatedJsonResponse = objectmapper.readTree(updatedResponseBody)
