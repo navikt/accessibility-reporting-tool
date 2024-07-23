@@ -30,7 +30,7 @@ object JwtConfig {
         .withClaim("oid", user.oid.str())
         .withClaim("preferred_username", user.email.str())
         .withClaim("name", user.name)
-        .withArrayClaim("groups", listOf("somegroup").toTypedArray())
+        .withArrayClaim("groups", user.groups.toTypedArray())
         .withExpiresAt(getExpiration())
         .sign(algorithm)
 

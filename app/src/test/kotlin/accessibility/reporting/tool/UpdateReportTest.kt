@@ -86,7 +86,7 @@ class UpdateReportTest {
                     author = it.author,
                     successCriteria = it.successCriteria,
                     created = it.created,
-                    lastChanged = it.lastChanged
+                    lastChanged = it.lastChanged,
                 )
             }
 

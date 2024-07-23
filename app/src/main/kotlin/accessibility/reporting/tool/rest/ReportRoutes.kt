@@ -25,18 +25,13 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
         get("/{id}") {
 
-            val id =
-                call.parameters["id"] ?: throw BadRequestException("Missing id")
+            val id = call.parameters["id"] ?: throw BadRequestException("Missing id")
 
             val result = reportRepository.getReport<Report>(id)
-                ?.toFullReport()
+                ?.toFullReportWithAccessPolicy(call.user)
+                ?: throw ResourceNotFoundException("report", id)
 
-            if (result != null) {
-                call.respond(result)
-            } else {
-                call.respond(HttpStatusCode.NotFound, "Report not found")
-            }
-
+            call.respond(result)
         }
 
         post("/new") {
@@ -60,7 +55,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             )
             call.respondText(status = HttpStatusCode.OK, provider = {
                 """{
-                "id": "${newReport.reportId}"}
+     "id": "${newReport.reportId}"}
             """.trimMargin()
             }
             )
@@ -87,7 +82,6 @@ data class ReportWithUrl(
 )
 
 data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
-
 data class FullReport(
     override val reportId: String,
     override val descriptiveName: String?,
@@ -99,6 +93,19 @@ data class FullReport(
     val lastChanged: LocalDateTime,
 ) : ReportContent
 
+data class FullReportWithAccessPolicy(
+    override val reportId: String,
+    override val descriptiveName: String?,
+    override val url: String,
+    val team: OrganizationUnit?,
+    val author: Author,
+    val successCriteria: List<SuccessCriterion>,
+    val created: LocalDateTime,
+    val lastChanged: LocalDateTime,
+    val hasWriteAccess: Boolean
+) : ReportContent
+
+
 fun Report.toFullReport(): FullReport {
     return FullReport(
         reportId = this.reportId,
@@ -109,6 +116,20 @@ fun Report.toFullReport(): FullReport {
         successCriteria = this.successCriteria,
         created = this.created,
         lastChanged = this.lastChanged
+    )
+}
+
+fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy {
+    return FullReportWithAccessPolicy(
+        reportId = this.reportId,
+        descriptiveName = this.descriptiveName,
+        url = this.url,
+        team = this.organizationUnit,
+        author = this.author,
+        successCriteria = this.successCriteria,
+        created = this.created,
+        lastChanged = this.lastChanged,
+        hasWriteAccess = this.writeAccess(user)
     )
 }
 
