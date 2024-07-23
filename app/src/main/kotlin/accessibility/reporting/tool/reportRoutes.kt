@@ -1,6 +1,7 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
@@ -16,16 +17,16 @@ import java.util.UUID
 private const val updateCriterionPath = "/reports/submit"
 private const val updateMetadataPath = "/metadata"
 
-fun Route.reports(repository: ReportRepository) {
+fun Route.reports(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
 
     route("/reports") {
         get("{id}") {
             val reportId = call.parameters["id"] ?: throw IllegalArgumentException("mangler rapportid")
-            val report = repository.getReport<Report>(reportId) ?: throw IllegalArgumentException()
+            val report = reportRepository.getReport<Report>(reportId) ?: throw IllegalArgumentException()
             if (report.reportType == ReportType.AGGREGATED) {
                 call.respondRedirect("/reports/collection/$reportId")
             }
-            val organizations = repository.getAllOrganizationUnits()
+            val organizations = reportRepository.getAllOrganizationUnits()
             call.respondHtmlContent("Tilgjengelighetsærklæring for ${report.descriptiveName}", NavBarItem.NONE) {
                 reportContainer(
                     report = report,
@@ -37,9 +38,9 @@ fun Route.reports(repository: ReportRepository) {
             }
         }
         delete("/{id}") {
-            repository.deleteReport(call.id)
+            reportRepository.deleteReport(call.id)
 
-            val reports = repository.getReportsForUser<Report>(call.user.oid)
+            val reports = reportRepository.getReportsForUser<Report>(call.user.oid)
                 .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
 
             fun response() = createHTML().ul(classes = "report-list") {
@@ -48,8 +49,8 @@ fun Route.reports(repository: ReportRepository) {
             call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)
         }
         delete("/single/{id}") {
-            repository.deleteReport(call.id)
-            val reports = repository.getReports<ReportShortSummary>(ReportType.SINGLE)
+            reportRepository.deleteReport(call.id)
+            val reports = reportRepository.getReports<ReportShortSummary>(ReportType.SINGLE)
             fun response() = createHTML().ul(classes = "report-list") {
                 reports.map { report -> reportListItem(report, true, deletePath = "/reports/single") }
             }
@@ -63,12 +64,12 @@ fun Route.reports(repository: ReportRepository) {
                 val formParameters = call.receiveParameters()
                 val url = formParameters["page-url"].toString()
                 val organizationUnit = formParameters["orgunit"].toString().let { id ->
-                    repository.getOrganizationUnit(id)
+                    organizationRepository.getOrganizationUnit(id)
                 }
                 val descriptiveName = formParameters["descriptive-name"].toString()
 
                 val newReportId = UUID.randomUUID().toString()
-                repository.upsertReport(
+                reportRepository.upsertReport(
                     SucessCriteriaV1.newReport(
                         organizationUnit, newReportId, url, call.user, descriptiveName
                     )
@@ -78,7 +79,7 @@ fun Route.reports(repository: ReportRepository) {
             }
 
             get {
-                val orgUnits = repository.getAllOrganizationUnits()
+                val orgUnits = reportRepository.getAllOrganizationUnits()
                 call.respondHtmlContent("Ny tilgjengelighetserklæring", NavBarItem.NONE) {
                     h1 {
                         +"Lag ny tilgjengelighetserklæring"
@@ -135,7 +136,7 @@ fun Route.reports(repository: ReportRepository) {
     }
 
     updateCriterionRoute(updateCriterionPath) { parameters ->
-        val oldReport = repository.getReport<Report>(call.id) ?: throw IllegalArgumentException()
+        val oldReport = reportRepository.getReport<Report>(call.id) ?: throw IllegalArgumentException()
         val criterion: SuccessCriterion = oldReport.updateCriterion(
             criterionNumber = parameters.criterionNumber,
             statusString = parameters.status,
@@ -143,8 +144,8 @@ fun Route.reports(repository: ReportRepository) {
             lawDoesNotApply = parameters.lawDoesNotApply,
             tooHardToComply = parameters.tooHardToComply
         )
-        repository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
+        reportRepository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
     }
-    updateMetdataRoute(repository = repository, routingPath = updateMetadataPath)
+    updateMetdataRoute(repository = reportRepository, routingPath = updateMetadataPath)
 
 }

@@ -3,6 +3,7 @@ package accessibility.reporting.tool
 import accessibility.reporting.tool.authenitcation.adminUser
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.Admins
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
@@ -18,7 +19,7 @@ import kotlinx.html.stream.createHTML
 private const val updateCriterionEndpoint = "/collection/submit"
 private const val updateMetadataPath = "/collection/metadata"
 
-fun Route.adminRoutes(repository: ReportRepository) {
+fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
 
     route("admin") {
         get {
@@ -26,7 +27,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
             call.respondHtmlContent("Admin", NavBarItem.ADMIN) {
                 h1 { +"Admin" }
                 h2 { +"Genererte rapporter" }
-                repository.getReports<ReportShortSummary>(ReportType.AGGREGATED).let { reports ->
+                reportRepository.getReports<ReportShortSummary>(ReportType.AGGREGATED).let { reports ->
                     if (reports.isNotEmpty()) {
                         ul {
                             reports.sortedBy { it.title.lowercase() }
@@ -37,7 +38,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     }
                 }
 
-                repository.getReports<ReportShortSummary>(ReportType.SINGLE).let { reports ->
+                reportRepository.getReports<ReportShortSummary>(ReportType.SINGLE).let { reports ->
                     h2 { +"Rapporter for enkeltsider" }
                     ul("report-list") {
                         reports.sortedBy { it.title.lowercase() }.filter { it.reportType == ReportType.SINGLE }
@@ -64,10 +65,10 @@ fun Route.adminRoutes(repository: ReportRepository) {
         get("{id}") {
             val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
             val report =
-                repository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException("Ukjent rapport")
-            val srcReports = repository.getReports<ReportShortSummary>(null, report.fromReports.map { it.reportId })
+                reportRepository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException("Ukjent rapport")
+            val srcReports = reportRepository.getReports<ReportShortSummary>(null, report.fromReports.map { it.reportId })
                 .sortedBy { it.title.lowercase() }
-            val organizations = repository.getAllOrganizationUnits()
+            val organizations = reportRepository.getAllOrganizationUnits()
 
             call.respondHtmlContent("Tilgjengelighetserklæring", NavBarItem.NONE) {
                 reportContainer(
@@ -108,8 +109,8 @@ fun Route.adminRoutes(repository: ReportRepository) {
         delete("/{id}") {
             call.unahtorizedIfNotAdmin()
             val id = call.parameters["id"] ?: throw IllegalArgumentException()
-            repository.deleteReport(id)
-            val reports = repository.getReports<ReportShortSummary>(ReportType.AGGREGATED)
+            reportRepository.deleteReport(id)
+            val reports = reportRepository.getReports<ReportShortSummary>(ReportType.AGGREGATED)
                 .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
 
             fun response() = createHTML().ul(classes = "report-list") {
@@ -121,14 +122,14 @@ fun Route.adminRoutes(repository: ReportRepository) {
         post("/{id}/update") {
             call.unahtorizedIfNotAdmin()
             val id = call.parameters["id"] ?: throw IllegalArgumentException("id for rapport mangler")
-            val srcReport = repository.getReport<Report>(
+            val srcReport = reportRepository.getReport<Report>(
                 call.parameters["srcReport"] ?: throw IllegalArgumentException("srcReportId må være satt")
             )
-            repository
+            reportRepository
                 .getReport<AggregatedReport>(id)
                 ?.updateWithDataFromSource(srcReport)
                 ?.also {
-                    repository.upsertReportReturning<AggregatedReport>(it)
+                    reportRepository.upsertReportReturning<AggregatedReport>(it)
                 }
                 ?: throw IllegalArgumentException("Ukjent samlerapport")
             call.response.header("HX-Refresh", "true")
@@ -137,8 +138,8 @@ fun Route.adminRoutes(repository: ReportRepository) {
 
         route("new") {
             get {
-                val reports = repository.getReports<ReportShortSummary>(ReportType.SINGLE)
-                val organizationUnits = repository.getAllOrganizationUnits()
+                val reports = reportRepository.getReports<ReportShortSummary>(ReportType.SINGLE)
+                val organizationUnits = reportRepository.getAllOrganizationUnits()
 
                 call.respondHtmlContent("Admin – Generer rapport", NavBarItem.ADMIN) {
                     h1 { +"Generer ny rapport" }
@@ -216,13 +217,13 @@ fun Route.adminRoutes(repository: ReportRepository) {
                     url = formParameters["page-url"].toString(),
                     descriptiveName = formParameters["descriptive-name"].toString(),
                     organizationUnit = formParameters["orgunit"].toString().let { id ->
-                        repository.getOrganizationUnit(id)
+                        organizationRepository.getOrganizationUnit(id)
                     },
                     user = call.adminUser,
-                    reports = repository.getReports<Report>(ids = formParameters.getAll("report"))
+                    reports = reportRepository.getReports<Report>(ids = formParameters.getAll("report"))
                         .sortedBy { it.descriptiveName }
                 ).let {
-                    repository.upsertReportReturning<AggregatedReport>(it)
+                    reportRepository.upsertReportReturning<AggregatedReport>(it)
                 }.apply {
                     call.respondRedirect("/reports/collection/$reportId")
                 }
@@ -230,7 +231,7 @@ fun Route.adminRoutes(repository: ReportRepository) {
         }
     }
     updateCriterionRoute(updateCriterionEndpoint) { parameters ->
-        val oldReport = repository.getReport<AggregatedReport>(call.id) ?: throw IllegalArgumentException()
+        val oldReport = reportRepository.getReport<AggregatedReport>(call.id) ?: throw IllegalArgumentException()
         val criterion: SuccessCriterion = oldReport.updateCriterion(
             criterionNumber = parameters.criterionNumber,
             statusString = parameters.status,
@@ -238,10 +239,10 @@ fun Route.adminRoutes(repository: ReportRepository) {
             lawDoesNotApply = parameters.lawDoesNotApply,
             tooHardToComply = parameters.tooHardToComply
         )
-        repository.upsertReportReturning<AggregatedReport>(oldReport.withUpdatedCriterion(criterion, call.user))
+        reportRepository.upsertReportReturning<AggregatedReport>(oldReport.withUpdatedCriterion(criterion, call.user))
     }
     updateMetdataRoute(
-        repository = repository,
+        repository = reportRepository,
         routingPath = updateMetadataPath,
         upsertReportFunction = { report -> upsertReportReturning<Report>(report) },
         getReportFunction = { id -> getReport<AggregatedReport>(id) },

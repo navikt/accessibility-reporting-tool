@@ -25,34 +25,17 @@ class OrganizationRepository(val database: Database) {
         }.asList
     }
 
-    /*fun getOrganizationUnitByTeamName(name: String): OrganizationUnit = database.query {
-        queryOf(
-            """SELECT * 
-                FROM organization_unit 
-                WHERE LOWER(name) = LOWER(:name)""",
-            mapOf(
-                "name" to name
-            ).map { row ->
-                OrganizationUnit(
-                    id = row.string("organization_unit_id"),
-                    name = row.string("name"),
-                    email = row.string("email")
-                )
-            }.toStringList
-    }*/
-
-    fun getOrganizationUnitbyName(name: String): OrganizationUnit? = database.query {
-        queryOf("select * from organization_unit where LOWER(name)=LOWER(:name)", mapOf("name" to name)).map { row ->
+    fun getOrganizationUnit(id: String): OrganizationUnit? = database.query {
+        queryOf("select * from organization_unit where organization_unit_id=:id", mapOf("id" to id)).map { row ->
             organizationUnit(row)
         }.asSingle
     }
-
     fun organizationUnit(row: Row): OrganizationUnit {
         return OrganizationUnit(
             id = row.string("organization_unit_id"),
             name = row.string("name"),
             email = row.string("email"),
-            members = row.stringOrNull("members")?.split(",")?.toMutableSet() ?: mutableSetOf()
+            members = row.stringOrNull("member")?.split(",")?.toMutableSet() ?: mutableSetOf()
         )
     }
 

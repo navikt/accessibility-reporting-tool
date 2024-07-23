@@ -27,7 +27,7 @@ class CreateReportTest {
                 """{
                 "name": "report 1",
                 "urlTilSiden": "abc@gmail.no",
-                "team": "team uu"
+                "teamId": "team-uu"
                 }
                 
             """.trimMargin()

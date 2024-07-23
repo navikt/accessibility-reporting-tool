@@ -168,12 +168,6 @@ class ReportRepository(val database: Database) {
     }
 
 
-    fun getOrganizationUnit(id: String): OrganizationUnit? = database.query {
-        queryOf("select * from organization_unit where organization_unit_id=:id", mapOf("id" to id)).map { row ->
-            organizationUnit(row)
-        }.asSingle
-    }
-
     fun getAllOrganizationUnits(): List<OrganizationUnit> = database.list {
         queryOf("select * from organization_unit")
             .map { row ->
@@ -222,7 +216,7 @@ fun List<String>.sqlList(): String = joinToString(",", "(", ")") { "'$it'" }
 object LocalDateTimeHelper {
 
     fun nowAtUtc(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-    fun JsonNode.toLocalDateTime(): LocalDateTime? =
+    fun JsonNode.toLocalDateTimeOrNull(): LocalDateTime? =
         toList()
             .map { it.asText() }
             .let {
@@ -231,6 +225,16 @@ object LocalDateTimeHelper {
             .let {
                 if (it.isNotBlank()) LocalDateTime.parse(it, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"))
                 else null
+            }
+
+    fun JsonNode.toLocalDateTime(): LocalDateTime =
+        toList()
+            .map { it.asText() }
+            .let {
+                "${it.year}.${it.month}.${it.day} ${it.hour}:${it.minutes}:${it.seconds}".trim()
+            }
+            .let {
+                LocalDateTime.parse(it, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"))
             }
 
     private fun String.padWithZero(charCount: Int = 2) = let { "0".repeat(charCount - it.length) + it }

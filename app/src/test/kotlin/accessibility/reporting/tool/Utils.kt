@@ -29,10 +29,8 @@ fun dummyReportV2(
     url = url,
     organizationUnit = orgUnit,
     version = Version.V2,
-    testData = null,
     author = user.toAuthor(),
     successCriteria = Version.V2.criteria,
-    filters = mutableListOf(),
     lastChanged = LocalDateTimeHelper.nowAtUtc(),
     created = LocalDateTimeHelper.nowAtUtc(),
     lastUpdatedBy = null,
@@ -61,7 +59,7 @@ fun setupTestApi(
 ) = testApplication {
     application {
         api(
-            repository = ReportRepository(database),
+            reportRepository = ReportRepository(database),
             organizationRepository = OrganizationRepository(database),
             corsAllowedOrigins = listOf("*"),
             corsAllowedSchemes = listOf("http", "https")
