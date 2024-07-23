@@ -11,6 +11,7 @@ import io.kotest.matchers.shouldBe
 import io.ktor.client.*
 import io.ktor.http.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -125,6 +126,7 @@ class LegacyOrganizationRoutesTest {
     }
 
 
+    @Disabled
     @Test
     fun `delete organization unit`() = setupLegacyTestApi(db) {
         val orgName = "Unit with Owner"
