@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import kotliquery.queryOf
 import org.flywaydb.core.Flyway
 import org.testcontainers.containers.PostgreSQLContainer
-import java.time.LocalDateTime
 
 class LocalPostgresDatabase private constructor() : Database {
 
@@ -24,6 +23,12 @@ class LocalPostgresDatabase private constructor() : Database {
             instance.update { queryOf("delete from organization_unit") }
             return instance
         }
+
+        fun prepareForNextTest(){
+            instance.update { queryOf("delete from changelog") }
+            instance.update { queryOf("delete from report") }
+            instance.update { queryOf("delete from organization_unit") }
+        }
     }
 
     init {
@@ -33,6 +38,7 @@ class LocalPostgresDatabase private constructor() : Database {
 
     override val dataSource: HikariDataSource
         get() = memDataSource
+
 
     private fun createDataSource(): HikariDataSource {
         return HikariDataSource().apply {
@@ -46,10 +52,10 @@ class LocalPostgresDatabase private constructor() : Database {
 
     private fun migrate(): Int =
         Flyway.configure()
-        .connectRetries(3)
-        .dataSource(dataSource)
-        .load()
-        .migrate().migrationsExecuted
+            .connectRetries(3)
+            .dataSource(dataSource)
+            .load()
+            .migrate().migrationsExecuted
 }
 
 inline fun <T> T.assert(block: T.() -> Unit): T =

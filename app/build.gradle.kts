@@ -76,6 +76,8 @@ dependencies {
     testImplementation(Kotest.junit5Runner)
     testImplementation(Kotest.assertionsCore)
     testImplementation(Testdependencies.MOCKK)
+    testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.12")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
 }
 
 
