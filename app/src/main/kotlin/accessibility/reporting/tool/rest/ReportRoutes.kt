@@ -78,8 +78,60 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             call.respond(HttpStatusCode.OK, result)
 
         }
-    }
-}
+        patch("/{id}/update") {
+            val id = call.parameters["id"] ?: throw BadPathParameterException("Missing id")
+            val updates = call.receive<ReportUpdate>()
+
+            val existingReport =
+                reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
+
+            var updatedReport = existingReport
+
+            updates.descriptiveName?.let {
+                updatedReport = updatedReport.copy(descriptiveName = it)
+            }
+            updates.team?.let {
+                updatedReport = updatedReport.copy(organizationUnit = it)
+            }
+            updates.author?.let {
+                updatedReport = updatedReport.copy(author = it)
+            }
+            updates.created?.let {
+                updatedReport = updatedReport.copy(created = LocalDateTime.parse(it))
+            }
+            updates.lastChanged?.let {
+                updatedReport = updatedReport.copy(lastChanged = LocalDateTime.parse(it))
+            }
+
+            updates.successCriteria?.let { criteriaList ->
+                updatedReport = updatedReport.copy(successCriteria = updatedReport.successCriteria.map { currentCriterion ->
+                    val updatedCriterion = criteriaList.find { it.number == currentCriterion.number }
+                        SuccessCriterion(
+                            name = currentCriterion.name,
+                            description = currentCriterion.description,
+                            principle = currentCriterion.principle,
+                            guideline = currentCriterion.guideline,
+                            tools = currentCriterion.tools,
+                            number = currentCriterion.number,
+                            breakingTheLaw = updatedCriterion?.breakingTheLaw ?: currentCriterion.breakingTheLaw,
+                            lawDoesNotApply = updatedCriterion?.lawDoesNotApply ?: currentCriterion.lawDoesNotApply,
+                            tooHardToComply = updatedCriterion?.tooHardToComply ?: currentCriterion.tooHardToComply,
+                            contentGroup = updatedCriterion?.contentGroup ?: currentCriterion.contentGroup,
+                            status = updatedCriterion?.status?.let { Status.valueOf(it) } ?: currentCriterion.status,
+                            wcagUrl = currentCriterion.wcagUrl,
+                            helpUrl = currentCriterion.helpUrl,
+                            wcagVersion = currentCriterion.wcagVersion
+                        ).apply {
+                            wcagLevel = currentCriterion.wcagLevel
+                        }
+                    })
+            }
+
+            val result = reportRepository.upsertReport(updatedReport).toFullReport()
+            call.respond(HttpStatusCode.OK, result)
+
+    }}}
+
 
 data class ReportWithUrl(
     val url: String,
@@ -111,4 +163,22 @@ fun Report.toFullReport(): FullReport {
         lastChanged = this.lastChanged
     )
 }
+
+data class ReportUpdate(
+    val descriptiveName: String? = null,
+    val team: OrganizationUnit? = null,
+    val author: Author? = null,
+    val created: String? = null,
+    val lastChanged: String? = null,
+    val successCriteria: List<SuccessCriterionUpdate>? = null
+)
+
+data class SuccessCriterionUpdate(
+    val number: String,
+    val breakingTheLaw: String? = null,
+    val lawDoesNotApply: String? = null,
+    val tooHardToComply: String? = null,
+    val contentGroup: String? = null,
+    val status: String? = null
+)
 
