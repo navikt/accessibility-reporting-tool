@@ -3,16 +3,13 @@ package accessibility.reporting.tool.html
 import LocalPostgresDatabase
 import accessibility.reporting.tool.TestUser
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.authenitcation.User.*
 import accessibility.reporting.tool.deleteWithJwtUser
 import accessibility.reporting.tool.getWithJwtUser
-import accessibility.reporting.tool.uuidStr
 import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.*
 import io.ktor.http.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -123,30 +120,33 @@ class LegacyOrganizationRoutesTest {
     }
 
 
-    @Disabled
     @Test
     fun `delete organization unit`() = setupLegacyTestApi(db) {
         val orgName = "Unit with Owner"
-        val orgId = "unit-with-owner"
-        val deleteRoute = orgSubRoute(orgId)
+        val orgRoute = orgSubRoute("unit-with-owner")
         val otherUser =
-            User(email = Email("new.new@test.nav"), name = "The New New", oid = Oid(uuidStr()), groups = emptyList())
-        val otherUserCapitalized = otherUser.copy(email = Email("New.New@test.nav"))
+            TestUser(email = "new.new@test.nav", name = "The New New")
 
+        TestUser(email = "new.new@test.nav", name = "The New New")
+
+
+        //should be able to delete organization you own
         client.postNewOrg(testUser.original, orgName)
-        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.OK
-        client.deleteWithJwtUser(testUser.original, deleteRoute).status shouldBe HttpStatusCode.OK
-        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.NotFound
+        client.deleteWithJwtUser(testUser.original, orgRoute).status shouldBe HttpStatusCode.OK
+        client.getWithJwtUser(testUser.original, orgRoute).status shouldBe HttpStatusCode.NotFound
 
-        client.postNewOrg(otherUser, orgName)
-        //client.deleteWithJwtUser(testUser.original, deleteRoute).status shouldBe HttpStatusCode.Forbidden
-        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.OK
-        client.deleteWithJwtUser(testAdminUser.original, deleteRoute).status shouldBe HttpStatusCode.OK
-        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.NotFound
+        //admin should be allowed to delete org
+        client.postNewOrg(otherUser.original, orgName)
 
-        client.postNewOrg(otherUser, orgName)
-        client.deleteWithJwtUser(otherUserCapitalized, deleteRoute).status shouldBe HttpStatusCode.OK
-        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.NotFound
+        // client.deleteWithJwtUser(testUser.original, orgRoute).status shouldBe HttpStatusCode.Forbidden -- not implemented
+        client.deleteWithJwtUser(testAdminUser.original, orgRoute).status shouldBe HttpStatusCode.OK
+        client.getWithJwtUser(testUser.original, orgRoute).status shouldBe HttpStatusCode.NotFound
+
+        //user should be recognized regardless of caps
+        client.postNewOrg(otherUser.original, orgRoute)
+        client.deleteWithJwtUser(otherUser.capitalized, orgRoute).status shouldBe HttpStatusCode.OK
+        client.getWithJwtUser(testUser.original, orgRoute).status shouldBe HttpStatusCode.NotFound
+
     }
 
 
