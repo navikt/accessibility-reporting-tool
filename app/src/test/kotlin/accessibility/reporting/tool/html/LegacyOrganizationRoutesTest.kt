@@ -1,6 +1,7 @@
 package accessibility.reporting.tool.html
 
 import LocalPostgresDatabase
+import accessibility.reporting.tool.TestUser
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.*
 import accessibility.reporting.tool.deleteWithJwtUser
@@ -27,18 +28,15 @@ import org.junit.jupiter.params.provider.ValueSource
 class LegacyOrganizationRoutesTest {
     private val db = LocalPostgresDatabase.cleanDb()
 
-    private val testAdminUser = User(
-        email = Email("admin@test.nav"),
+    private val testAdminUser = TestUser(
+        email = "admin@test.nav",
         name = "Hello Test",
-        oid = Oid(uuidStr()),
         groups = listOf("test_admin")
     )
 
-    private val testUser = User(
-        email = Email("not.admin@test.nav"),
+    private val testUser = TestUser(
+        email = "not.admin@test.nav",
         name = "Hello Test",
-        oid = Oid(uuidStr()),
-        groups = listOf()
     )
 
     @BeforeEach
@@ -52,11 +50,11 @@ class LegacyOrganizationRoutesTest {
         val expectedTestUnitId = "new-and-shiny-testunit"
 
         client.adminAndNonAdminsShouldBeOK(orgSubRoute("new"))
-        client.getWithJwtUser(testUser, orgSubRoute("does-not-exists")).status shouldBe HttpStatusCode.NotFound
+        client.getWithJwtUser(testUser.original, orgSubRoute("does-not-exists")).status shouldBe HttpStatusCode.NotFound
 
         //new
-        client.submitWithJwtUser(testUser, orgSubRoute("new")) {
-            append("unit-email", testUser.email.str())
+        client.submitWithJwtUser(testUser.original, orgSubRoute("new")) {
+            append("unit-email", testUser.original.email.str())
             append("unit-name", testUnit)
         }.assert {
             status shouldBe HttpStatusCode.Created
@@ -66,19 +64,19 @@ class LegacyOrganizationRoutesTest {
 
         client.assertErrorOnSubmit(orgSubRoute("new")) {
             assertBadRequest {
-                user = testUser
+                user = testUser.original
                 parametersBuilder = null
             }
             assertBadRequest {
-                user = testUser
+                user = testUser.original
                 parametersBuilder = {
-                    append("unit-email", testUser.email.str())
+                    append("unit-email", testUser.original.email.str())
                 }
             }
             assertBadRequest {
-                user = testUser
+                user = testUser.original
                 parametersBuilder = {
-                    append("unit-name", testUser.email.str())
+                    append("unit-name", testUser.original.email.str())
                 }
             }
 
@@ -91,31 +89,30 @@ class LegacyOrganizationRoutesTest {
         val orgid = "unit-with-owner"
         val ownerUpdateRoute = orgSubRoute("$orgid/owner")
         val newOwner =
-            User(email = Email("new.new@test.nav"), name = "The New New", oid = Oid(uuidStr()), groups = emptyList())
-        val newOwnerCapitalLetters =
-            User(email = Email("new.new@test.nav"), name = "The New New", oid = Oid(uuidStr()), groups = emptyList())
+            TestUser(email = "new.new@test.nav", name = "The New New")
 
 
-        client.postNewOrg(testUser, newOrgName)
 
-        client.submitWithJwtUser(testUser, ownerUpdateRoute) {
-            append("orgunit-email", newOwner.email.str())
+        client.postNewOrg(testUser.original, newOrgName)
+
+        client.submitWithJwtUser(testUser.original, ownerUpdateRoute) {
+            append("orgunit-email", newOwner.original.email.str())
         }.status shouldBe HttpStatusCode.OK
 
-        client.submitWithJwtUser(newOwnerCapitalLetters, ownerUpdateRoute) {
+        client.submitWithJwtUser(newOwner.capitalized, ownerUpdateRoute) {
             append("orgunit-email", "anotherOne@test.nav")
         }.status shouldBe HttpStatusCode.OK
 
-        client.submitWithJwtUser(testAdminUser, ownerUpdateRoute) {
+        client.submitWithJwtUser(testAdminUser.original, ownerUpdateRoute) {
             append("orgunit-email", "another@test.nav")
         }.status shouldBe HttpStatusCode.OK
 
         client.assertErrorOnSubmit(ownerUpdateRoute) {
             assertBadRequest {
-                user = testAdminUser
+                user = testAdminUser.original
             }
             assertBadRequest {
-                user = testAdminUser
+                user = testAdminUser.original
                 parametersBuilder = {
                     append("organic-email", "newowner@test.nav")
                 }
@@ -136,20 +133,20 @@ class LegacyOrganizationRoutesTest {
             User(email = Email("new.new@test.nav"), name = "The New New", oid = Oid(uuidStr()), groups = emptyList())
         val otherUserCapitalized = otherUser.copy(email = Email("New.New@test.nav"))
 
-        client.postNewOrg(testUser, orgName)
-        client.getWithJwtUser(testUser,orgId).status shouldBe HttpStatusCode.OK
-        client.deleteWithJwtUser(testUser, deleteRoute).status shouldBe HttpStatusCode.OK
-        client.getWithJwtUser(testUser,orgId).status shouldBe HttpStatusCode.NotFound
+        client.postNewOrg(testUser.original, orgName)
+        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.OK
+        client.deleteWithJwtUser(testUser.original, deleteRoute).status shouldBe HttpStatusCode.OK
+        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.NotFound
 
         client.postNewOrg(otherUser, orgName)
-        //client.deleteWithJwtUser(testUser, deleteRoute).status shouldBe HttpStatusCode.Forbidden
-        client.getWithJwtUser(testUser,orgId).status shouldBe HttpStatusCode.OK
-        client.deleteWithJwtUser(testAdminUser, deleteRoute).status shouldBe HttpStatusCode.OK
-        client.getWithJwtUser(testUser,orgId).status shouldBe HttpStatusCode.NotFound
+        //client.deleteWithJwtUser(testUser.original, deleteRoute).status shouldBe HttpStatusCode.Forbidden
+        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.OK
+        client.deleteWithJwtUser(testAdminUser.original, deleteRoute).status shouldBe HttpStatusCode.OK
+        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.NotFound
 
         client.postNewOrg(otherUser, orgName)
         client.deleteWithJwtUser(otherUserCapitalized, deleteRoute).status shouldBe HttpStatusCode.OK
-        client.getWithJwtUser(testUser,orgId).status shouldBe HttpStatusCode.NotFound
+        client.getWithJwtUser(testUser.original,orgId).status shouldBe HttpStatusCode.NotFound
     }
 
 
@@ -170,8 +167,10 @@ class LegacyOrganizationRoutesTest {
     private fun orgSubRoute(route: String) = "orgunit/$route"
 
     private suspend fun HttpClient.adminAndNonAdminsShouldBeOK(url: String) {
-        getWithJwtUser(testUser, url).status shouldBe HttpStatusCode.OK
-        getWithJwtUser(testAdminUser, url).status shouldBe HttpStatusCode.OK
+        getWithJwtUser(testUser.original, url).status shouldBe HttpStatusCode.OK
+        getWithJwtUser(testUser.capitalized, url).status shouldBe HttpStatusCode.OK
+        getWithJwtUser(testAdminUser.original, url).status shouldBe HttpStatusCode.OK
+        getWithJwtUser(testAdminUser.capitalized, url).status shouldBe HttpStatusCode.OK
     }
 
     private suspend fun HttpClient.postNewOrg(user: User, newName: String) =
