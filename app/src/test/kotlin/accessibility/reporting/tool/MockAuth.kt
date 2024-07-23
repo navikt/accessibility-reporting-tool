@@ -9,6 +9,7 @@ import io.ktor.client.request.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import kotlinx.css.header
 import java.util.*
 
 object JwtConfig {
@@ -72,6 +73,13 @@ suspend fun HttpClient.postWithJwtUser(user: User, urlString: String, block: Htt
 
 suspend fun HttpClient.putWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     put(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+    }
+
+//patch
+suspend fun HttpClient.patchWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    patch(urlString) {
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }

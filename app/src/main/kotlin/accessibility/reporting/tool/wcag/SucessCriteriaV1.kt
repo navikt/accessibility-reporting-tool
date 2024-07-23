@@ -63,14 +63,14 @@ object SucessCriteriaV1 {
         const val tastatur = "Tastatur"
     }
 
-    private object Tools {
+    object Tools {
         const val arcToolkit = "ARC Toolkit"
         const val skjønn = "Skjønn"
         const val devTools = "DevTools"
         const val cca = "CCA"
     }
 
-    private object Guidelines {
+    object Guidelines {
         const val `1-1 Tekstalternativer` = "1.1 Tekstalternativer"
         const val `1-2 Tidsbaserte medier` = "1.2 Tidsbaserte medier"
         const val `1-3 Mulig å tilpasse` = "1.3 Mulig å tilpasse"
@@ -451,7 +451,7 @@ object SucessCriteriaV1 {
 
 }
 
-private fun SuccessCriterion.levelA() =
+fun SuccessCriterion.levelA() =
     apply { wcagLevel = A }
 
 
