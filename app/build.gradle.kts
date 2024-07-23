@@ -68,6 +68,7 @@ dependencies {
 
     testImplementation(Jupiter.engine)
     testImplementation(Jupiter.api)
+    testImplementation(Jupiter.params)
     testImplementation(Ktor.ktorServerTestHost)
     testImplementation(TestContainers.containers)
     testImplementation(TestContainers.jupiterRunner)
@@ -75,9 +76,8 @@ dependencies {
     testImplementation(Kotest.junit5Runner)
     testImplementation(Kotest.assertionsCore)
     testImplementation(Testdependencies.MOCKK)
-
-
 }
+
 
 application {
     // Define the main class for the application.
@@ -88,6 +88,7 @@ application {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+    environment ("ADMIN_GROUP" to "test_admin")
 }
 fun isNonStable(version: String): Boolean {
     val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }

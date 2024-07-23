@@ -11,6 +11,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.testing.*
+import io.mockk.InternalPlatformDsl.toStr
 import java.util.*
 
 val defaultUserEmail = User.Email("tadda@test.tadda")
@@ -72,8 +73,10 @@ fun setupTestApi(
     block()
 }
 
-private fun Application.mockEmptyAuth() = authentication {
+fun Application.mockEmptyAuth() = authentication {
     jwt {
         skipWhen { true }
     }
 }
+
+fun uuidStr() = UUID.randomUUID().toStr()
