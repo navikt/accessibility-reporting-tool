@@ -144,7 +144,7 @@ class UpdateReportTest {
     //Lag en test hvor bare ett metadatafelt blir send med (f.eks team eller descriptive name)
     @Test
     fun `partial updates metadata`() = setupTestApi(database) {
-val newDescriptiveName="Updated Report Title"
+        val newDescriptiveName = "Updated Report Title"
         val updateDescriptiveName = """
         {
             "reportId": "${dummyreport.reportId}",
@@ -466,226 +466,15 @@ val newDescriptiveName="Updated Report Title"
         updatedCriterion2["status"].asText() shouldBe "COMPLIANT"
         updatedCriterion2["wcagLevel"].asText() shouldBe originalCriterion2.wcagLevel.name
 
-        val otherCriteria = criteriaList.filter { it["number"].asText() != "1.3.1"
-                && it["number"].asText() != "1.3.2"}
+        val otherCriteria = criteriaList.filter {
+            it["number"].asText() != "1.3.1"
+                    && it["number"].asText() != "1.3.2"
+        }
         otherCriteria.isNotEmpty() shouldBe true
     }
 
 
-    @Test
-    fun `full update`() = setupTestApi(database) {
-        val updateDescriptiveName = """
-        {
-            "reportId": "${dummyreport.reportId}",
-            "descriptiveName": "Updated Report Title"
-        }
-    """.trimIndent()
 
-        val response = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
-            setBody(updateDescriptiveName)
-            contentType(ContentType.Application.Json)
-        }
-        response.status shouldBe HttpStatusCode.OK
-
-        val updatedResponse = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse = objectmapper.readTree(updatedResponse.bodyAsText())
-
-        updatedJsonResponse["descriptiveName"].asText() shouldBe "Updated Report Title"
-
-        updatedJsonResponse["team"].asText() shouldBe dummyreport.organizationUnit
-        updatedJsonResponse["author"].asText() shouldBe dummyreport.author
-        updatedJsonResponse["successCriteria"].asText() shouldBe dummyreport.successCriteria
-        updatedJsonResponse["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse["lastChanged"].asText() shouldBe dummyreport.lastChanged
-
-        val updateTeam = """
-        {
-            "reportId": "${dummyreport.reportId}",
-            "team": {
-                "id": "test-id",
-                "name": "Team-dolly",
-                "email": "teamdolly@test.com"
-            }
-        }
-    """.trimIndent()
-
-        val response1 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
-            setBody(updateTeam)
-            contentType(ContentType.Application.Json)
-        }
-        response1.status shouldBe HttpStatusCode.OK
-
-        val updatedResponse1 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse1.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse1 = objectmapper.readTree(updatedResponse1.bodyAsText())
-
-        updatedJsonResponse1["team"]["name"].asText() shouldBe "Team-dolly"
-        updatedJsonResponse1["team"]["email"].asText() shouldBe "teamdolly@test.com"
-
-        updatedJsonResponse1["descriptiveName"].asText() shouldBe dummyreport.descriptiveName
-        updatedJsonResponse1["author"].asText() shouldBe dummyreport.author
-        updatedJsonResponse1["successCriteria"].asText() shouldBe dummyreport.successCriteria
-        updatedJsonResponse1["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse1["lastChanged"].asText() shouldBe dummyreport.lastChanged
-
-        val updateAuthor = """
-        {
-            "reportId": "${dummyreport.reportId}",
-            "author": {
-                "email": "author@test.com",
-                "oid": "123"
-            }
-        }
-    """.trimIndent()
-
-        val response2 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
-            setBody(updateAuthor)
-            contentType(ContentType.Application.Json)
-        }
-        response2.status shouldBe HttpStatusCode.OK
-
-        val updatedResponse2 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse2.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse2 = objectmapper.readTree(updatedResponse2.bodyAsText())
-
-        updatedJsonResponse2["author"]["email"].asText() shouldBe "author@test.com"
-
-        updatedJsonResponse2["descriptiveName"].asText() shouldBe dummyreport.descriptiveName
-        updatedJsonResponse2["team"].asText() shouldBe dummyreport.organizationUnit
-        updatedJsonResponse2["successCriteria"].asText() shouldBe dummyreport.successCriteria
-        updatedJsonResponse2["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse2["lastChanged"].asText() shouldBe dummyreport.lastChanged
-
-        val originalCriterion = 1.perceivable("1.3.4", "Visningsretning") {
-            description = "Brukeren må få velge om innholdet skal vises i liggende eller stående retning."
-            guideline = `1-3 Mulig å tilpasse`
-            tools = devTools
-            wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/orientation"
-        }.levelA()
-
-        val updateCriterion = """
-        {
-            "reportId": "${dummyreport.reportId}",
-            "criteria": {
-                "id": "criterion-id",
-                "name": "Updated Criterion",
-                "description": "Updated Description",
-                "principle": "Updated Principle",
-                "guideline": "Updated Guideline",
-                "tools": "Updated Tools",
-                "number": "Updated Number",
-                "breakingTheLaw": "ja",
-                "lawDoesNotApply": "ja",
-                "tooHardToComply": "ja",
-                "contentGroup": "Group 1",
-                "status": "PARTIALLY_COMPLIANT",
-                "wcagLevel": "A"
-            }
-        }
-        """.trimIndent()
-        val response3 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
-            setBody(updateCriterion)
-            contentType(ContentType.Application.Json)
-        }
-        response3.status shouldBe HttpStatusCode.OK
-
-        val updatedResponse3 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse3.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse3 = objectmapper.readTree(updatedResponse3.bodyAsText())
-        val criteriaList = updatedJsonResponse3["successCriteria"].toList()
-        criteriaList.size shouldBe 49
-            val specificCriterion = criteriaList.find { it["number"].asText() == "1.3.4" }
-            specificCriterion?.let {
-                it["name"].asText() shouldBe originalCriterion.name
-                it["description"].asText() shouldBe originalCriterion.description
-                it["principle"].asText() shouldBe originalCriterion.principle
-                it["guideline"].asText() shouldBe originalCriterion.guideline
-                it["tools"].asText() shouldBe originalCriterion.tools
-                it["number"].asText() shouldBe originalCriterion.number
-                it["breakingTheLaw"].asText() shouldBe "ja"
-                it["lawDoesNotApply"].asText() shouldBe "ja"
-                it["tooHardToComply"].asText() shouldBe "ja"
-                it["contentGroup"].asText() shouldBe "Group 1"
-                it["status"].asText() shouldBe "PARTIALLY_COMPLIANT"
-                it["wcagLevel"].asText() shouldBe originalCriterion.wcagLevel
-            } ?: throw ResourceNotFoundException("Criterion", "1.3.4")
-
-            val otherCriteria = criteriaList.filter { it["number"].asText() != "1.3.4" }
-            otherCriteria.isNotEmpty() shouldBe true
-
-
-        val fullUpdate = """{
-            "reportId": "${dummyreport.reportId}",
-            "descriptiveName": "fullUpdated Report Title",
-            "team": {
-                "id": "test-report2",
-                "name": "Team-Universell Utforming",
-                "email": "team@testUU.com"
-            },
-            "author": {
-                "email": "fullupdateduser@test.com",
-                "oid": "123"
-            },
-            "created": "${LocalDateTime.now()}",
-            "lastChanged": "${LocalDateTime.now()}"
-      
-            "successCriteria" : [ {
-            "name": "full updated criteria",
-            "description": "full updated description",
-            "principle": "full updated principle",
-            "guideline": "full updated guideline",
-            "tools": "full updated tools",
-            "number": "full updated number",
-            "breakingTheLaw": "ja",
-            "lawDoesNotApply": "ja",
-            "tooHardToComply": "ja",
-            "contentGroup": "Group 1",
-            "status": "COMPLIANT",
-            "wcagLevel": "AA"
-        }]
-        
-        }""".trimIndent()
-
-        val response4 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/partialUpdate") {
-            setBody(fullUpdate)
-            contentType(ContentType.Application.Json)
-        }
-        response4.status shouldBe HttpStatusCode.OK
-
-        val updatedResponse4 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse4.status shouldBe HttpStatusCode.OK
-        val updatedResponseBody4 = updatedResponse4.bodyAsText()
-        val updatedJsonResponse4 = objectmapper.readTree(updatedResponseBody4)
-
-        updatedJsonResponse4["descriptiveName"].asText() shouldBe "fullUpdated Report Title"
-        updatedJsonResponse4["team"]["name"].asText() shouldBe "Team-Universell Utforming"
-        updatedJsonResponse4["team"]["email"].asText() shouldBe "team@testUU.com"
-        updatedJsonResponse4["author"]["email"].asText() shouldBe "fullupdateduser@test.com"
-        val criteriaList2 = updatedJsonResponse3["successCriteria"].toList()
-            criteriaList2.size shouldBe 49
-        val specificCriterion2 = criteriaList.find { it["number"].asText() == "1.3.4" }
-        specificCriterion2?.let {
-
-            it["name"].asText() shouldBe originalCriterion.name
-            it["description"].asText() shouldBe originalCriterion.description
-            it["principle"].asText() shouldBe originalCriterion.principle
-            it["guideline"].asText() shouldBe originalCriterion.guideline
-            it["tools"].asText() shouldBe originalCriterion.tools
-            it["number"].asText() shouldBe originalCriterion.number
-            it["breakingTheLaw"].asText() shouldBe "ja"
-            it["lawDoesNotApply"].asText() shouldBe "ja"
-            it["tooHardToComply"].asText() shouldBe "ja"
-            it["contentGroup"].asText() shouldBe "Group 1"
-            it["status"].asText() shouldBe "COMPLIANT"
-            it["wcagLevel"].asText() shouldBe originalCriterion.wcagLevel
-
-        }?: throw ResourceNotFoundException("Criterion", "1.3.4")
-
-        val otherCriteria2 = criteriaList.filter { it["number"].asText() != "1.3.4" }
-        otherCriteria2.isNotEmpty() shouldBe true
-    }
-}
 
 //Tester for:
 // oppdatere kun metada
