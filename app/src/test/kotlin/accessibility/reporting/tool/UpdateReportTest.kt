@@ -497,7 +497,7 @@ private fun Report.assertExists(jsonNode: JsonNode) {
         it["email"].asText() shouldBe this.author.email
         it["oid"].asText() shouldBe this.author.oid
     }
-}
+}}
 
 private fun metadata(
     descriptiveName: String,
