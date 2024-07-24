@@ -103,9 +103,12 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                 updatedReport = updatedReport.copy(lastChanged = LocalDateTime.parse(it))
             }
 
-            updates.successCriteria?.let { criteriaList ->
-                updatedReport = updatedReport.copy(successCriteria = updatedReport.successCriteria.map { currentCriterion ->
-                    val updatedCriterion = criteriaList.find { it.number == currentCriterion.number }
+            updates.successCriteria?.let { pendingUpdateList ->
+                val currentCriteria = existingReport.successCriteria
+                val newList = currentCriteria.map { currentCriterion ->
+                    //Finner den kriteriet?
+                    val updatedCriterion = pendingUpdateList.find { it.number == currentCriterion.number }
+                    if (updatedCriterion != null) {
                         SuccessCriterion(
                             name = currentCriterion.name,
                             description = currentCriterion.description,
@@ -113,24 +116,36 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                             guideline = currentCriterion.guideline,
                             tools = currentCriterion.tools,
                             number = currentCriterion.number,
-                            breakingTheLaw = updatedCriterion?.breakingTheLaw ?: currentCriterion.breakingTheLaw,
-                            lawDoesNotApply = updatedCriterion?.lawDoesNotApply ?: currentCriterion.lawDoesNotApply,
-                            tooHardToComply = updatedCriterion?.tooHardToComply ?: currentCriterion.tooHardToComply,
-                            contentGroup = updatedCriterion?.contentGroup ?: currentCriterion.contentGroup,
-                            status = updatedCriterion?.status?.let { Status.valueOf(it) } ?: currentCriterion.status,
+                            breakingTheLaw = updatedCriterion.breakingTheLaw ?: currentCriterion.breakingTheLaw,
+                            lawDoesNotApply = updatedCriterion.lawDoesNotApply ?: currentCriterion.lawDoesNotApply,
+                            tooHardToComply = updatedCriterion.tooHardToComply ?: currentCriterion.tooHardToComply,
+                            contentGroup = updatedCriterion.contentGroup ?: currentCriterion.contentGroup,
+                            status = updatedCriterion.status?.let { Status.valueOf(it) }
+                                ?: currentCriterion.status,
                             wcagUrl = currentCriterion.wcagUrl,
                             helpUrl = currentCriterion.helpUrl,
                             wcagVersion = currentCriterion.wcagVersion
                         ).apply {
                             wcagLevel = currentCriterion.wcagLevel
+                        }.also {
+                            //lager den nytt criterion riktig?
+                            println(it)
                         }
-                    })
+                    } else {
+                        currentCriterion
+                    }
+                }
+                //En newList oppdatert?
+                updatedReport = updatedReport.updateCriteria(newList, call.user)
             }
 
             val result = reportRepository.upsertReport(updatedReport).toFullReport()
+            //Er result oppdatert?
             call.respond(HttpStatusCode.OK, result)
+        }
 
-    }}}
+    }
+}
 
 
 data class ReportWithUrl(

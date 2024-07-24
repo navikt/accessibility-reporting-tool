@@ -293,24 +293,6 @@ val newDescriptiveName="Updated Report Title"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships"
         }.levelA()
 
-        /*val singleCriterionUpdate = listOf(
-            SuccessCriterion(
-                name = "Informasjon og relasjoner",
-                description = "Ting skal være kodet som det ser ut som.",
-                principle = "Principle 1",
-                guideline = "1-3 Mulig å tilpasse",
-                tools = "DevTools/headingsMap",
-                number = "1.3.1",
-                breakingTheLaw = "nei",
-                lawDoesNotApply = "nei",
-                tooHardToComply = "nei",
-                contentGroup = "Group 1",
-                status = Status.NOT_TESTED,
-                wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships",
-                helpUrl = "https://www.helpurl.com",
-                wcagVersion = "2.1"
-            )
-        )*/
 
         //Bruk en av criteriene som er definert i successcriteria v1
         //Sjekk med Nima om det kommer som enkeltobjekt eller i en liste=universal function , enkeltobjekt- metadata; success criteria- liste; bare den som endrer seg
@@ -324,18 +306,18 @@ val newDescriptiveName="Updated Report Title"
                 "principle": "single updated principle",
                 "guideline": "single updated guideline",
                 "tools": "single updated tools",
-                "number": "single updated number",
+                "number": "1.3.1",
                 "breakingTheLaw": "nei",
                 "lawDoesNotApply": "nei",
                 "tooHardToComply": "nei",
-                "contentGroup": "single updated contentGroup",
+                "contentGroup": "Group 1",
                 "status": "COMPLIANT",
-                "wcagLevel": "AA"
+                "wcagLevel": "A"
             }]
         }
     """.trimIndent()
         //patch istedet for put
-        val response2 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/partialUpdate") {
+        val response2 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
             setBody(singleCriterionUpdate)
             contentType(ContentType.Application.Json)
         }
@@ -382,7 +364,7 @@ val newDescriptiveName="Updated Report Title"
             it["tooHardToComply"].asText() shouldBe "nei"
             it["contentGroup"].asText() shouldBe "Group 1"
             it["status"].asText() shouldBe "COMPLIANT"
-            it["wcagLevel"].asText() shouldBe originalCriteria.wcagLevel
+            it["wcagLevel"].asText() shouldBe originalCriteria.wcagLevel.name
         } ?: throw ResourceNotFoundException("Criterion", "1.3.1")
 
         val otherCriteria = criteriaList.filter { it["number"].asText() != "1.3.1" }
