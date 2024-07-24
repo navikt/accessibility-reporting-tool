@@ -35,24 +35,24 @@ fun setupLegacyTestApi(
 }
 
 
-
 suspend fun HttpClient.assertErrorOnSubmit(url: String, block: suspend ErrorAsserter.() -> Unit) {
     ErrorAsserter(this, url).block()
 }
+
 class ErrorAsserter(val httpClient: HttpClient, val urlString: String) {
     suspend fun assertBadRequest(requestConfig: ErrorRequestConfig.() -> Unit) {
         val statusCode = ErrorRequestConfig(urlString).apply(requestConfig)
             .doSubmit(httpClient).status
-        withClue("Expected $urlString to return 403: BadRequest, actual statuscode was $statusCode"){
-          statusCode  shouldBe HttpStatusCode.BadRequest
+        withClue("Expected $urlString to return 403: BadRequest, actual statuscode was $statusCode") {
+            statusCode shouldBe HttpStatusCode.BadRequest
         }
     }
 
     suspend fun assertForbidden(requestConfig: ErrorRequestConfig.() -> Unit) {
         val statusCode = ErrorRequestConfig(urlString).apply(requestConfig)
             .doSubmit(httpClient).status
-        withClue("Expected $urlString to return 403: Forbidden, actual statuscode was $statusCode"){
-            statusCode  shouldBe HttpStatusCode.Forbidden
+        withClue("Expected $urlString to return 403: Forbidden, actual statuscode was $statusCode") {
+            statusCode shouldBe HttpStatusCode.Forbidden
         }
     }
 
@@ -60,7 +60,8 @@ class ErrorAsserter(val httpClient: HttpClient, val urlString: String) {
         lateinit var user: TestUser
         var parametersBuilder: (ParametersBuilder.() -> Unit)? = null
 
-        suspend fun doSubmit(httpClient: HttpClient) = httpClient.submitWithJwtUser(user.original, url, parametersBuilder)
+        suspend fun doSubmit(httpClient: HttpClient) =
+            httpClient.submitWithJwtUser(user.original, url, parametersBuilder)
 
 
     }
@@ -79,13 +80,14 @@ suspend fun HttpClient.submitWithJwtUser(
 ) {
     header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
 }
+
 suspend fun HttpClient.submitWithJwtTestUser(
     testUser: TestUser,
     urlString: String,
     appendParameters: (ParametersBuilder.() -> Unit?)? = null
-) = submitWithJwtUser(testUser.original,urlString,appendParameters)
+) = submitWithJwtUser(testUser.original, urlString, appendParameters)
 
-suspend fun HttpClient.assertCORSOptions(route: String, user: User, allowedMethod: String)  {
+suspend fun HttpClient.assertCORSOptions(route: String, user: User, allowedMethod: String) {
     optionsWithJwtUser(user, route) {
         header(HttpHeaders.Origin, "https://test.cors.nav.no")
         header(HttpHeaders.AccessControlRequestMethod, allowedMethod)
@@ -95,3 +97,22 @@ suspend fun HttpClient.assertCORSOptions(route: String, user: User, allowedMetho
         headers[HttpHeaders.AccessControlAllowCredentials] shouldBe "true"
     }
 }
+
+suspend fun HttpClient.adminAndNonAdminsShouldBeOK(testUser: TestUser, testAdminUser: TestUser, url: String) {
+    getWithJwtUser(testUser.original, url).status shouldBe HttpStatusCode.OK
+    getWithJwtUser(testUser.capitalized, url).status shouldBe HttpStatusCode.OK
+    getWithJwtUser(testAdminUser.original, url).status shouldBe HttpStatusCode.OK
+    getWithJwtUser(testAdminUser.capitalized, url).status shouldBe HttpStatusCode.OK
+}
+
+fun createTestAdminAndTestUser() = Pair(
+    TestUser(
+        email = "admin@test.nav",
+        name = "Hello Test",
+        groups = listOf("test_admin")
+    ),
+    TestUser(
+        email = "notadmin@test.nav",
+        name = "Hello Test",
+    )
+)

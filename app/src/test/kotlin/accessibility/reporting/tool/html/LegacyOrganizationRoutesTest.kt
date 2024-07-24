@@ -8,13 +8,10 @@ import accessibility.reporting.tool.getWithJwtUser
 import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.*
-import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 
 /**
  * Legacy routes test Testing that legacy routes are still available NB:
@@ -26,16 +23,6 @@ import org.junit.jupiter.params.provider.ValueSource
 class LegacyOrganizationRoutesTest {
     private val db = LocalPostgresDatabase.cleanDb()
 
-    private val testAdminUser = TestUser(
-        email = "admin@test.nav",
-        name = "Hello Test",
-        groups = listOf("test_admin")
-    )
-
-    private val testUser = TestUser(
-        email = "not.admin@test.nav",
-        name = "Hello Test",
-    )
 
     @BeforeEach
     fun cleanDb() {
@@ -44,10 +31,11 @@ class LegacyOrganizationRoutesTest {
 
     @Test
     fun `Should create new organization unit`() = setupLegacyTestApi(db) {
+        val (testAdminUser, testUser) = createTestAdminAndTestUser()
         val testUnit = "New and shiny testunit"
         val expectedTestUnitId = "new-and-shiny-testunit"
 
-        client.adminAndNonAdminsShouldBeOK(orgSubRoute("new"))
+        client.adminAndNonAdminsShouldBeOK(testUser, testAdminUser, orgSubRoute("new"))
         client.getWithJwtUser(testUser.original, orgSubRoute("does-not-exists")).status shouldBe HttpStatusCode.NotFound
 
         //new
@@ -58,7 +46,7 @@ class LegacyOrganizationRoutesTest {
             status shouldBe HttpStatusCode.Created
             headers["HX-Redirect"] shouldBe "/orgunit"
         }
-        client.adminAndNonAdminsShouldBeOK(orgSubRoute(expectedTestUnitId))
+        client.adminAndNonAdminsShouldBeOK(testUser, testAdminUser, orgSubRoute(expectedTestUnitId))
 
         client.assertErrorOnSubmit(orgSubRoute("new")) {
             assertBadRequest {
@@ -88,6 +76,7 @@ class LegacyOrganizationRoutesTest {
         val ownerUpdateRoute = orgSubRoute("$orgid/owner")
         val newOwner =
             TestUser(email = "new.new@test.nav", name = "The New New")
+        val (testAdminUser,testUser)=createTestAdminAndTestUser()
 
 
 
@@ -124,6 +113,7 @@ class LegacyOrganizationRoutesTest {
         val orgRoute = orgSubRoute("unit-with-owner")
         val otherUser =
             TestUser(email = "new.new@test.nav", name = "The New New")
+        val (testAdminUser,testUser)=createTestAdminAndTestUser()
 
         //should be able to delete organization you own
         client.postNewOrg(testUser.original, orgName)
@@ -150,6 +140,7 @@ class LegacyOrganizationRoutesTest {
         val otherMemberEmail = "tadda@test.nav"
         val otherMember2Email = "tadda2@test.nav"
         val otherMember3Email = "tadda3@test.nav"
+        val (testAdminUser,testUser)=createTestAdminAndTestUser()
 
         client.postNewOrg(testUser.original, testorgName)
         client.submitWithJwtTestUser(testUser, memberRoute) {
@@ -196,22 +187,7 @@ class LegacyOrganizationRoutesTest {
 
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["/", "/orgunit", "/user", "faq"])
-    fun `summary pages`(url: String) = setupLegacyTestApi(
-        database = LocalPostgresDatabase.cleanDb()
-    ) {
-        client.adminAndNonAdminsShouldBeOK(url)
-    }
-
     private fun orgSubRoute(route: String) = "orgunit/$route"
-
-    private suspend fun HttpClient.adminAndNonAdminsShouldBeOK(url: String) {
-        getWithJwtUser(testUser.original, url).status shouldBe HttpStatusCode.OK
-        getWithJwtUser(testUser.capitalized, url).status shouldBe HttpStatusCode.OK
-        getWithJwtUser(testAdminUser.original, url).status shouldBe HttpStatusCode.OK
-        getWithJwtUser(testAdminUser.capitalized, url).status shouldBe HttpStatusCode.OK
-    }
 
     private suspend fun HttpClient.postNewOrg(user: User, newName: String) =
         submitWithJwtUser(user, orgSubRoute("new")) {
