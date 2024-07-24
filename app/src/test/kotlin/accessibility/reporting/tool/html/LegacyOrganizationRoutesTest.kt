@@ -8,6 +8,7 @@ import accessibility.reporting.tool.getWithJwtUser
 import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.*
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,7 +43,7 @@ class LegacyOrganizationRoutesTest {
     }
 
     @Test
-    fun `Create new organization unit`() = setupLegacyTestApi(db) {
+    fun `Should create new organization unit`() = setupLegacyTestApi(db) {
         val testUnit = "New and shiny testunit"
         val expectedTestUnitId = "new-and-shiny-testunit"
 
@@ -61,17 +62,17 @@ class LegacyOrganizationRoutesTest {
 
         client.assertErrorOnSubmit(orgSubRoute("new")) {
             assertBadRequest {
-                user = testUser.original
+                user = testUser
                 parametersBuilder = null
             }
             assertBadRequest {
-                user = testUser.original
+                user = testUser
                 parametersBuilder = {
                     append("unit-email", testUser.original.email.str())
                 }
             }
             assertBadRequest {
-                user = testUser.original
+                user = testUser
                 parametersBuilder = {
                     append("unit-name", testUser.original.email.str())
                 }
@@ -81,7 +82,7 @@ class LegacyOrganizationRoutesTest {
     }
 
     @Test
-    fun `Update owner `() = setupLegacyTestApi(db) {
+    fun `Should update owner `() = setupLegacyTestApi(db) {
         val newOrgName = "Unit with Owner"
         val orgid = "unit-with-owner"
         val ownerUpdateRoute = orgSubRoute("$orgid/owner")
@@ -106,29 +107,23 @@ class LegacyOrganizationRoutesTest {
 
         client.assertErrorOnSubmit(ownerUpdateRoute) {
             assertBadRequest {
-                user = testAdminUser.original
+                user = testAdminUser
             }
             assertBadRequest {
-                user = testAdminUser.original
+                user = testAdminUser
                 parametersBuilder = {
                     append("organic-email", "newowner@test.nav")
                 }
             }
-
-            //OBS OBS: det er ikke satt noen grenser for hvem som får lov til å oppdatere eier
         }
     }
 
-
     @Test
-    fun `delete organization unit`() = setupLegacyTestApi(db) {
+    fun `Should delete organization unit`() = setupLegacyTestApi(db) {
         val orgName = "Unit with Owner"
         val orgRoute = orgSubRoute("unit-with-owner")
         val otherUser =
             TestUser(email = "new.new@test.nav", name = "The New New")
-
-        TestUser(email = "new.new@test.nav", name = "The New New")
-
 
         //should be able to delete organization you own
         client.postNewOrg(testUser.original, orgName)
@@ -137,8 +132,6 @@ class LegacyOrganizationRoutesTest {
 
         //admin should be allowed to delete org
         client.postNewOrg(otherUser.original, orgName)
-
-        // client.deleteWithJwtUser(testUser.original, orgRoute).status shouldBe HttpStatusCode.Forbidden -- not implemented
         client.deleteWithJwtUser(testAdminUser.original, orgRoute).status shouldBe HttpStatusCode.OK
         client.getWithJwtUser(testUser.original, orgRoute).status shouldBe HttpStatusCode.NotFound
 
@@ -149,12 +142,59 @@ class LegacyOrganizationRoutesTest {
 
     }
 
+    @Test
+    fun `Should add and remove members in organization unit`() = setupLegacyTestApi(database = db) {
+        val testorgName = "Another one"
+        val testorgId = "another-one"
+        val memberRoute = orgSubRoute("member")
+        val otherMemberEmail = "tadda@test.nav"
+        val otherMember2Email = "tadda2@test.nav"
+        val otherMember3Email = "tadda3@test.nav"
 
-    //delete /{id}
-    //post {id}/owner
-    //post {id}/member
-    //delete {id}/member
+        client.postNewOrg(testUser.original, testorgName)
+        client.submitWithJwtTestUser(testUser, memberRoute) {
+            append("member", otherMemberEmail)
+            append("orgunit", testorgId)
+        }.status shouldBe HttpStatusCode.OK
 
+        client.assertErrorOnSubmit(memberRoute) {
+            assertBadRequest {
+                user = testAdminUser
+                parametersBuilder = {
+                    append("member", otherMemberEmail)
+                }
+            }
+            assertBadRequest {
+                user = testAdminUser
+                parametersBuilder = {
+                    append("org-unit", "no-exists")
+                }
+            }
+            assertBadRequest {
+                user = testAdminUser
+                parametersBuilder = {
+                    append("org-unit", testorgId)
+                }
+            }
+        }
+
+        client.submitWithJwtTestUser(testUser, memberRoute) {
+            append("member", otherMember2Email)
+            append("orgunit", testorgId)
+        }.status shouldBe HttpStatusCode.OK
+        client.submitWithJwtTestUser(testUser, memberRoute) {
+            append("member", otherMember3Email)
+            append("orgunit", testorgId)
+        }.status shouldBe HttpStatusCode.OK
+
+        client.deleteWithJwtUser(testUser.original, "$memberRoute?email=$otherMember2Email&orgunit=$testorgId")
+            .status shouldBe HttpStatusCode.OK
+        client.deleteWithJwtUser(testUser.original, "$memberRoute?email=nope&orgunit=$testorgId")
+            .status shouldBe HttpStatusCode.OK
+        client.deleteWithJwtUser(testUser.original, "$memberRoute?email=nope&orgunit=notorg")
+            .status shouldBe HttpStatusCode.BadRequest
+
+    }
 
     @ParameterizedTest
     @ValueSource(strings = ["/", "/orgunit", "/user", "faq"])

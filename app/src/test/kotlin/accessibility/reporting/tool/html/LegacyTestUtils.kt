@@ -57,10 +57,10 @@ class ErrorAsserter(val httpClient: HttpClient, val urlString: String) {
     }
 
     class ErrorRequestConfig(val url: String) {
-        lateinit var user: User
+        lateinit var user: TestUser
         var parametersBuilder: (ParametersBuilder.() -> Unit)? = null
 
-        suspend fun doSubmit(httpClient: HttpClient) = httpClient.submitWithJwtUser(user, url, parametersBuilder)
+        suspend fun doSubmit(httpClient: HttpClient) = httpClient.submitWithJwtUser(user.original, url, parametersBuilder)
 
 
     }
@@ -79,6 +79,12 @@ suspend fun HttpClient.submitWithJwtUser(
 ) {
     header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
 }
+suspend fun HttpClient.submitWithJwtTestUser(
+    testUser: TestUser,
+    urlString: String,
+    appendParameters: (ParametersBuilder.() -> Unit?)? = null
+) = submitWithJwtUser(testUser.original,urlString,appendParameters)
+
 suspend fun HttpClient.assertCORSOptions(route: String, user: User, allowedMethod: String)  {
     optionsWithJwtUser(user, route) {
         header(HttpHeaders.Origin, "https://test.cors.nav.no")
