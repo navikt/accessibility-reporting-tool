@@ -79,7 +79,6 @@ suspend fun HttpClient.submitWithJwtUser(
 ) {
     header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
 }
-
 suspend fun HttpClient.assertCORSOptions(route: String, user: User, allowedMethod: String)  {
     optionsWithJwtUser(user, route) {
         header(HttpHeaders.Origin, "https://test.cors.nav.no")
