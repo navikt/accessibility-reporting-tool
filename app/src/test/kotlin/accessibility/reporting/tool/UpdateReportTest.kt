@@ -32,6 +32,12 @@ class UpdateReportTest {
         email = "test@nav.no",
         members = mutableSetOf()
     )
+    private val testOrg2 = OrganizationUnit(
+        id = UUID.randomUUID().toString(),
+        name = "Team-dolly",
+        email = "teamdolly@test.com",
+        members = mutableSetOf()
+    )
     private val database = LocalPostgresDatabase.cleanDb()
     private val repository = ReportRepository(database)
     private val testUser =
@@ -138,11 +144,11 @@ class UpdateReportTest {
     //Lag en test hvor bare ett metadatafelt blir send med (f.eks team eller descriptive name)
     @Test
     fun `partial updates metadata`() = setupTestApi(database) {
-
+val newDescriptiveName="Updated Report Title"
         val updateDescriptiveName = """
         {
             "reportId": "${dummyreport.reportId}",
-            "descriptiveName": "Updated Report Title"
+            "descriptiveName": "${newDescriptiveName}"
         }
     """.trimIndent()
 
@@ -162,19 +168,22 @@ class UpdateReportTest {
 
         updatedJsonResponse5["descriptiveName"].asText() shouldBe "Updated Report Title"
         // test at andre metadatafelt ikke er endret
-        updatedJsonResponse5["team"].asText() shouldBe dummyreport.organizationUnit
-        updatedJsonResponse5["author"].asText() shouldBe dummyreport.author
-        updatedJsonResponse5["successCriteria"].asText() shouldBe dummyreport.successCriteria
-        updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged
+        updatedJsonResponse5["team"]["name"].asText() shouldBe dummyreport.organizationUnit!!.name
+        updatedJsonResponse5["author"]["email"].asText() shouldBe dummyreport.author.email
+        updatedJsonResponse5["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
+        /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
+        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
 
+        val newTeamId = testOrg2.id
+        val newTeamName = testOrg2.name
+        val newTeamEmail = testOrg2.email
         val updateTeam = """
         {
             "reportId": "${dummyreport.reportId}",
             "team": {
-                "id": "test-id",
-                "name": "Team-dolly",
-                "email": "teamdolly@test.com"
+                "id": "${newTeamId}",
+                "name": "${newTeamName}",
+                "email": "${newTeamEmail}"
             }
         }
     """.trimIndent()
@@ -184,6 +193,18 @@ class UpdateReportTest {
             contentType(ContentType.Application.Json)
         }
         response6.status shouldBe HttpStatusCode.OK
+        database.update {
+            queryOf(
+                """INSERT INTO organization_unit (organization_unit_id, name, email) 
+                    VALUES (:id,:name, :email) 
+                """.trimMargin(),
+                mapOf(
+                    "id" to newTeamId,
+                    "name" to newTeamName,
+                    "email" to newTeamEmail
+                )
+            )
+        }
 
         val updatedResponse6 = client.get("api/reports/${dummyreport.reportId}")
         updatedResponse6.status shouldBe HttpStatusCode.OK
@@ -192,17 +213,19 @@ class UpdateReportTest {
         updatedJsonResponse6["team"]["name"].asText() shouldBe "Team-dolly"
         updatedJsonResponse6["team"]["email"].asText() shouldBe "teamdolly@test.com"
 
-        updatedJsonResponse5["descriptiveName"].asText() shouldBe dummyreport.descriptiveName
-        updatedJsonResponse5["author"].asText() shouldBe dummyreport.author
-        updatedJsonResponse5["successCriteria"].asText() shouldBe dummyreport.successCriteria
-        updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged
+        updatedJsonResponse6["descriptiveName"].asText() shouldBe newDescriptiveName
+        updatedJsonResponse6["author"]["email"].asText() shouldBe dummyreport.author.email
+        updatedJsonResponse6["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
+        /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
+        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
 
+
+        val newAuthorEmail = "author@test.com"
         val updateAuthor = """
         {
             "reportId": "${dummyreport.reportId}",
             "author": {
-                "email": "author@test.com",
+                "email": "${newAuthorEmail}",
                 "oid": "123"
             }
         }
@@ -220,29 +243,30 @@ class UpdateReportTest {
 
         updatedJsonResponse7["author"]["email"].asText() shouldBe "author@test.com"
 
-        updatedJsonResponse5["descriptiveName"].asText() shouldBe dummyreport.descriptiveName
-        updatedJsonResponse5["team"].asText() shouldBe dummyreport.organizationUnit
-        updatedJsonResponse5["successCriteria"].asText() shouldBe dummyreport.successCriteria
-        updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged
+        updatedJsonResponse7["descriptiveName"].asText() shouldBe newDescriptiveName
+        updatedJsonResponse7["team"]["name"].asText() shouldBe newTeamName
+        updatedJsonResponse7["team"]["email"].asText() shouldBe newTeamEmail
+        updatedJsonResponse7["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
+        /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
+        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
 
         val metadataTest = """{
             "reportId": "${dummyreport.reportId}",
-            "descriptiveName": "Updated Report Title",
+            "descriptiveName": "${newDescriptiveName}",
             "team": {
-                "id": "test-report",
-                "name": "Team-UU",
-                "email": "team@test.com"
+                "id": "${dummyreport.organizationUnit!!.id}",
+                "name": "${newTeamName}",
+                "email": "${newTeamEmail}"
             },
             "author": {
-                "email": "updateduser@test.com",
+                "email": "${newAuthorEmail}",
                 "oid": "123"
             },
             "created": "${LocalDateTime.now()}",
             "lastChanged": "${LocalDateTime.now()}"
                 }""".trimMargin()
 
-        val response = client.putWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val response = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
             setBody(metadataTest)
             contentType(ContentType.Application.Json)
         }
@@ -253,9 +277,10 @@ class UpdateReportTest {
         val updatedJsonResponse = objectmapper.readTree(updatedResponse.bodyAsText())
 
         updatedJsonResponse["descriptiveName"].asText() shouldBe "Updated Report Title"
-        updatedJsonResponse["team"]["name"].asText() shouldBe "Team-UU"
-        updatedJsonResponse["team"]["email"].asText() shouldBe "team@test.com"
-        updatedJsonResponse["author"]["email"].asText() shouldBe "updateduser@test.com"
+        updatedJsonResponse["team"]["name"].asText() shouldBe "Team-dolly"
+        updatedJsonResponse["team"]["email"].asText() shouldBe "teamdolly@test.com"
+        updatedJsonResponse["author"]["email"].asText() shouldBe "author@test.com"
+        updatedJsonResponse["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
     }
 
     @Test

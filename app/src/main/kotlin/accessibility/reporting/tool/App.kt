@@ -11,6 +11,7 @@ import accessibility.reporting.tool.rest.RequestException
 import accessibility.reporting.tool.rest.jsonApiReports
 import accessibility.reporting.tool.rest.jsonapiteams
 import accessibility.reporting.tool.rest.jsonApiUsers
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
@@ -70,6 +71,7 @@ fun Application.api(
     install(ContentNegotiation) {
         jackson {
             registerModule(JavaTimeModule())
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
     }
     install(CORS) {
