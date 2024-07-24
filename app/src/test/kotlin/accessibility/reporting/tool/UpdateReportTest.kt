@@ -400,7 +400,7 @@ val newDescriptiveName="Updated Report Title"
                 "principle": "multiple updated principle",
                 "guideline": "multiple updated guideline",
                 "tools": "multiple updated tools",
-                "number": "multiple updated number",
+                "number": "1.3.1",
                 "breakingTheLaw": "ja",
                 "lawDoesNotApply": "nei",
                 "tooHardToComply": "nei",
@@ -413,7 +413,7 @@ val newDescriptiveName="Updated Report Title"
                 "principle": "flere updated principle",
                 "guideline": "flere updated guideline",
                 "tools": "flere updated tools",
-                "number": "flere updated number",
+                "number": "1.3.2",
                 "breakingTheLaw": "nei",
                 "lawDoesNotApply": "nei",
                 "tooHardToComply": "ja",
@@ -451,7 +451,7 @@ val newDescriptiveName="Updated Report Title"
         updatedCriterion1["tooHardToComply"].asText() shouldBe "nei"
         updatedCriterion1["contentGroup"].asText() shouldBe "Group 1"
         updatedCriterion1["status"].asText() shouldBe "COMPLIANT"
-        updatedCriterion1["wcagLevel"].asText() shouldBe originalCriterion1.wcagLevel
+        updatedCriterion1["wcagLevel"].asText() shouldBe originalCriterion1.wcagLevel.name
 
         updatedCriterion2["name"].asText() shouldBe originalCriterion2.name
         updatedCriterion2["description"].asText() shouldBe originalCriterion2.description
@@ -464,7 +464,7 @@ val newDescriptiveName="Updated Report Title"
         updatedCriterion2["tooHardToComply"].asText() shouldBe "ja"
         updatedCriterion2["contentGroup"].asText() shouldBe "Group 1"
         updatedCriterion2["status"].asText() shouldBe "COMPLIANT"
-        updatedCriterion2["wcagLevel"].asText() shouldBe originalCriterion2.wcagLevel
+        updatedCriterion2["wcagLevel"].asText() shouldBe originalCriterion2.wcagLevel.name
 
         val otherCriteria = criteriaList.filter { it["number"].asText() != "1.3.1"
                 && it["number"].asText() != "1.3.2"}
