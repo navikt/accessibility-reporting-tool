@@ -1,13 +1,11 @@
 package accessibility.reporting.tool.html
 
 import LocalPostgresDatabase
-import accessibility.reporting.tool.JwtConfig
-import accessibility.reporting.tool.api
+import accessibility.reporting.tool.*
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.installJwtTestAuth
-import accessibility.reporting.tool.mockEmptyAuth
+import assert
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.ktor.client.*
@@ -25,7 +23,7 @@ fun setupLegacyTestApi(
         api(
             reportRepository = ReportRepository(database),
             organizationRepository = OrganizationRepository(database),
-            corsAllowedOrigins = listOf("*"),
+            corsAllowedOrigins = listOf("*.nav.no"),
             corsAllowedSchemes = listOf("http", "https")
         ) {
             if (withEmptyAuth) {
@@ -80,4 +78,15 @@ suspend fun HttpClient.submitWithJwtUser(
     }
 ) {
     header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+}
+
+suspend fun HttpClient.assertCORSOptions(route: String, user: User, allowedMethod: String)  {
+    optionsWithJwtUser(user, route) {
+        header(HttpHeaders.Origin, "https://test.cors.nav.no")
+        header(HttpHeaders.AccessControlRequestMethod, allowedMethod)
+    }.assert {
+        status shouldBe HttpStatusCode.OK
+        headers[HttpHeaders.AccessControlAllowOrigin] shouldBe "https://test.cors.nav.no"
+        headers[HttpHeaders.AccessControlAllowCredentials] shouldBe "true"
+    }
 }
