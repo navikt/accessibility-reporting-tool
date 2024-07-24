@@ -15,7 +15,7 @@ object Kotlin {
     const val VERSION = "1.9.23"
 }
 object Database {
-    object Flyway : Dependency(version = "10.15.2", groupId = "org.flywaydb") {
+    object Flyway : Dependency(version = "10.16.0", groupId = "org.flywaydb") {
 
         val core = dependency("flyway-core")
         val postgres = dependency("flyway-database-postgresql")
