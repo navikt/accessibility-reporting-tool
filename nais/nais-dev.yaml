@@ -24,14 +24,11 @@ spec:
   prometheus:
     enabled: true
     path: /open/metrics
-  tokenx:
-    enabled: true
   accessPolicy:
     inbound:
       rules:
         - application: "accessibility-reporting-tool-frontend-beta"
         - application: "accessibility-reporting-tool-frontend"
-
   azure:
     application:
       enabled: true
