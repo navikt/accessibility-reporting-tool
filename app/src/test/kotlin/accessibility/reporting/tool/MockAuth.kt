@@ -23,6 +23,7 @@ object JwtConfig {
         .require(algorithm)
         .withIssuer(issuer)
         .build()
+
     fun generateToken(
         user: User
     ): String = JWT.create()
@@ -77,7 +78,12 @@ suspend fun HttpClient.putWithJwtUser(user: User, urlString: String, block: Http
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }
 
-//patch
+suspend fun HttpClient.deleteWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    delete(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+    }
+
 suspend fun HttpClient.patchWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     patch(urlString) {
         block()

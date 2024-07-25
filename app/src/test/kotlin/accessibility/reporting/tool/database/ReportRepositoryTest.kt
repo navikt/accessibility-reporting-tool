@@ -3,11 +3,9 @@ package accessibility.reporting.tool.database
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
-import accessibility.reporting.tool.toEmail
 import accessibility.reporting.tool.wcag.*
 import assert
 import io.kotest.assertions.withClue
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import kotliquery.queryOf
 import org.junit.jupiter.api.Test
@@ -27,7 +25,6 @@ class ReportRepositoryTest {
     )
     private val database = LocalPostgresDatabase.cleanDb()
     private val reportRepository = ReportRepository(database)
-    private val organizationRepository= OrganizationRepository(database)
     private val testUserEmail = Email("tadda@test.tadda")
     private val testUserName = "Tadda Taddasen"
     private val testUserOid = User.Oid(UUID.randomUUID().toString())
@@ -88,76 +85,6 @@ class ReportRepositoryTest {
     }
 
     @Test
-    fun `alter org units`() {
-        val testOrg1 = OrganizationUnit("some-id", "Some unit", "tadda@nav.no")
-        val childTestOrg = OrganizationUnit("some-other-id", "Child unit", "jaha@nav.no")
-        val testOrg2 = OrganizationUnit(
-            "some-other-two",
-            "Child unit",
-            "jaha@nav.no",
-        )
-        val grandchildTestOrg =
-            OrganizationUnit("some-id-thats-this", "Grandchild unit", "something@nav.no")
-
-        reportRepository.upsertOrganizationUnit(testOrg1)
-        reportRepository.upsertReport(dummyReportV2(orgUnit = testOrg1))
-        testOrg1.addMember("testMember@test.ko".toEmail())
-        reportRepository.upsertOrganizationUnit(testOrg1)
-
-        reportRepository.getReportForOrganizationUnit<Report>(testOrg1.id).apply {
-            first.assert {
-                require(this != null)
-                members.size shouldBe 1
-            }
-            second.size shouldBe 1
-            second.first().assert {
-                require(organizationUnit != null)
-                organizationUnit!!.id shouldBe testOrg1.id
-                organizationUnit!!.members.size shouldBe 1
-            }
-        }
-
-        reportRepository.upsertOrganizationUnit(childTestOrg)
-        //Ønsket oppførsel om navn ikke er unikt, kaste expception?
-
-        reportRepository.upsertOrganizationUnit(testOrg2)
-        reportRepository.upsertOrganizationUnit(grandchildTestOrg)
-
-        database.list {
-            queryOf(
-                "select * from organization_unit"
-            ).map { row ->
-                OrganizationUnit(
-                    id = row.string("organization_unit_id"),
-                    name = row.string("name"),
-                    email = row.string("email")
-                )
-            }.asList
-        }.assert {
-            map { it.name } shouldContainExactlyInAnyOrder listOf(
-                testOrg1.name,
-                testOrg2.name,
-                childTestOrg.name,
-                grandchildTestOrg.name,
-                testOrg.name
-            )
-        }
-        reportRepository.deleteOrgUnit(orgUnitId = testOrg1.id).size shouldBe 4
-    }
-
-    @Test
-    fun `changes owner of orgunit`(){
-        val testOrg1 = OrganizationUnit("some-id", "Some unit", "tadda@nav.no")
-        reportRepository.upsertOrganizationUnit(testOrg1)
-        reportRepository.upsertOrganizationUnit(testOrg1.copy(email = "newowner@nav.no"))
-        organizationRepository.getOrganizationUnit(testOrg1.id)!!.assert {
-            id shouldBe testOrg1.id
-            name shouldBe testOrg1.name
-            email shouldBe "newowner@nav.no"
-        }
-    }
-
-    @Test
     fun `get reports by type`() {
         val testReport = dummyReportV2()
         val aggregatedTestReport = dummyAggregatedReportV2(orgUnit = testOrg)
@@ -181,34 +108,6 @@ class ReportRepositoryTest {
 
         reportRepository.getReports<Report>(ids = listOf(aggregatedTestReport.reportId, testReport.reportId)).size shouldBe 2
         reportRepository.getReports<AggregatedReport>(ids = listOf(aggregatedTestReport.reportId)).size shouldBe 1
-    }
-
-
-    @Test
-    fun `get reports for unit`() {
-        reportRepository.upsertReport(dummyReportV2(orgUnit = testOrg))
-        reportRepository.upsertReport(dummyReportV2("http://dummyurl2.test", testOrg))
-        reportRepository.upsertReport(dummyReportV2("http://dummyurl3.test", testOrg))
-        reportRepository.upsertReport(dummyReportV2("http://dummyurl4.test", testOrg))
-
-        reportRepository.getReportForOrganizationUnit<Report>(testOrg.id).assert {
-            require(first != null)
-            second.assert {
-                size shouldBe 4
-                withClue("Report with url dummyUrl.test is missing") {
-                    any { it.url == "http://dummyurl.test" } shouldBe true
-                }
-                withClue("Report with url dummyurl2.test is missing") {
-                    any { it.url == "http://dummyurl2.test" } shouldBe true
-                }
-                withClue("Report with url dummyurl3.test is missing") {
-                    any { it.url == "http://dummyurl3.test" } shouldBe true
-                }
-                withClue("Report with url dummyurl4.test is missing") {
-                    any { it.url == "http://dummyurl4.test" } shouldBe true
-                }
-            }
-        }
     }
 
     @Test

@@ -6,6 +6,7 @@ import accessibility.reporting.tool.database.Flyway
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
+import accessibility.reporting.tool.html.*
 import accessibility.reporting.tool.microfrontends.faqRoute
 import accessibility.reporting.tool.rest.RequestException
 import accessibility.reporting.tool.rest.jsonApiReports
@@ -115,7 +116,7 @@ fun Application.api(
     }
     routing {
         authenticate {
-            organizationUnits(reportRepository =reportRepository, organizationRepository =organizationRepository)
+            organizationUnits(organizationRepository =organizationRepository)
             userRoute(reportRepository)
             reports(reportRepository =reportRepository, organizationRepository =organizationRepository)
             landingPage(reportRepository)
@@ -123,7 +124,7 @@ fun Application.api(
             faqRoute()
             route("api") {
                 jsonApiReports(organizationRepository = organizationRepository, reportRepository = reportRepository)
-                jsonapiteams(organizationRepository = organizationRepository, reportRepository = reportRepository)
+                jsonapiteams(organizationRepository = organizationRepository)
                 jsonApiUsers(organizationRepository = organizationRepository, reportRepository = reportRepository)
             }
         }
@@ -132,8 +133,6 @@ fun Application.api(
         staticResources("/static", "static") {
             preCompressed(CompressedFileType.GZIP)
         }
-        //openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
-        //}
     }
 
     allRoutes(plugin(Routing))

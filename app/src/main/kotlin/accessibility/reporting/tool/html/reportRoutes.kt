@@ -1,4 +1,4 @@
-package accessibility.reporting.tool
+package accessibility.reporting.tool.html
 
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.OrganizationRepository
@@ -26,7 +26,7 @@ fun Route.reports(reportRepository: ReportRepository, organizationRepository: Or
             if (report.reportType == ReportType.AGGREGATED) {
                 call.respondRedirect("/reports/collection/$reportId")
             }
-            val organizations = reportRepository.getAllOrganizationUnits()
+            val organizations = organizationRepository.getAllOrganizationUnits()
             call.respondHtmlContent("Tilgjengelighetsærklæring for ${report.descriptiveName}", NavBarItem.NONE) {
                 reportContainer(
                     report = report,
@@ -79,7 +79,7 @@ fun Route.reports(reportRepository: ReportRepository, organizationRepository: Or
             }
 
             get {
-                val orgUnits = reportRepository.getAllOrganizationUnits()
+                val orgUnits = organizationRepository.getAllOrganizationUnits()
                 call.respondHtmlContent("Ny tilgjengelighetserklæring", NavBarItem.NONE) {
                     h1 {
                         +"Lag ny tilgjengelighetserklæring"
@@ -146,6 +146,10 @@ fun Route.reports(reportRepository: ReportRepository, organizationRepository: Or
         )
         reportRepository.upsertReport(oldReport.withUpdatedCriterion(criterion, call.user))
     }
-    updateMetdataRoute(repository = reportRepository, routingPath = updateMetadataPath)
+    updateMetdataRoute(
+        reportRepository = reportRepository,
+        organizationRepository = organizationRepository,
+        routingPath = updateMetadataPath
+    )
 
 }

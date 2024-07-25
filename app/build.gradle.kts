@@ -68,6 +68,7 @@ dependencies {
 
     testImplementation(Jupiter.engine)
     testImplementation(Jupiter.api)
+    testImplementation(Jupiter.params)
     testImplementation(Ktor.ktorServerTestHost)
     testImplementation(TestContainers.containers)
     testImplementation(TestContainers.jupiterRunner)
@@ -75,9 +76,8 @@ dependencies {
     testImplementation(Kotest.junit5Runner)
     testImplementation(Kotest.assertionsCore)
     testImplementation(Testdependencies.MOCKK)
-
-
 }
+
 
 application {
     // Define the main class for the application.

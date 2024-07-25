@@ -6,7 +6,6 @@ import accessibility.reporting.tool.authenitcation.userOrNull
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
-import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
@@ -126,6 +125,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                         currentCriterion
                     }
                 }
+
                 updatedReport = updatedReport.updateCriteria(newCriteria, call.user)
             }
 
@@ -134,7 +134,6 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
         }
     }
 }
-
 data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
 data class FullReport(
     override val reportId: String,

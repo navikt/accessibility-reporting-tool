@@ -1,11 +1,9 @@
 package accessibility.reporting.tool.microfrontends
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.AggregatedReport
 import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.SuccessCriterion
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -15,7 +13,6 @@ import io.ktor.util.pipeline.*
 import kotlinx.html.div
 import kotlinx.html.select
 import kotlinx.html.stream.createHTML
-import kotlin.reflect.KClass
 
 val Parameters.status
     get() = this["status"].toString()
@@ -54,7 +51,8 @@ fun Route.updateCriterionRoute(
 
 fun Route.updateMetdataRoute(
     routingPath: String,
-    repository: ReportRepository,
+    reportRepository: ReportRepository,
+    organizationRepository: OrganizationRepository,
     getReportFunction: ReportRepository.(String) -> Report? = { id -> getReport<Report>(id) },
     upsertReportFunction: ReportRepository.(Report) -> Report = { id -> upsertReportReturning<Report>(id) },
     validateAccess: suspend ApplicationCall.() -> Unit = {}
@@ -62,8 +60,8 @@ fun Route.updateMetdataRoute(
     post("$routingPath/{id}") {
         call.validateAccess()
         val formParameters = call.receiveParameters()
-        val organizations = repository.getAllOrganizationUnits()
-        val report = repository.getReportFunction(call.parameters["id"] ?: throw IllegalArgumentException())
+        val organizations = organizationRepository.getAllOrganizationUnits()
+        val report = reportRepository.getReportFunction(call.parameters["id"] ?: throw IllegalArgumentException())
             ?.withUpdatedMetadata(
                 title = formParameters["report-title"],
                 pageUrl = formParameters["page-url"],
@@ -72,7 +70,7 @@ fun Route.updateMetdataRoute(
                 },
                 updateBy = call.user
             )
-            ?.let { repository.upsertReportFunction(it) }
+            ?.let { reportRepository.upsertReportFunction(it) }
 
         fun response() = createHTML().select { orgSelector(organizations, report!!, routingPath) }
         call.respondText(contentType = ContentType.Text.Html, HttpStatusCode.OK, ::response)

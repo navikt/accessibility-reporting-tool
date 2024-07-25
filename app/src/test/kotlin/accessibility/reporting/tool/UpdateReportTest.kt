@@ -454,5 +454,3 @@ class UpdateReportTest {
         }
     }
 }
-
-

@@ -1,4 +1,4 @@
-package accessibility.reporting.tool
+package accessibility.reporting.tool.html
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
@@ -17,7 +17,7 @@ import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 
 
-fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
+fun Route.organizationUnits(organizationRepository: OrganizationRepository) {
     route("orgunit") {
 
         get {
@@ -29,7 +29,7 @@ fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepo
                 }
                 ul {
                     id = "orgunit-list"
-                    reportRepository.getAllOrganizationUnits().forEach { orgUnit ->
+                    organizationRepository.getAllOrganizationUnits().forEach { orgUnit ->
                         li {
                             a {
                                 href = "orgunit/${orgUnit.id}"
@@ -53,7 +53,7 @@ fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepo
         get("{id}") {
 
             call.parameters["id"]!!.let { unitId ->
-                val (org, reports) = reportRepository.getReportForOrganizationUnit<Report>(unitId)
+                val (org, reports) = organizationRepository.getReportForOrganizationUnit<Report>(unitId)
 
                 org?.let { orgUnit ->
                     call.respondHtmlContent(orgUnit.name, NavBarItem.ORG_ENHETER) {
@@ -75,7 +75,7 @@ fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepo
 
         delete("{id}") {
             val newOrgList =
-                reportRepository.deleteOrgUnit(call.parameters["id"] ?: throw IllegalArgumentException("orgid mangler"))
+                organizationRepository.deleteOrgUnit(call.parameters["id"] ?: throw IllegalArgumentException("orgid mangler"))
 
             fun response() = createHTML().ul {
                 id = "orgunit-list"
@@ -106,7 +106,7 @@ fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepo
             } ?: throw IllegalArgumentException("Ukjent organisasjonenhetsid")
             val newOwnerEmail =
                 params["orgunit-email"] ?: throw IllegalArgumentException("Mangler email til ny eier")
-            reportRepository.upsertOrganizationUnit(orgUnit.copy(email = newOwnerEmail))
+            organizationRepository.upsertOrganizationUnit(orgUnit.copy(email = newOwnerEmail))
 
             call.respondText(status = HttpStatusCode.OK) {
                 createHTML().div {
@@ -125,7 +125,7 @@ fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepo
                     )
                     ?.apply {
                         addMember(formParameters["member"].toEmail())
-                        reportRepository.upsertOrganizationUnit(this)
+                        organizationRepository.upsertOrganizationUnit(this)
                     }
                     ?: throw IllegalArgumentException("organisasjonsenhet finnes ikke")
 
@@ -142,7 +142,7 @@ fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepo
                         removeMember(
                             call.parameters["email"] ?: throw IllegalArgumentException("Mangler brukers email")
                         )
-                        reportRepository.upsertOrganizationUnit(this)
+                        organizationRepository.upsertOrganizationUnit(this)
                     }
                     ?: throw IllegalArgumentException("Fant ikke organisasjon")
 
@@ -193,7 +193,7 @@ fun Route.organizationUnits(reportRepository: ReportRepository, organizationRepo
                 val email = params["unit-email"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha en email")
                 val name = params["unit-name"] ?: throw IllegalArgumentException("Organisasjonsenhet må ha ett navn")
 
-                reportRepository.upsertOrganizationUnit(
+                organizationRepository.upsertOrganizationUnit(
                     OrganizationUnit.createNew(
                         name = name,
                         email = email

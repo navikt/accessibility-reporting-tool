@@ -80,5 +80,6 @@ object Testdependencies {
 
         val engine = dependency(ENGINE_ARTIFACT_ID)
         val api = "$groupId:$ENGINE_ARTIFACT_ID:junit-jupiter-api"
+        val params = dependency("junit-jupiter-params")
     }
 }

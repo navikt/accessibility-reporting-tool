@@ -1,6 +1,7 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User.Email
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
@@ -24,7 +25,7 @@ import org.junit.jupiter.api.TestInstance
 class TeamApiTest {
 
     private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = ReportRepository(database)
+    private val repository = OrganizationRepository(database)
     private val testOrg = OrganizationUnit(
         id = "1234567",
         name = "Testorganisation",
@@ -46,9 +47,9 @@ class TeamApiTest {
         repository.upsertOrganizationUnit(testOrg)
         repository.upsertOrganizationUnit(testOrg2)
         testorgsReports.forEach { report ->
-            repository.upsertReport(report)
+            repository.upsertReportReturning<Report>(report)
         }
-        repository.upsertReport(dummyReportV2(orgUnit = testOrg2))
+        repository.upsertReportReturning<Report>(dummyReportV2(orgUnit = testOrg2))
     }
 
     @Test
