@@ -7,6 +7,7 @@ import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.kotest.assertions.withClue
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -83,3 +84,15 @@ class TestUser(email: String, name: String, groups: List<String> = listOf()) {
         User(email = User.Email(s = email), name = name, oid = User.Oid(UUID.randomUUID().toString()), groups = groups)
     val capitalized = original.copy(email = User.Email(email.replaceFirstChar(Char::titlecase)))
 }
+
+fun withJsonClue(jsonField: String, assertFuntion: (String) -> Unit) {
+    withClue("Jsonfield: $jsonField") {
+        try {
+            assertFuntion(jsonField)
+        } catch (nullpointerException: NullPointerException) {
+            throw JsonAssertionFailedException(jsonField)
+        }
+    }
+}
+
+class JsonAssertionFailedException(field: String) : Throwable("field $field is not present in jsonnode")

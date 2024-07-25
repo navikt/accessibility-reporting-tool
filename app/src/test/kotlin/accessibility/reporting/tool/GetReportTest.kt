@@ -69,34 +69,34 @@ class GetReportTest {
     @Test
     fun `get Report`() = setupTestApi(database) {
         val responseForAuthor = client.getWithJwtUser(testUser.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertExists(responseForAuthor, testUser.original, true)
+        dummyreport.assertListItemExists(responseForAuthor, testUser.original, true)
         val responseForAuthorCapitalised =
             client.getWithJwtUser(testUser.capitalized, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertExists(responseForAuthorCapitalised, testUser.capitalized, true)
+        dummyreport.assertListItemExists(responseForAuthorCapitalised, testUser.capitalized, true)
 
         val responseForAdmin = client.getWithJwtUser(testUserAdmin.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertExists(responseForAdmin, testUserAdmin.original, true)
+        dummyreport.assertListItemExists(responseForAdmin, testUserAdmin.original, true)
         val responseForAdminCapitalized =
             client.getWithJwtUser(testUserAdmin.capitalized, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertExists(responseForAdminCapitalized, testUserAdmin.capitalized, true)
+        dummyreport.assertListItemExists(responseForAdminCapitalized, testUserAdmin.capitalized, true)
 
         val responseForTeamMember = client.getWithJwtUser(teamMember.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertExists(responseForTeamMember, teamMember.original, true)
+        dummyreport.assertListItemExists(responseForTeamMember, teamMember.original, true)
         val responseForTeamMemberCapitalized =
             client.getWithJwtUser(teamMember.capitalized, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertExists(responseForTeamMemberCapitalized, teamMember.capitalized, true)
+        dummyreport.assertListItemExists(responseForTeamMemberCapitalized, teamMember.capitalized, true)
 
         val responseForNonTeamMember =
             client.getWithJwtUser(notTeamMember.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertExists(responseForNonTeamMember, notTeamMember.original, false)
+        dummyreport.assertListItemExists(responseForNonTeamMember, notTeamMember.original, false)
         val responseForNonTeamMemberCapitalized =
             client.getWithJwtUser(notTeamMember.capitalized, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertExists(responseForNonTeamMemberCapitalized, notTeamMember.capitalized, false)
+        dummyreport.assertListItemExists(responseForNonTeamMemberCapitalized, notTeamMember.capitalized, false)
 
     }
 }
 
-private suspend fun Report.assertExists(response: HttpResponse, user: User, shouldHaveWriteAccess: Boolean) {
+private suspend fun Report.assertListItemExists(response: HttpResponse, user: User, shouldHaveWriteAccess: Boolean) {
     response.status shouldBe HttpStatusCode.OK
     val jsonNode = objectmapper.readTree(response.bodyAsText())
     jsonNode["reportId"].asText() shouldBe this.reportId

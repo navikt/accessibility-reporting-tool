@@ -5,8 +5,10 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.datestr
 import assert
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -15,6 +17,7 @@ import kotliquery.queryOf
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApiTest {
@@ -62,7 +65,7 @@ class ApiTest {
             objectmapper.readTree(bodyAsText()).toList().assert {
                 this.size shouldBe 3
                 initialReports.forEach {
-                    it.assertExists(this)
+                    it.assertListItemExists(this)
                 }
             }
         }
@@ -138,8 +141,20 @@ class ApiTest {
     }
 }
 
-private fun Report.assertExists(jsonList: List<JsonNode>) {
-    val result = jsonList.find { jsonNode -> jsonNode["navn"].asText() == descriptiveName }
+private fun Report.assertListItemExists(jsonList: List<JsonNode>) {
+    val result = jsonList.find { jsonNode -> jsonNode["id"].asText() == reportId }
     require(result != null)
-    result["url"].asText() shouldBe this.url
+
+    withJsonClue("title") { titleField ->
+       result[titleField].asText() shouldBe descriptiveName
+    }
+    withJsonClue("teamName") { teamNameField ->
+        result[teamNameField].asText() shouldBe this.organizationUnit!!.name
+    }
+    withJsonClue("teamId") { teamIdField ->
+        result[teamIdField].asText() shouldBe this.organizationUnit!!.id
+    }
+    withJsonClue("date") { dateField ->
+        result[dateField].asText() shouldBe "yyyy-MM-dd".datestr(LocalDateTime.now())
+    }
 }

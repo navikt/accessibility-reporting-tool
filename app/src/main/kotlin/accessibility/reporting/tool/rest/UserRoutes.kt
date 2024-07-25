@@ -31,27 +31,3 @@ data class UserDetails(
     val reports: List<ReportListItem>,
     val teams: List<OrganizationUnit>
 )
-
-class ReportListItem(
-    @JsonProperty("id")
-    override val reportId: String,
-    @JsonProperty("title")
-    override val descriptiveName: String?,
-    @JsonIgnore
-    override val url: String,
-    val teamId: String,
-    lastChanged: LocalDateTime
-) : ReportContent {
-    val date: String = "yyyy-MM-dd".datestr(lastChanged)
-
-    companion object {
-
-        fun fromJson(jsonNode: JsonNode) = ReportListItem(
-            reportId = jsonNode.reportId,
-            descriptiveName = jsonNode.descriptiveName,
-            url = jsonNode.url,
-            teamId = jsonNode.organizationUnit()?.id ?: "",
-            lastChanged = jsonNode.lastChangedOrDefault()
-        )
-    }
-}
