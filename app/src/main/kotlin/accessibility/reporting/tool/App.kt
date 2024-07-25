@@ -82,6 +82,7 @@ fun Application.api(
         allowHeader(HttpHeaders.ContentType)
         allowMethod(HttpMethod.Patch)
         allowMethod(HttpMethod.Delete)
+        allowMethod(HttpMethod.Options)
         allowCredentials = true
     }
 
