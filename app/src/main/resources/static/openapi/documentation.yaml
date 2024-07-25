@@ -4,8 +4,7 @@ info:
   description: "accessibility_reporting_tool API"
   version: "1.0.0"
 servers:
-  - url: "https://a11y-statement.ekstern.dev.nav.no"
-  - url: "https://a11y-statement.ansatt.dev.nav.no"
+- url: "https://accessibility_reporting_tool"
 paths:
   /api/reports/{id}:
     get:
@@ -23,21 +22,9 @@ paths:
             text/plain:
               schema:
                 type: "string"
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Missing or malformed id"
         "500":
           description: "Internal Server Error"
           content:
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
             text/plain:
               schema:
                 type: "string"
@@ -46,21 +33,127 @@ paths:
                   value: ""
                 Example#2:
                   value: ""
+                Example#3:
+                  value: ""
+                Example#4:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullReportWithAccessPolicy"
+  /api/reports/{id}/update:
+    patch:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: "#/components/schemas/ReportUpdate"
+        required: true
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+                Example#2:
+                  value: ""
+                Example#3:
+                  value: ""
+                Example#4:
+                  value: ""
+                Example#5:
+                  value: ""
+                Example#6:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            text/plain:
+              schema:
+                type: "string"
         "200":
           description: "OK"
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/FullReport"
-        "404":
-          description: "Not Found"
+    put:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: "#/components/schemas/FullReport"
+        required: true
+      responses:
+        "400":
+          description: "Bad Request"
           content:
-            '*/*':
+            text/plain:
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
               schema:
                 type: "string"
               examples:
                 Example#1:
-                  value: "Report not found"
+                  value: ""
+                Example#2:
+                  value: ""
+                Example#3:
+                  value: ""
+                Example#4:
+                  value: ""
+                Example#5:
+                  value: ""
+                Example#6:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FullReport"
   /api/reports/list:
     get:
       description: ""
@@ -72,7 +165,7 @@ paths:
               schema:
                 type: "array"
                 items:
-                  $ref: "#/components/schemas/ReportWithUrl"
+                  $ref: "#/components/schemas/ReportListItem"
         "400":
           description: "Bad Request"
           content:
@@ -277,862 +370,8 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDetails"
-  /faq:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-  /isalive:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-  /isready:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-  /open/{id}:
-    get:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-        "404":
-          description: "Not Found <br> TODO"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-  /open/metrics:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                type: "string"
-  /orgunit:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-  /orgunit/{id}:
-    delete:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/html:
-              schema:
-                type: "string"
-    get:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-        "404":
-          description: "Not Found"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-  /orgunit/{id}/owner:
-    post:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - name: "orgunit-email"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-                Example#5:
-                  value: ""
-                Example#6:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-  /orgunit/member:
-    delete:
-      description: ""
-      parameters:
-      - name: "orgunit"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      - name: "email"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-                Example#5:
-                  value: ""
-                Example#6:
-                  value: ""
-                Example#7:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/html:
-              schema:
-                type: "string"
-    post:
-      description: ""
-      parameters:
-      - name: "orgunit"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      - name: "member"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-                Example#5:
-                  value: ""
-                Example#6:
-                  value: ""
-                Example#7:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/html:
-              schema:
-                type: "string"
-  /orgunit/new:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-    post:
-      description: ""
-      parameters:
-      - name: "unit-email"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      - name: "unit-name"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-                Example#5:
-                  value: ""
-                Example#6:
-                  value: ""
-        "201":
-          description: "Created"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-          headers:
-            HX-Redirect:
-              required: true
-              schema:
-                type: "string"
-  /reports/{id}:
-    delete:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/html:
-              schema:
-                type: "string"
-    get:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-                Example#5:
-                  value: ""
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-  /reports/collection/{id}:
-    delete:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "401":
-          description: "Unauthorized"
-          content:
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Du har ikke tilgang til denne siden"
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/html:
-              schema:
-                type: "string"
-    get:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-                Example#5:
-                  value: ""
-                Example#6:
-                  value: ""
-                Example#7:
-                  value: ""
-                Example#8:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-  /reports/collection/{id}/update:
-    post:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - name: "srcReport"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      responses:
-        "401":
-          description: "Unauthorized"
-          content:
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Du har ikke tilgang til denne siden"
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-                Example#5:
-                  value: ""
-                Example#6:
-                  value: ""
-                Example#7:
-                  value: ""
-                Example#8:
-                  value: ""
-                Example#9:
-                  value: ""
-                Example#10:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-  /reports/collection/new:
-    get:
-      description: ""
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-    post:
-      description: ""
-      parameters:
-      - name: "page-url"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      - name: "descriptive-name"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      - name: "orgunit"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      - name: "report"
-        in: "query"
-        required: false
-        schema:
-          type: "array"
-          items:
-            type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-                Example#4:
-                  value: ""
-                Example#5:
-                  value: ""
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-  /reports/new:
-    get:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-    post:
-      description: ""
-      parameters:
-      - name: "page-url"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      - name: "orgunit"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      - name: "descriptive-name"
-        in: "query"
-        required: false
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-        "201":
-          description: "Created"
-          content:
-            '*/*':
-              schema:
-                type: "object"
-  /reports/single/{id}:
-    delete:
-      description: ""
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-                Example#3:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/html:
-              schema:
-                type: "string"
-  /user:
-    get:
-      description: ""
-      responses:
-        "400":
-          description: "Bad Request"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "500":
-          description: "Internal Server Error"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
-                Example#2:
-                  value: ""
-        "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
 components:
   schemas:
-    Function1:
-      type: "object"
-      properties: {}
-    Function1_? super HTML:
-      type: "object"
     OrganizationUnit:
       type: "object"
       properties:
@@ -1198,6 +437,63 @@ components:
           - "UNKNOWN"
         successCriterionNumber:
           type: "string"
+    FullReportWithAccessPolicy:
+      type: "object"
+      properties:
+        reportId:
+          type: "string"
+        descriptiveName:
+          type: "string"
+        url:
+          type: "string"
+        team:
+          $ref: "#/components/schemas/OrganizationUnit"
+        author:
+          $ref: "#/components/schemas/Author"
+        successCriteria:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SuccessCriterion"
+        created:
+          type: "string"
+          format: "date-time"
+        lastChanged:
+          type: "string"
+          format: "date-time"
+        hasWriteAccess:
+          type: "boolean"
+    SuccessCriterionUpdate:
+      type: "object"
+      properties:
+        number:
+          type: "string"
+        breakingTheLaw:
+          type: "string"
+        lawDoesNotApply:
+          type: "string"
+        tooHardToComply:
+          type: "string"
+        contentGroup:
+          type: "string"
+        status:
+          type: "string"
+    ReportUpdate:
+      type: "object"
+      properties:
+        descriptiveName:
+          type: "string"
+        team:
+          $ref: "#/components/schemas/OrganizationUnit"
+        author:
+          $ref: "#/components/schemas/Author"
+        created:
+          type: "string"
+        lastChanged:
+          type: "string"
+        successCriteria:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SuccessCriterionUpdate"
     FullReport:
       type: "object"
       properties:
@@ -1221,12 +517,20 @@ components:
         lastChanged:
           type: "string"
           format: "date-time"
-    ReportWithUrl:
+    ReportListItem:
       type: "object"
       properties:
+        reportId:
+          type: "string"
+        descriptiveName:
+          type: "string"
         url:
           type: "string"
-        navn:
+        teamId:
+          type: "string"
+        teamName:
+          type: "string"
+        date:
           type: "string"
     Rapport:
       type: "object"
@@ -1245,19 +549,6 @@ components:
         name:
           type: "string"
         email:
-          type: "string"
-    ReportListItem:
-      type: "object"
-      properties:
-        reportId:
-          type: "string"
-        descriptiveName:
-          type: "string"
-        url:
-          type: "string"
-        teamId:
-          type: "string"
-        date:
           type: "string"
     NewTeam:
       type: "object"
