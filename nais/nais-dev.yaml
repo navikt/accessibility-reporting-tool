@@ -24,6 +24,11 @@ spec:
   prometheus:
     enabled: true
     path: /open/metrics
+  accessPolicy:
+    inbound:
+      rules:
+        - application: "accessibility-reporting-tool-frontend-beta"
+        - application: "accessibility-reporting-tool-frontend"
   azure:
     application:
       enabled: true
