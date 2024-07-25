@@ -87,17 +87,6 @@ suspend fun HttpClient.submitWithJwtTestUser(
     appendParameters: (ParametersBuilder.() -> Unit?)? = null
 ) = submitWithJwtUser(testUser.original, urlString, appendParameters)
 
-suspend fun HttpClient.assertCORSOptions(route: String, user: User, allowedMethod: String) {
-    optionsWithJwtUser(user, route) {
-        header(HttpHeaders.Origin, "https://test.cors.nav.no")
-        header(HttpHeaders.AccessControlRequestMethod, allowedMethod)
-    }.assert {
-        status shouldBe HttpStatusCode.OK
-        headers[HttpHeaders.AccessControlAllowOrigin] shouldBe "https://test.cors.nav.no"
-        headers[HttpHeaders.AccessControlAllowCredentials] shouldBe "true"
-    }
-}
-
 suspend fun HttpClient.adminAndNonAdminsShouldBeOK(testUser: TestUser, testAdminUser: TestUser, url: String) {
     getWithJwtUser(testUser.original, url).status shouldBe HttpStatusCode.OK
     getWithJwtUser(testUser.capitalized, url).status shouldBe HttpStatusCode.OK
