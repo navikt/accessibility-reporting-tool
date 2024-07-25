@@ -79,7 +79,7 @@ fun Application.api(
             allowHost(host = allowedHost, schemes = corsAllowedSchemes)
         }
         allowHeader(HttpHeaders.AccessControlAllowOrigin)
-        allowMethod(HttpMethod.Options)
+        allowHeader(HttpHeaders.ContentType)
         allowMethod(HttpMethod.Patch)
         allowMethod(HttpMethod.Delete)
         allowCredentials = true
