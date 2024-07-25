@@ -114,5 +114,10 @@ private suspend fun Report.assertExists(response: HttpResponse, user: User, shou
     withClue("${user.email.str()} has incorrect permissions on report") {
         jsonNode["hasWriteAccess"].asBoolean() shouldBe shouldHaveWriteAccess
     }
+
+    /** I denne testen: By default sendes dates som arrays, vi vil at de skal sendes som en string på formatet backen
+     * se UserRoutes.kt og ReportJsonUtils linje 41
+     */
+
 }
 
