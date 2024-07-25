@@ -6,6 +6,7 @@ import accessibility.reporting.tool.authenitcation.userOrNull
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
@@ -19,9 +20,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
     route("reports") {
         get("/list") {
-            call.respond(
-                reportRepository.getReports<ReportShortSummary>()
-                    .map { ReportWithUrl(it.url, it.descriptiveName ?: it.url) })
+            call.respond(reportRepository.getReports<ReportListItem>())
         }
 
         get("/{id}") {
@@ -136,11 +135,6 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
     }
 }
 
-data class ReportWithUrl(
-    val url: String,
-    val navn: String,
-)
-
 data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
 data class FullReport(
     override val reportId: String,
@@ -196,6 +190,7 @@ data class SuccessCriterionUpdate(
     val contentGroup: String? = null,
     val status: String? = null
 )
+
 fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy {
     return FullReportWithAccessPolicy(
         reportId = this.reportId,
