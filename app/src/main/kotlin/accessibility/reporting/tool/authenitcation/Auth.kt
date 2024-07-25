@@ -30,6 +30,8 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger { }
 val ApplicationCall.user: User
     get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Princial ikke satt")
+val ApplicationCall.userOrNull: User?
+    get() = principal<User>()
 
 val ApplicationCall.adminUser: User
     get() = user.also { if (!user.groups.contains(System.getenv("ADMIN_GROUP"))) throw NotAdminException() }

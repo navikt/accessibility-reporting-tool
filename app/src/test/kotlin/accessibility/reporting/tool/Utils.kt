@@ -77,3 +77,9 @@ private fun Application.mockEmptyAuth() = authentication {
         skipWhen { true }
     }
 }
+
+class TestUser(email: String, name: String, groups: List<String> = listOf()) {
+    val original =
+        User(email = User.Email(s = email), name = name, oid = User.Oid(UUID.randomUUID().toString()), groups = groups)
+    val capitalized = original.copy(email = User.Email(email.replaceFirstChar(Char::titlecase)))
+}
