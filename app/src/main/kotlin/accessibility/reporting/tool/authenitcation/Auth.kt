@@ -3,6 +3,7 @@ package accessibility.reporting.tool.authenitcation
 
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.authenitcation.User.Oid
+import accessibility.reporting.tool.rest.MissingPrincipalException
 import accessibility.reporting.tool.wcag.Author
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
@@ -19,6 +20,7 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -27,9 +29,11 @@ import mu.KotlinLogging
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-private val logger = KotlinLogging.logger { }
 val ApplicationCall.user: User
-    get() = principal<User>() ?: throw java.lang.IllegalArgumentException("Princial ikke satt")
+    get() = principal<User>() ?: throw MissingPrincipalException(route = this.request.path(), expectedPrincipal ="User")
+
+val ApplicationCall.userOrNull: User?
+    get() = principal<User>()
 
 val ApplicationCall.adminUser: User
     get() = user.also { if (!user.groups.contains(System.getenv("ADMIN_GROUP"))) throw NotAdminException() }

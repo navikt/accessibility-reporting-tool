@@ -2,6 +2,7 @@ package accessibility.reporting.tool.rest
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.authenitcation.userOrNull
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
@@ -28,7 +29,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             val id = call.parameters["id"] ?: throw BadRequestException("Missing id")
 
             val result = reportRepository.getReport<Report>(id)
-                ?.toFullReportWithAccessPolicy(call.user)
+                ?.toFullReportWithAccessPolicy(call.userOrNull)
                 ?: throw ResourceNotFoundException("report", id)
 
             call.respond(result)
@@ -73,8 +74,75 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             call.respond(HttpStatusCode.OK, result)
 
         }
+        patch("/{id}/update") {
+            val id = call.parameters["id"] ?: throw BadPathParameterException("Missing id")
+            val updates = call.receive<ReportUpdate>()
+
+            val existingReport =
+                reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
+
+            var updatedReport = existingReport
+
+            updates.descriptiveName?.let {
+                updatedReport = updatedReport.copy(descriptiveName = it)
+            }
+            updates.team?.let {
+                updatedReport = updatedReport.copy(organizationUnit = it)
+            }
+            updates.author?.let {
+                updatedReport = updatedReport.copy(author = it)
+            }
+            updates.created?.let {
+                updatedReport = updatedReport.copy(created = LocalDateTime.parse(it))
+            }
+            updates.lastChanged?.let {
+                updatedReport = updatedReport.copy(lastChanged = LocalDateTime.parse(it))
+            }
+
+            updates.successCriteria?.let { pendingUpdateList ->
+                val currentCriteria = existingReport.successCriteria
+                val newList = currentCriteria.map { currentCriterion ->
+                    //Finner den kriteriet?
+                    val updatedCriterion = pendingUpdateList.find { it.number == currentCriterion.number }
+                    if (updatedCriterion != null) {
+                        SuccessCriterion(
+                            name = currentCriterion.name,
+                            description = currentCriterion.description,
+                            principle = currentCriterion.principle,
+                            guideline = currentCriterion.guideline,
+                            tools = currentCriterion.tools,
+                            number = currentCriterion.number,
+                            breakingTheLaw = updatedCriterion.breakingTheLaw ?: currentCriterion.breakingTheLaw,
+                            lawDoesNotApply = updatedCriterion.lawDoesNotApply ?: currentCriterion.lawDoesNotApply,
+                            tooHardToComply = updatedCriterion.tooHardToComply ?: currentCriterion.tooHardToComply,
+                            contentGroup = updatedCriterion.contentGroup ?: currentCriterion.contentGroup,
+                            status = updatedCriterion.status?.let { Status.valueOf(it) }
+                                ?: currentCriterion.status,
+                            wcagUrl = currentCriterion.wcagUrl,
+                            helpUrl = currentCriterion.helpUrl,
+                            wcagVersion = currentCriterion.wcagVersion
+                        ).apply {
+                            wcagLevel = currentCriterion.wcagLevel
+                        }.also {
+                            //lager den nytt criterion riktig?
+                            println(it)
+                        }
+                    } else {
+                        currentCriterion
+                    }
+                }
+                //En newList oppdatert?
+                updatedReport = updatedReport.updateCriteria(newList, call.user)
+            }
+
+            val result = reportRepository.upsertReport(updatedReport).toFullReport()
+            //Er result oppdatert?
+            call.respond(HttpStatusCode.OK, result)
+        }
+
     }
 }
+
 
 data class ReportWithUrl(
     val url: String,
@@ -132,4 +200,21 @@ fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy
         hasWriteAccess = this.writeAccess(user)
     )
 }
+data class ReportUpdate(
+    val descriptiveName: String? = null,
+    val team: OrganizationUnit? = null,
+    val author: Author? = null,
+    val created: String? = null,
+    val lastChanged: String? = null,
+    val successCriteria: List<SuccessCriterionUpdate>? = null
+)
+
+data class SuccessCriterionUpdate(
+    val number: String,
+    val breakingTheLaw: String? = null,
+    val lawDoesNotApply: String? = null,
+    val tooHardToComply: String? = null,
+    val contentGroup: String? = null,
+    val status: String? = null
+)
 

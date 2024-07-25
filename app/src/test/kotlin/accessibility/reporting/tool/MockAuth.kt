@@ -9,6 +9,7 @@ import io.ktor.client.request.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import kotlinx.css.header
 import java.util.*
 
 object JwtConfig {
@@ -22,6 +23,7 @@ object JwtConfig {
         .require(algorithm)
         .withIssuer(issuer)
         .build()
+
     fun generateToken(
         user: User
     ): String = JWT.create()
@@ -78,6 +80,12 @@ suspend fun HttpClient.putWithJwtUser(user: User, urlString: String, block: Http
 
 suspend fun HttpClient.deleteWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     delete(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+    }
+
+suspend fun HttpClient.patchWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    patch(urlString) {
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }
