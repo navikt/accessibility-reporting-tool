@@ -18,10 +18,8 @@ import java.time.LocalDateTime
 import java.util.*
 import accessibility.reporting.tool.rest.ResourceNotFoundException
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.perceivable
-import accessibility.reporting.tool.wcag.SucessCriteriaV1
 import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`1-3 Mulig å tilpasse`
 import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.devTools
-import kotlinx.css.times
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -87,7 +85,6 @@ class UpdateReportTest {
                 wcagLevel = WcagLevel.AA
             }
 
-
         val updatedReport = dummyreport.updateCriteria(listOf(newCriteria), testUser)
             .let {
                 FullReport(
@@ -141,7 +138,6 @@ class UpdateReportTest {
         }
     }
 
-    //Lag en test hvor bare ett metadatafelt blir send med (f.eks team eller descriptive name)
     @Test
     fun `partial updates metadata`() = setupTestApi(database) {
         val newDescriptiveName = "Updated Report Title"
@@ -152,25 +148,21 @@ class UpdateReportTest {
         }
     """.trimIndent()
 
-        val response5 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val descriptiveNamePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
             setBody(updateDescriptiveName)
             contentType(ContentType.Application.Json)
         }
-        response5.status shouldBe HttpStatusCode.OK
-        //trenger ikke de 3 neste linjene (det blir testet på linje 156-161)
-        /*val responseBody5 = response5.bodyAsText()
-        val jsonResponse5 = objectmapper.readTree(responseBody5)
-        jsonResponse5["reportId"].asText() shouldBe dummyreport.reportId*/
+        descriptiveNamePatchRequest.status shouldBe HttpStatusCode.OK
 
-        val updatedResponse5 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse5.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse5 = objectmapper.readTree(updatedResponse5.bodyAsText())
+        val descriptiveNameGetRequest = client.get("api/reports/${dummyreport.reportId}")
+        descriptiveNameGetRequest.status shouldBe HttpStatusCode.OK
+        val descriptiveNameUpdate = objectmapper.readTree(descriptiveNameGetRequest.bodyAsText())
 
-        updatedJsonResponse5["descriptiveName"].asText() shouldBe "Updated Report Title"
-        // test at andre metadatafelt ikke er endret
-        updatedJsonResponse5["team"]["name"].asText() shouldBe dummyreport.organizationUnit!!.name
-        updatedJsonResponse5["author"]["email"].asText() shouldBe dummyreport.author.email
-        updatedJsonResponse5["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
+        descriptiveNameUpdate["descriptiveName"].asText() shouldBe "Updated Report Title"
+
+        descriptiveNameUpdate["team"]["name"].asText() shouldBe dummyreport.organizationUnit!!.name
+        descriptiveNameUpdate["author"]["email"].asText() shouldBe dummyreport.author.email
+        descriptiveNameUpdate["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
         /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
         updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
 
@@ -188,11 +180,11 @@ class UpdateReportTest {
         }
     """.trimIndent()
 
-        val response6 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val teamUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
             setBody(updateTeam)
             contentType(ContentType.Application.Json)
         }
-        response6.status shouldBe HttpStatusCode.OK
+        teamUpdatePatchRequest.status shouldBe HttpStatusCode.OK
         database.update {
             queryOf(
                 """INSERT INTO organization_unit (organization_unit_id, name, email) 
@@ -206,16 +198,16 @@ class UpdateReportTest {
             )
         }
 
-        val updatedResponse6 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse6.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse6 = objectmapper.readTree(updatedResponse6.bodyAsText())
+        val teamUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
+        teamUpdateGetRequest.status shouldBe HttpStatusCode.OK
+        val teamUpdate = objectmapper.readTree(teamUpdateGetRequest.bodyAsText())
 
-        updatedJsonResponse6["team"]["name"].asText() shouldBe "Team-dolly"
-        updatedJsonResponse6["team"]["email"].asText() shouldBe "teamdolly@test.com"
+        teamUpdate["team"]["name"].asText() shouldBe "Team-dolly"
+        teamUpdate["team"]["email"].asText() shouldBe "teamdolly@test.com"
 
-        updatedJsonResponse6["descriptiveName"].asText() shouldBe newDescriptiveName
-        updatedJsonResponse6["author"]["email"].asText() shouldBe dummyreport.author.email
-        updatedJsonResponse6["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
+        teamUpdate["descriptiveName"].asText() shouldBe newDescriptiveName
+        teamUpdate["author"]["email"].asText() shouldBe dummyreport.author.email
+        teamUpdate["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
         /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
         updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
 
@@ -231,22 +223,22 @@ class UpdateReportTest {
         }
     """.trimIndent()
 
-        val response7 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val authorUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
             setBody(updateAuthor)
             contentType(ContentType.Application.Json)
         }
-        response7.status shouldBe HttpStatusCode.OK
+        authorUpdatePatchRequest.status shouldBe HttpStatusCode.OK
 
-        val updatedResponse7 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse7.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse7 = objectmapper.readTree(updatedResponse7.bodyAsText())
+        val authorUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
+        authorUpdateGetRequest.status shouldBe HttpStatusCode.OK
+        val authorUpdate = objectmapper.readTree(authorUpdateGetRequest.bodyAsText())
 
-        updatedJsonResponse7["author"]["email"].asText() shouldBe "author@test.com"
+        authorUpdate["author"]["email"].asText() shouldBe "author@test.com"
 
-        updatedJsonResponse7["descriptiveName"].asText() shouldBe newDescriptiveName
-        updatedJsonResponse7["team"]["name"].asText() shouldBe newTeamName
-        updatedJsonResponse7["team"]["email"].asText() shouldBe newTeamEmail
-        updatedJsonResponse7["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
+        authorUpdate["descriptiveName"].asText() shouldBe newDescriptiveName
+        authorUpdate["team"]["name"].asText() shouldBe newTeamName
+        authorUpdate["team"]["email"].asText() shouldBe newTeamEmail
+        authorUpdate["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
         /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
         updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
 
@@ -266,21 +258,21 @@ class UpdateReportTest {
             "lastChanged": "${LocalDateTime.now()}"
                 }""".trimMargin()
 
-        val response = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val metadataUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
             setBody(metadataTest)
             contentType(ContentType.Application.Json)
         }
-        response.status shouldBe HttpStatusCode.OK
+        metadataUpdatePatchRequest.status shouldBe HttpStatusCode.OK
 
-        val updatedResponse = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse = objectmapper.readTree(updatedResponse.bodyAsText())
+        val metadataUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
+        metadataUpdateGetRequest.status shouldBe HttpStatusCode.OK
+        val metadataUpdate = objectmapper.readTree(metadataUpdateGetRequest.bodyAsText())
 
-        updatedJsonResponse["descriptiveName"].asText() shouldBe "Updated Report Title"
-        updatedJsonResponse["team"]["name"].asText() shouldBe "Team-dolly"
-        updatedJsonResponse["team"]["email"].asText() shouldBe "teamdolly@test.com"
-        updatedJsonResponse["author"]["email"].asText() shouldBe "author@test.com"
-        updatedJsonResponse["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
+        metadataUpdate["descriptiveName"].asText() shouldBe "Updated Report Title"
+        metadataUpdate["team"]["name"].asText() shouldBe "Team-dolly"
+        metadataUpdate["team"]["email"].asText() shouldBe "teamdolly@test.com"
+        metadataUpdate["author"]["email"].asText() shouldBe "author@test.com"
+        metadataUpdate["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
     }
 
     @Test
@@ -293,9 +285,6 @@ class UpdateReportTest {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships"
         }.levelA()
 
-
-        //Bruk en av criteriene som er definert i successcriteria v1
-        //Sjekk med Nima om det kommer som enkeltobjekt eller i en liste=universal function , enkeltobjekt- metadata; success criteria- liste; bare den som endrer seg
         val singleCriterionUpdate = """
         {
             "reportId": "${dummyreport.reportId}",
@@ -316,40 +305,20 @@ class UpdateReportTest {
             }]
         }
     """.trimIndent()
-        //patch istedet for put
-        val response2 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+
+        val singleCriterionUpdateRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
             setBody(singleCriterionUpdate)
             contentType(ContentType.Application.Json)
         }
-        response2.status shouldBe HttpStatusCode.OK
+        singleCriterionUpdateRequest.status shouldBe HttpStatusCode.OK
 
-        val updatedResponse2 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse2.status shouldBe HttpStatusCode.OK
-        val updatedJsonResponse2 = objectmapper.readTree(updatedResponse2.bodyAsText())
+        val singleCriterionGetRequest = client.get("api/reports/${dummyreport.reportId}")
+        singleCriterionGetRequest.status shouldBe HttpStatusCode.OK
+        val singleCriterionUpdateJsonResponse = objectmapper.readTree(singleCriterionGetRequest.bodyAsText())
 
 
-        val criteriaList = updatedJsonResponse2["successCriteria"].toList()
+        val criteriaList = singleCriterionUpdateJsonResponse["successCriteria"].toList()
         criteriaList.size shouldBe 49
-
-        /*updatedJsonResponse2["successCriteria"].toList().assert {
-            size shouldBe 1
-            //sjekk at kriterielista sin size fortsatt er 49
-            val criterion = this.first() //find (se på sammen)
-            criterion["name"].asText() shouldBe "Informasjon og relasjoner" //sjekk at det ikke har endret seg
-            criterion["description"].asText() shouldBe "Ting skal være kodet som det ser ut som."
-            criterion["principle"].asText() shouldBe "Principle 1"
-            criterion["guideline"].asText() shouldBe "1-3 Mulig å tilpasse"
-            criterion["tools"].asText() shouldBe "$devTools/headingsMap"
-            criterion["number"].asText() shouldBe "1.3.1"
-            criterion["breakingTheLaw"].asText() shouldBe "nei"
-            criterion["lawDoesNotApply"].asText() shouldBe "nei"
-            criterion["tooHardToComply"].asText() shouldBe "nei"
-            criterion["contentGroup"].asText() shouldBe "Group 1"
-            criterion["status"].asText() shouldBe "COMPLIANT"
-            criterion["wcagLevel"].asText() shouldBe "AA"
-
-            //Sjekk at andre kriterier ikke har endret seg
-        }*/
 
         val specificCriterion = criteriaList.find { it["number"].asText() == "1.3.1" }
         specificCriterion?.let {
@@ -369,13 +338,10 @@ class UpdateReportTest {
 
         val otherCriteria = criteriaList.filter { it["number"].asText() != "1.3.1" }
         otherCriteria.isNotEmpty() shouldBe true
-
-
     }
 
     @Test
     fun `partial updates multipleCriteria`() = setupTestApi(database) {
-        //liste
 
         val originalCriterion1 = 1.perceivable("1.3.1", "Informasjon og relasjoner") {
             description = "Ting skal være kodet som det ser ut som."
@@ -391,7 +357,7 @@ class UpdateReportTest {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/meaningful-sequence"
         }.levelA()
 
-        val multipleCriteriaUpdate = """ 
+        val updatedMultipleCriteria = """ 
         {
             "reportId": "${dummyreport.reportId}",
             "successCriteria": [{
@@ -423,19 +389,19 @@ class UpdateReportTest {
             }]
         }
     """.trimIndent()
-        //patch
-        val response3 = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
-            setBody(multipleCriteriaUpdate)
+
+        val multipleCriteriaUpdateRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+            setBody(updatedMultipleCriteria)
             contentType(ContentType.Application.Json)
         }
-        response3.status shouldBe HttpStatusCode.OK
+        multipleCriteriaUpdateRequest.status shouldBe HttpStatusCode.OK
 
-        val updatedResponse3 = client.get("api/reports/${dummyreport.reportId}")
-        updatedResponse3.status shouldBe HttpStatusCode.OK
-        val updatedResponseBody3 = updatedResponse3.bodyAsText()
-        val updatedJsonResponse3 = objectmapper.readTree(updatedResponseBody3)
+        val multipleCriteriaUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
+        multipleCriteriaUpdateGetRequest.status shouldBe HttpStatusCode.OK
+        val multipleCriteriaUpdate = multipleCriteriaUpdateGetRequest.bodyAsText()
+        val multipleCriteriaJsonResponse = objectmapper.readTree(multipleCriteriaUpdate)
 
-        val criteriaList = updatedJsonResponse3["successCriteria"].toList()
+        val criteriaList = multipleCriteriaJsonResponse["successCriteria"].toList()
         criteriaList.size shouldBe 49
         val updatedCriterion1 = criteriaList.find { it["number"].asText() == "1.3.1" }!!
         val updatedCriterion2 = criteriaList.find { it["number"].asText() == "1.3.2" }!!
@@ -473,45 +439,20 @@ class UpdateReportTest {
         otherCriteria.isNotEmpty() shouldBe true
     }
 
-
-
-
-//Tester for:
-// oppdatere kun metada
-// oppdatere kun 1 criterion (i liste)
-// oppdatere kun flere criteria (ikke metadata)
-// oppdatere både metadata og criteria?
-//NB! bruke jsonstrings, ikke objectmapper i request
-
-
-private fun Report.assertExists(jsonNode: JsonNode) {
-    jsonNode["reportId"].asText() shouldBe this.reportId
-    jsonNode["url"].asText() shouldBe this.url
-    jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
-    jsonNode["team"].let {
-        it["id"].asText() shouldBe this.organizationUnit?.id
-        it["name"].asText() shouldBe this.organizationUnit?.name
-        it["email"].asText() shouldBe this.organizationUnit?.email
+    private fun Report.assertExists(jsonNode: JsonNode) {
+        jsonNode["reportId"].asText() shouldBe this.reportId
+        jsonNode["url"].asText() shouldBe this.url
+        jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
+        jsonNode["team"].let {
+            it["id"].asText() shouldBe this.organizationUnit?.id
+            it["name"].asText() shouldBe this.organizationUnit?.name
+            it["email"].asText() shouldBe this.organizationUnit?.email
+        }
+        jsonNode["author"].let {
+            it["email"].asText() shouldBe this.author.email
+            it["oid"].asText() shouldBe this.author.oid
+        }
     }
-    jsonNode["author"].let {
-        it["email"].asText() shouldBe this.author.email
-        it["oid"].asText() shouldBe this.author.oid
-    }
-}}
+}
 
-private fun metadata(
-    descriptiveName: String,
-    team: OrganizationUnit,
-    author: Author,
-    created: LocalDateTime,
-    lastChanged: LocalDateTime
-) = FullReport(
-    reportId = "test-report",
-    url = "test@test.com",
-    descriptiveName = descriptiveName,
-    team = team,
-    author = author,
-    successCriteria = emptyList(),
-    created = created,
-    lastChanged = lastChanged
-)
+

@@ -105,8 +105,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
             updates.successCriteria?.let { pendingUpdateList ->
                 val currentCriteria = existingReport.successCriteria
-                val newList = currentCriteria.map { currentCriterion ->
-                    //Finner den kriteriet?
+                val newCriteria = currentCriteria.map { currentCriterion ->
                     val updatedCriterion = pendingUpdateList.find { it.number == currentCriterion.number }
                     if (updatedCriterion != null) {
                         SuccessCriterion(
@@ -127,26 +126,19 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                             wcagVersion = currentCriterion.wcagVersion
                         ).apply {
                             wcagLevel = currentCriterion.wcagLevel
-                        }.also {
-                            //lager den nytt criterion riktig?
-                            println(it)
                         }
                     } else {
                         currentCriterion
                     }
                 }
-                //En newList oppdatert?
-                updatedReport = updatedReport.updateCriteria(newList, call.user)
+                updatedReport = updatedReport.updateCriteria(newCriteria, call.user)
             }
 
             val result = reportRepository.upsertReport(updatedReport).toFullReport()
-            //Er result oppdatert?
             call.respond(HttpStatusCode.OK, result)
         }
-
     }
 }
-
 
 data class ReportWithUrl(
     val url: String,

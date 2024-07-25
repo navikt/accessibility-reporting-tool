@@ -19,16 +19,16 @@ data class SuccessCriterion(
     val guideline: String,
     val tools: String,
     val number: String,
-    val breakingTheLaw: String, //kan endres
-    val lawDoesNotApply: String, //kan endres
-    val tooHardToComply: String, // kan endres
+    val breakingTheLaw: String,
+    val lawDoesNotApply: String,
+    val tooHardToComply: String,
     val contentGroup: String,
-    var status: Status, //kan endres
+    var status: Status,
     val wcagUrl: String? = null,
     val helpUrl: String? = null,
     val wcagVersion: String = "2.1"
 ) {
-    lateinit var wcagLevel: WcagLevel //kan ikke endres
+    lateinit var wcagLevel: WcagLevel
     val successCriterionNumber = number
 
     fun devationIsDesputed() =
