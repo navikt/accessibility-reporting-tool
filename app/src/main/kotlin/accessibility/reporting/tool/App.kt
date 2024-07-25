@@ -8,7 +8,10 @@ import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.html.*
 import accessibility.reporting.tool.microfrontends.faqRoute
-import accessibility.reporting.tool.rest.*
+import accessibility.reporting.tool.rest.RequestException
+import accessibility.reporting.tool.rest.jsonApiReports
+import accessibility.reporting.tool.rest.jsonapiteams
+import accessibility.reporting.tool.rest.jsonApiUsers
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*

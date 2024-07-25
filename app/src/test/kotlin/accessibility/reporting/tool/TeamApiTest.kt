@@ -1,6 +1,5 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
@@ -62,7 +61,7 @@ class TeamApiTest {
             jsonResponse.toList().assert {
                 this.size shouldBe 2
                 testorgsReports.forEach {
-                    it.assertExists(this)
+                    it.assertListItemExists(this)
                 }
             }
         }
@@ -100,7 +99,7 @@ class TeamApiTest {
     }
 }
 
-private fun Report.assertExists(jsonList: List<JsonNode>) {
+private fun Report.assertListItemExists(jsonList: List<JsonNode>) {
     val result = jsonList.find { jsonNode -> jsonNode["id"].asText() == reportId }
     require(result != null) { "Could not find report with id $reportId! Available nodes: ${jsonList.map { it.toString() }}" }
     result["teamId"].asText() shouldBe organizationUnit!!.id

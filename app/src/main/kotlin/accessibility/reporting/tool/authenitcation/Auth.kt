@@ -30,8 +30,10 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 
 val ApplicationCall.user: User
-    get() = principal<User>() ?: throw MissingPrincipalException(route = this.request.path(), expectedPrincipal ="User")
-
+    get() = principal<User>() ?: throw MissingPrincipalException(
+        route = this.request.path(),
+        expectedPrincipal = "User"
+    )
 val ApplicationCall.userOrNull: User?
     get() = principal<User>()
 

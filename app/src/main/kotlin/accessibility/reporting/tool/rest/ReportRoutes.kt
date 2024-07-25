@@ -19,9 +19,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
     route("reports") {
         get("/list") {
-            call.respond(
-                reportRepository.getReports<ReportShortSummary>()
-                    .map { ReportWithUrl(it.url, it.descriptiveName ?: it.url) })
+            call.respond(reportRepository.getReports<ReportListItem>())
         }
 
         get("/{id}") {
@@ -101,8 +99,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
             updates.successCriteria?.let { pendingUpdateList ->
                 val currentCriteria = existingReport.successCriteria
-                val newList = currentCriteria.map { currentCriterion ->
-                    //Finner den kriteriet?
+                val newCriteria = currentCriteria.map { currentCriterion ->
                     val updatedCriterion = pendingUpdateList.find { it.number == currentCriterion.number }
                     if (updatedCriterion != null) {
                         SuccessCriterion(
@@ -123,32 +120,20 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                             wcagVersion = currentCriterion.wcagVersion
                         ).apply {
                             wcagLevel = currentCriterion.wcagLevel
-                        }.also {
-                            //lager den nytt criterion riktig?
-                            println(it)
                         }
                     } else {
                         currentCriterion
                     }
                 }
-                //En newList oppdatert?
-                updatedReport = updatedReport.updateCriteria(newList, call.user)
+
+                updatedReport = updatedReport.updateCriteria(newCriteria, call.user)
             }
 
             val result = reportRepository.upsertReport(updatedReport).toFullReport()
-            //Er result oppdatert?
             call.respond(HttpStatusCode.OK, result)
         }
-
     }
 }
-
-
-data class ReportWithUrl(
-    val url: String,
-    val navn: String,
-)
-
 data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
 data class FullReport(
     override val reportId: String,
@@ -187,19 +172,6 @@ fun Report.toFullReport(): FullReport {
     )
 }
 
-fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy {
-    return FullReportWithAccessPolicy(
-        reportId = this.reportId,
-        descriptiveName = this.descriptiveName,
-        url = this.url,
-        team = this.organizationUnit,
-        author = this.author,
-        successCriteria = this.successCriteria,
-        created = this.created,
-        lastChanged = this.lastChanged,
-        hasWriteAccess = this.writeAccess(user)
-    )
-}
 data class ReportUpdate(
     val descriptiveName: String? = null,
     val team: OrganizationUnit? = null,
@@ -218,3 +190,16 @@ data class SuccessCriterionUpdate(
     val status: String? = null
 )
 
+fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy {
+    return FullReportWithAccessPolicy(
+        reportId = this.reportId,
+        descriptiveName = this.descriptiveName,
+        url = this.url,
+        team = this.organizationUnit,
+        author = this.author,
+        successCriteria = this.successCriteria,
+        created = this.created,
+        lastChanged = this.lastChanged,
+        hasWriteAccess = this.writeAccess(user)
+    )
+}

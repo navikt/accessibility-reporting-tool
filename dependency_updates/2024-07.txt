@@ -37,3 +37,10 @@ org.testcontainers:  1.19.8 -> 1.20.0
 **Ignored dependencies
 org.jetbrains.kotlin
 org.gradle.kotlin.kotlin-dsl
+ -----Dependency check ------
+2024-07-23 15:53:20: 2 outdated dependencies found
+org.flywaydb:  10.15.2 -> 10.16.0
+org.flywaydb:  10.15.2 -> 10.16.0
+**Ignored dependencies
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
