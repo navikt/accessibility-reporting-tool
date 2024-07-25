@@ -133,8 +133,6 @@ fun Application.api(
         staticResources("/static", "static") {
             preCompressed(CompressedFileType.GZIP)
         }
-        //openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
-        //}
     }
 
     allRoutes(plugin(Routing))

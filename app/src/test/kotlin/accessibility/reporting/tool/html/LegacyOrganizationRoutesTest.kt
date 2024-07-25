@@ -38,7 +38,6 @@ class LegacyOrganizationRoutesTest {
         client.adminAndNonAdminsShouldBeOK(testUser, testAdminUser, orgSubRoute("new"))
         client.getWithJwtUser(testUser.original, orgSubRoute("does-not-exists")).status shouldBe HttpStatusCode.NotFound
 
-        //new
         client.submitWithJwtUser(testUser.original, orgSubRoute("new")) {
             append("unit-email", testUser.original.email.str())
             append("unit-name", testUnit)

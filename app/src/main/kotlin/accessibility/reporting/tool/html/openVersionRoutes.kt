@@ -19,7 +19,6 @@ fun Route.openReportRoute(repository: ReportRepository) {
         val reportId = call.parameters["id"] ?: throw IllegalArgumentException("mangler rapportid")
         val report = repository.getReport<Report>(reportId) ?: throw IllegalArgumentException()
         if (report.reportType == ReportType.AGGREGATED) {
-            //TODO
             call.respond(HttpStatusCode.NotFound)
         }
         call.respondHtmlOpenContent("Tilgjengelighetsærklæring for ${report.descriptiveName}") {
