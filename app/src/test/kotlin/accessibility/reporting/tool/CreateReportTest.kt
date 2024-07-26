@@ -1,12 +1,13 @@
 package accessibility.reporting.tool
 
+import accessibility.reporting.tool.database.ReportRepository
 import assert
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
@@ -37,7 +38,6 @@ class CreateReportTest {
         objectmapper.readTree(response.bodyAsText())["id"].asText() shouldNotBe null
     }
 
-    @Disabled
     @Test
     fun `debug options response`()= setupTestApi(db){
         client.request("api/reports/new") {
