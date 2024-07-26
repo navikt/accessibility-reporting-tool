@@ -146,17 +146,20 @@ data class FullReport(
     val lastChanged: LocalDateTime,
 ) : ReportContent
 
-data class FullReportWithAccessPolicy(
+class FullReportWithAccessPolicy(
     override val reportId: String,
     override val descriptiveName: String?,
     override val url: String,
     val team: OrganizationUnit?,
     val author: Author,
     val successCriteria: List<SuccessCriterion>,
-    val created: LocalDateTime,
-    val lastChanged: LocalDateTime,
+    created: LocalDateTime,
+    lastChanged: LocalDateTime,
     val hasWriteAccess: Boolean
-) : ReportContent
+) : ReportContent{
+    val lastChanged: String = "yyyy.MM.dd HH:mm:ss".datestr(lastChanged)
+    val created: String = "yyyy.MM.dd HH:mm:ss".datestr(created)
+}
 
 
 fun Report.toFullReport(): FullReport {
