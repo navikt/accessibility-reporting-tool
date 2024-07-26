@@ -1,6 +1,7 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.database.ReportRepository
+import assert
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -35,6 +36,26 @@ class CreateReportTest {
         }
         response.status shouldBe HttpStatusCode.OK
         objectmapper.readTree(response.bodyAsText())["id"].asText() shouldNotBe null
+    }
 
+    @Test
+    fun `debug options response`()= setupTestApi(db){
+        client.request("api/reports/new") {
+            method = HttpMethod.Options
+            headers {
+                append(HttpHeaders.Accept, "*/*")
+                append(HttpHeaders.AcceptLanguage, "en-GB,en-US;q=0.9,en;q=0.8")
+                append(HttpHeaders.CacheControl, "no-cache")
+                append(HttpHeaders.Pragma, "no-cache")
+                append("priority", "u=1, i")
+                append("sec-fetch-dest", "empty")
+                append("sec-fetch-mode", "cors")
+                append("sec-fetch-site", "same-site")
+                append(HttpHeaders.Referrer, "https://a11y-statement-ny.ansatt.dev.nav.no/")
+                append("referrer-policy", "strict-origin-when-cross-origin")
+            }
+        }.assert {
+            this.status shouldBe HttpStatusCode.OK
+        }
     }
 }
