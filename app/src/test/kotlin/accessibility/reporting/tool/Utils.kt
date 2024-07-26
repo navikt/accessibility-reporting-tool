@@ -63,7 +63,7 @@ fun setupTestApi(
         api(
             reportRepository = ReportRepository(database),
             organizationRepository = OrganizationRepository(database),
-            corsAllowedOrigins = listOf("*"),
+            corsAllowedOrigins = listOf("*.this.shitt"),
             corsAllowedSchemes = listOf("http", "https")
         ) {
             if (withEmptyAuth) {

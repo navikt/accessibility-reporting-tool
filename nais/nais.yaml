@@ -41,6 +41,7 @@ spec:
       autoLoginIgnorePaths:
         - /open/*
         - /static/*
+        - /api/**
   gcp:
     sqlInstances:
       - name: a11y-statement
