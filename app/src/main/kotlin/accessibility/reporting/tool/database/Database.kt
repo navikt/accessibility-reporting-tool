@@ -13,7 +13,6 @@ import kotliquery.action.ListResultQueryAction
 import kotliquery.action.NullableResultQueryAction
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 
 interface Database {
@@ -73,6 +72,7 @@ abstract class BaseRepository(val database: Database) {
         }
         return reports.first
     }
+
     inline fun <reified T> report(row: Row): T {
         val rapportData = repositoryObjectMapper.readTree(row.string("report_data"))
         return when (val name = T::class.simpleName) {
@@ -92,38 +92,22 @@ object LocalDateTimeHelper {
     fun nowAtUtc(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
     fun JsonNode.toLocalDateTimeOrNull(): LocalDateTime? =
         toList()
-            .map { it.asText() }
-            .let {
-                "${it.year}.${it.month}.${it.day} ${it.hour}:${it.minutes}:${it.seconds}".trim()
-            }
-            .let {
-                if (it.isNotBlank()) LocalDateTime.parse(it, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"))
+            .let { dateList ->
+                if (dateList.any { it.asText() != "" })
+                    dateList.toLocalDateTime()
                 else null
             }
 
     fun JsonNode.toLocalDateTime(): LocalDateTime =
-        toList()
-            .map { it.asText() }
-            .let {
-                "${it.year}.${it.month}.${it.day} ${it.hour}:${it.minutes}:${it.seconds}".trim()
-            }
-            .let {
-                LocalDateTime.parse(it, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"))
-            }
-
-    private fun String.padWithZero(charCount: Int = 2) = let { "0".repeat(charCount - it.length) + it }
-    private val List<String>.year: String
-        get() = this[0]
-    private val List<String>.month: String
-        get() = this[1].padWithZero(2)
-    private val List<String>.day: String
-        get() = this[2].padWithZero(2)
-    private val List<String>.hour: String
-        get() = this[3].padWithZero(2)
-    private val List<String>.minutes: String
-        get() = (if (this.size < 5) "" else this[4]).padWithZero(2)
-    private val List<String>.seconds: String
-        get() = (if (this.size < 6) "" else this[5]).padWithZero()
+        toList().toLocalDateTime()
+    private fun List<JsonNode>.toLocalDateTime() = LocalDateTime.of(
+        this[0].asInt(),
+        this[1].asInt(),
+        this[2].asInt(),
+        this[3].asInt(),
+        (if (this.size < 5) null else this[4])?.asInt() ?: 0,
+        (if (this.size < 6) null else this[5])?.asInt() ?: 0
+    )
 }
 
 

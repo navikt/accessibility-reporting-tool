@@ -6,6 +6,7 @@ import accessibility.reporting.tool.authenitcation.userOrNull
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
@@ -153,13 +154,12 @@ class FullReportWithAccessPolicy(
     val team: OrganizationUnit?,
     val author: Author,
     val successCriteria: List<SuccessCriterion>,
-    created: LocalDateTime,
-    lastChanged: LocalDateTime,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val created: LocalDateTime,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    val lastChanged: LocalDateTime,
     val hasWriteAccess: Boolean
-) : ReportContent{
-    val lastChanged: String = "yyyy.MM.dd HH:mm:ss".datestr(lastChanged)
-    val created: String = "yyyy.MM.dd HH:mm:ss".datestr(created)
-}
+) : ReportContent
 
 
 fun Report.toFullReport(): FullReport {
