@@ -74,4 +74,4 @@ spec:
     - name: ADMIN_GROUP
       value: "07bca51b-e5dc-484a-ac09-685e61244b6b"
     - name: CORS_ALLOWED_ORIGIN
-      value: "*"
+      value: "*.ansatt.dev.nav.no,*.ekstern.dev.nav.no"
