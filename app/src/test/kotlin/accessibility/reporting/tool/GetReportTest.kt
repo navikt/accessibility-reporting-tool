@@ -6,6 +6,7 @@ import accessibility.reporting.tool.database.toStringList
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import io.kotest.assertions.withClue
+import accessibility.reporting.tool.wcag.*
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.statement.*
@@ -114,5 +115,8 @@ private suspend fun Report.assertListItemExists(response: HttpResponse, user: Us
     withClue("${user.email.str()} has incorrect permissions on report") {
         jsonNode["hasWriteAccess"].asBoolean() shouldBe shouldHaveWriteAccess
     }
+    val dateFormat = "yyyy.MM.dd HH:mm:ss"
+    jsonNode["created"].asText() shouldBe dateFormat.datestr(this.created)
+    jsonNode["lastChanged"].asText() shouldBe dateFormat.datestr(this.lastChanged)
 }
 
