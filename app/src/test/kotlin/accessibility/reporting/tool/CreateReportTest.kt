@@ -17,11 +17,11 @@ import org.junit.jupiter.api.TestInstance
 class CreateReportTest {
 
     private val db = LocalPostgresDatabase.cleanDb()
-
+    private val testUser = TestUser(email = "Cierra", name = "Shelli").original
     @Test
     fun `Create a new report `() = setupTestApi(db) {
         //TODO: legg til user på rapport
-        val response = client.post("api/reports/new") {
+        val response = client.postWithJwtUser(testUser,"api/reports/new") {
             contentType(ContentType.Application.Json)
             setBody(
                 """{

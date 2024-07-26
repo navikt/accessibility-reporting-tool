@@ -83,8 +83,8 @@ fun Application.api(
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Patch)
         allowMethod(HttpMethod.Delete)
-        allowMethod(HttpMethod.Post)
         allowCredentials = true
+        allowNonSimpleContentTypes = true
     }
 
     install(StatusPages) {

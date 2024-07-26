@@ -70,6 +70,7 @@ suspend fun HttpClient.postWithJwtUser(user: User, urlString: String, block: Htt
     post(urlString) {
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+        header("Origin","https://fuck.this.shitt")
     }
 
 suspend fun HttpClient.putWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
@@ -86,6 +87,12 @@ suspend fun HttpClient.deleteWithJwtUser(user: User, urlString: String, block: H
 
 suspend fun HttpClient.patchWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     patch(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+    }
+
+suspend fun HttpClient.optionsWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    options(urlString) {
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }
