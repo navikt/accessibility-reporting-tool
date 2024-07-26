@@ -79,7 +79,7 @@ fun Application.api(
         corsAllowedOrigins.forEach { allowedHost ->
             allowHost(host = allowedHost, schemes = corsAllowedSchemes)
         }
-        allowHeader(HttpHeaders.AccessControlAllowOrigin)
+        allowHeaders { true }
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Patch)
         allowMethod(HttpMethod.Delete)
