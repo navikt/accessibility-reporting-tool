@@ -41,11 +41,7 @@ spec:
           - id: '07bca51b-e5dc-484a-ac09-685e61244b6b' #admins
     sidecar:
       enabled: true
-      autoLogin: true
-      autoLoginIgnorePaths:
-        - /open/*
-        - /static/**
-        - /api/**
+      autoLogin: false
   gcp:
     sqlInstances:
       - name: a11y-statement
