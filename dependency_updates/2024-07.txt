@@ -44,3 +44,9 @@ org.flywaydb:  10.15.2 -> 10.16.0
 **Ignored dependencies
 org.jetbrains.kotlin
 org.gradle.kotlin.kotlin-dsl
+ -----Dependency check ------
+2024-07-29 13:47:37: 1 outdated dependencies found
+net.logstash.logback:  7.4 -> 8.0
+**Ignored dependencies
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
