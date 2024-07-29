@@ -1,6 +1,7 @@
 package accessibility.reporting.tool.database
 
 import LocalPostgresDatabase
+import accessibility.reporting.tool.TestUser
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.datestr
@@ -9,6 +10,7 @@ import accessibility.reporting.tool.rest.ReportListItem
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.report.*
 import assert
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
@@ -158,9 +160,9 @@ class ReportRepositoryTest {
     }
 
     @Test
-    fun `can dezerialize date from legacyReports`() {
+    fun `can dezerialize lastChanged from legacy report versions`() {
         val legacyReport = dummyAggregatedReportV2()
-        val withoutLastChanged = legacyReport.removeJsonFields("lastChanged")
+        val withoutLastChanged = legacyReport.removeJsonFields("lastChanged").toString()
 
         database.insertLegacyReport(
             legacyReport,
@@ -174,12 +176,51 @@ class ReportRepositoryTest {
         assertSerializationIsOK(legacyReport.reportId)
     }
 
-    private fun assertSerializationIsOK(reportId: String) {
-        reportRepository.getReport<AggregatedReport>(reportId).assert {
-            this shouldNotBe null
+    @Test
+    fun `can deserialize author from legacyfield user`() {
+        val user = TestUser(email = "Curtiss@nav.test", name = "Mariela").original
+        val dummyReport = dummyReportV2(user = user)
+        val jsonWithVersion1UserEmail = dummyReport.removeJsonFields("author", "version").apply {
+            this as ObjectNode
+            put("version","V1")
+            val userNode = putObject("user")
+            userNode.put("email", user.email.str())
+
+        }
+        database.insertLegacyReport(dummyReport, jsonWithVersion1UserEmail.toString())
+        assertSerializationIsOK(dummyReport.reportId){ result ->
+            result.author.email shouldBe  user.email.str()
+        }
+
+        val dummyReport2 = dummyReportV2(user = user)
+        val jsonWithVersion1User = dummyReport2.removeJsonFields("author").apply {
+            this as ObjectNode
+            val userNode = putObject("user")
+            put("version","V1")
+            userNode.put("email", user.email.str())
+            userNode.put("oid", user.oid.str())
+        }
+        database.insertLegacyReport(dummyReport2, jsonWithVersion1User.toString())
+        assertSerializationIsOK(dummyReport2.reportId){ result ->
+            result.author.email shouldBe user.email.str()
+            result.author.oid shouldBe user.oid.str()
+        }
+
+    }
+
+    private fun assertSerializationIsOK(
+        reportId: String,
+        isAggregated: Boolean = false,
+        assertValues: (Report) -> Unit = {}
+    ) {
+        if (isAggregated) {
+            reportRepository.getReport<AggregatedReport>(reportId).assert {
+                this shouldNotBe null
+            }
         }
         reportRepository.getReport<Report>(reportId).assert {
-            this shouldNotBe null
+            require(this != null)
+            assertValues(this)
         }
         reportRepository.getReport<ReportShortSummary>(reportId).assert {
             this shouldNotBe null
@@ -187,15 +228,6 @@ class ReportRepositoryTest {
         reportRepository.getReport<ReportListItem>(reportId).assert {
             this shouldNotBe null
         }
-      /*  reportRepository.getReport<FullReport>(reportId).assert {
-            this shouldNotBe null
-        }
-
-
-        reportRepository.getReport<FullReportWithAccessPolicy>(reportId).assert {
-            this shouldNotBe null
-        }
-        */
     }
 
     private fun dummyReportV2(
@@ -234,7 +266,7 @@ class ReportRepositoryTest {
 
 }
 
-private fun Report.removeJsonFields(vararg fields: String): String =
+private fun Report.removeJsonFields(vararg fields: String): JsonNode =
     toJson().let {
         objectmapper.readTree(it).apply {
             this as ObjectNode
@@ -242,7 +274,8 @@ private fun Report.removeJsonFields(vararg fields: String): String =
                 remove(jsonFieldName)
             }
         }
-    }.toString()
+    }
+
 
 private fun Database.insertLegacyReport(report: Report, legacyJsonNode: String) =
     update {

@@ -18,7 +18,7 @@ object ReportVersions {
     fun migrateFromJsonVersion1(jsonNode: JsonNode) = deserialize(
         jsonNode = jsonNode,
         descriptiveName = jsonNode.descriptiveNameOrDefault,
-        author = Author.fromJsonOrNull(jsonNode, "user")!!,
+        author = Author.fromLegacyJson(jsonNode, "user"),
         lastChanged = jsonNode.lastChangedOrDefault(),
         created = jsonNode.createdOrDefault(),
     )
@@ -28,7 +28,7 @@ object ReportVersions {
         lastChanged = jsonNode.lastChangedOrDefault(),
         descriptiveName = jsonNode.descriptiveNameOrDefault,
         created = jsonNode.createdOrDefault(),
-        author = Author.fromJsonOrNull(jsonNode, "author")!!
+        author = Author.fromLegacyJson(jsonNode, "author")
     )
 
     fun fromJsonVersion3(jsonNode: JsonNode) = deserialize(
@@ -38,7 +38,6 @@ object ReportVersions {
         created = jsonNode["created"].toLocalDateTimeFromArray(),
         lastChanged = jsonNode.lastChanged(),
     )
-
 
     private fun deserialize(
         jsonNode: JsonNode,

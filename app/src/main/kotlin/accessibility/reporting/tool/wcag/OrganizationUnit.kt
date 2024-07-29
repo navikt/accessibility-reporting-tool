@@ -54,7 +54,22 @@ class Author(val email: String, val oid: String) {
     companion object {
         fun fromJsonOrNull(jsonNode: JsonNode?, fieldName: String): Author? =
             jsonNode?.get(fieldName)?.takeIf { !it.isNull && !it.isEmpty }
-                ?.let { Author(email = it["email"].asText(), oid = it["oid"].asText()) }
+                ?.let {authorNode ->
+                    Author(
+                        email = authorNode["email"].asText(),
+                        oid = authorNode["oid"]?.takeIf { !it.isNull }?.asText() ?: authorNode["email"].asText()
+                    )
+                }
+
+        fun fromLegacyJson(jsonNode: JsonNode, fieldName: String): Author =
+            jsonNode[fieldName].let { authorNode ->
+                Author(
+                    email = authorNode["email"].asText(),
+                    oid = authorNode["oid"]?.takeIf { !it.isNull }?.asText()
+                        ?: authorNode["email"].asText()
+                )
+            }
+
 
         fun fromJson(jsonNode: JsonNode, fieldName: String): Author =
             jsonNode[fieldName].let { Author(email = it["email"].asText(), oid = it["oid"].asText()) }
