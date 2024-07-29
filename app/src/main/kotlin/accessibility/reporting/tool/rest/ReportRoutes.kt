@@ -60,19 +60,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             }
             )
         }
-        put("/{id}/update") {
-            val id =
-                call.parameters["id"] ?: throw BadPathParameterException("Missing id")
-            val updatedCriteria = call.receive<FullReport>()
 
-            val existingReport =
-                reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
-
-            val updatedReport = existingReport.updateCriteria(updatedCriteria.successCriteria, call.user)
-            val result = reportRepository.upsertReport(updatedReport).toFullReport()
-            call.respond(HttpStatusCode.OK, result)
-
-        }
         patch("/{id}/update") {
             val id = call.parameters["id"] ?: throw BadPathParameterException("Missing id")
             val updates = call.receive<ReportUpdate>()
@@ -130,22 +118,12 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                 updatedReport = updatedReport.updateCriteria(newCriteria, call.user)
             }
 
-            val result = reportRepository.upsertReport(updatedReport).toFullReport()
-            call.respond(HttpStatusCode.OK, result)
+            reportRepository.upsertReport(updatedReport)
+            call.respond(HttpStatusCode.OK)
         }
     }
 }
 data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
-data class FullReport(
-    override val reportId: String,
-    override val descriptiveName: String?,
-    override val url: String,
-    val team: OrganizationUnit?,
-    val author: Author,
-    val successCriteria: List<SuccessCriterion>,
-    val created: LocalDateTime,
-    val lastChanged: LocalDateTime,
-) : ReportContent
 
 class FullReportWithAccessPolicy(
     override val reportId: String,
@@ -160,20 +138,6 @@ class FullReportWithAccessPolicy(
     val lastChanged: LocalDateTime,
     val hasWriteAccess: Boolean
 ) : ReportContent
-
-
-fun Report.toFullReport(): FullReport {
-    return FullReport(
-        reportId = this.reportId,
-        descriptiveName = this.descriptiveName,
-        url = this.url,
-        team = this.organizationUnit,
-        author = this.author,
-        successCriteria = this.successCriteria,
-        created = this.created,
-        lastChanged = this.lastChanged
-    )
-}
 
 data class ReportUpdate(
     val descriptiveName: String? = null,

@@ -2,9 +2,7 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.rest.FullReport
 import accessibility.reporting.tool.wcag.*
-import assert
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.request.*
 import com.fasterxml.jackson.databind.JsonNode
@@ -65,79 +63,6 @@ class UpdateReportTest {
     fun populateDb() {
         repository.upsertReport(dummyreport)
     }
-
-    @Test
-    fun `update success criteria`() = setupTestApi(database) {
-        val newCriteria =
-            SuccessCriterion(
-                name = "updated criterion",
-                description = "updated description",
-                principle = "updated principle",
-                guideline = "updated guideline",
-                tools = "updated tools",
-                number = "updated number",
-                breakingTheLaw = "updated breakingTheLaw",
-                lawDoesNotApply = "updated lawDoesNotApply",
-                tooHardToComply = "updated tooHardToComply",
-                contentGroup = "updated contentGroup",
-                status = Status.COMPLIANT
-            ).apply {
-                wcagLevel = WcagLevel.AA
-            }
-
-        val updatedReport = dummyreport.updateCriteria(listOf(newCriteria), testUser)
-            .let {
-                FullReport(
-                    it.reportId, it.descriptiveName, it.url,
-                    team = it.organizationUnit,
-                    author = it.author,
-                    successCriteria = it.successCriteria,
-                    created = it.created,
-                    lastChanged = it.lastChanged,
-                )
-            }
-
-
-        val response = client.putWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
-            setBody(
-                objectmapper.writeValueAsString(updatedReport)
-            )
-            contentType(
-                ContentType.Application.Json
-            )
-        }
-
-        response.status shouldBe HttpStatusCode.OK
-        val responseBody = response.bodyAsText()
-        val jsonResponse = objectmapper.readTree(responseBody)
-        jsonResponse["reportId"].asText() shouldBe dummyreport.reportId
-
-        val updatedResponse = client.getWithJwtUser(testUser,"api/reports/${dummyreport.reportId}")
-        updatedResponse.status shouldBe HttpStatusCode.OK
-        val updatedResponseBody = updatedResponse.bodyAsText()
-        val updatedJsonResponse = objectmapper.readTree(updatedResponseBody)
-
-
-        dummyreport.assertExists(updatedJsonResponse)
-        updatedJsonResponse["successCriteria"].toList().assert {
-            size shouldBe 1
-            val criterion = this.first()
-            criterion["name"].asText() shouldBe "updated criterion"
-            criterion["description"].asText() shouldBe "updated description"
-            criterion["principle"].asText() shouldBe "updated principle"
-            criterion["guideline"].asText() shouldBe "updated guideline"
-            criterion["tools"].asText() shouldBe "updated tools"
-            criterion["number"].asText() shouldBe "updated number"
-            criterion["breakingTheLaw"].asText() shouldBe "updated breakingTheLaw"
-            criterion["lawDoesNotApply"].asText() shouldBe "updated lawDoesNotApply"
-            criterion["tooHardToComply"].asText() shouldBe "updated tooHardToComply"
-            criterion["contentGroup"].asText() shouldBe "updated contentGroup"
-            criterion["status"].asText() shouldBe "COMPLIANT"
-            criterion["wcagLevel"].asText() shouldBe "AA"
-
-        }
-    }
-
     @Test
     fun `partial updates metadata`() = setupTestApi(database) {
         val newDescriptiveName = "Updated Report Title"

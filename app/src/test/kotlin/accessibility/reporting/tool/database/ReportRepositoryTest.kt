@@ -4,14 +4,10 @@ import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.objectmapper
-import accessibility.reporting.tool.rest.FullReport
-import accessibility.reporting.tool.rest.FullReportWithAccessPolicy
 import accessibility.reporting.tool.rest.ReportListItem
 import accessibility.reporting.tool.wcag.*
 import assert
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
