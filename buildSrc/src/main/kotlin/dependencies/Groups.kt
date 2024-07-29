@@ -15,7 +15,7 @@ object Kotlin {
     const val VERSION = "1.9.23"
 }
 object Database {
-    object Flyway : Dependency(version = "10.16.0", groupId = "org.flywaydb") {
+    object Flyway : Dependency(version = "10.17.0", groupId = "org.flywaydb") {
 
         val core = dependency("flyway-core")
         val postgres = dependency("flyway-database-postgresql")
@@ -37,7 +37,7 @@ object Logback : Dependency(version = "1.5.6", groupId = "ch.qos.logback") {
 
     val logbackCore = dependency("logback-core")
     val logbackClassic = dependency("logback-classic")
-    const val LOGSTASH_ENCODER = "net.logstash.logback:logstash-logback-encoder:7.4"
+    const val LOGSTASH_ENCODER = "net.logstash.logback:logstash-logback-encoder:8.0"
 }
 
 object Ktor : Dependency("2.3.12", groupId = "io.ktor") {
