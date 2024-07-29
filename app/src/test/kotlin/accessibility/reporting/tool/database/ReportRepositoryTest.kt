@@ -3,15 +3,21 @@ package accessibility.reporting.tool.database
 import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.User.Email
+import accessibility.reporting.tool.objectmapper
+import accessibility.reporting.tool.rest.FullReport
+import accessibility.reporting.tool.rest.FullReportWithAccessPolicy
+import accessibility.reporting.tool.rest.ReportListItem
 import accessibility.reporting.tool.wcag.*
 import assert
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotliquery.queryOf
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
+import java.time.LocalDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -106,7 +112,12 @@ class ReportRepositoryTest {
         reportRepository.upsertReport(aggregatedTestReport)
         reportRepository.upsertReport(dummyAggregatedReportV2(orgUnit = testOrg))
 
-        reportRepository.getReports<Report>(ids = listOf(aggregatedTestReport.reportId, testReport.reportId)).size shouldBe 2
+        reportRepository.getReports<Report>(
+            ids = listOf(
+                aggregatedTestReport.reportId,
+                testReport.reportId
+            )
+        ).size shouldBe 2
         reportRepository.getReports<AggregatedReport>(ids = listOf(aggregatedTestReport.reportId)).size shouldBe 1
     }
 
@@ -148,6 +159,47 @@ class ReportRepositoryTest {
 
     }
 
+    @Test
+    fun `can dezerialize date from legacyReports`() {
+        val legacyReport = dummyAggregatedReportV2()
+        val withoutLastChanged = legacyReport.removeJsonFields("lastChanged")
+
+        database.insertLegacyReport(
+            legacyReport,
+            withoutLastChanged
+        )
+        reportRepository.getReport<AggregatedReport>(legacyReport.reportId).assert {
+            require(this != null)
+            "yyyy-MM-dd".datestr(lastChanged) shouldBe "yyyy-MM-dd".datestr(LocalDateTime.now())
+        }
+
+        assertSerializationIsOK(legacyReport.reportId)
+    }
+
+    private fun assertSerializationIsOK(reportId: String) {
+        reportRepository.getReport<AggregatedReport>(reportId).assert {
+            this shouldNotBe null
+        }
+        reportRepository.getReport<Report>(reportId).assert {
+            this shouldNotBe null
+        }
+        reportRepository.getReport<ReportShortSummary>(reportId).assert {
+            this shouldNotBe null
+        }
+        reportRepository.getReport<ReportListItem>(reportId).assert {
+            this shouldNotBe null
+        }
+      /*  reportRepository.getReport<FullReport>(reportId).assert {
+            this shouldNotBe null
+        }
+
+
+        reportRepository.getReport<FullReportWithAccessPolicy>(reportId).assert {
+            this shouldNotBe null
+        }
+        */
+    }
+
     private fun dummyReportV2(
         url: String = "http://dummyurl.test",
         orgUnit: OrganizationUnit? = null,
@@ -183,4 +235,30 @@ class ReportRepositoryTest {
         )
 
 }
+
+private fun Report.removeJsonFields(vararg fields: String): String =
+    toJson().let {
+        objectmapper.readTree(it).apply {
+            this as ObjectNode
+            fields.forEach { jsonFieldName ->
+                remove(jsonFieldName)
+            }
+        }
+    }.toString()
+
+private fun Database.insertLegacyReport(report: Report, legacyJsonNode: String) =
+    update {
+        queryOf(
+            """insert into report (report_id,report_data,created, last_changed) 
+                    values (:id, :data, :created, :lastChanged) 
+                """.trimMargin(),
+            mapOf(
+                "id" to report.reportId,
+                "data" to legacyJsonNode.jsonB(),
+                "created" to report.created,
+                "lastChanged" to LocalDateTimeHelper.nowAtUtc()
+            )
+        )
+
+    }
 

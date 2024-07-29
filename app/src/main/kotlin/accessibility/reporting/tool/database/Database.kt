@@ -90,24 +90,27 @@ abstract class BaseRepository(val database: Database) {
 object LocalDateTimeHelper {
 
     fun nowAtUtc(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-    fun JsonNode.toLocalDateTimeOrNull(): LocalDateTime? =
+    fun JsonNode.toLocalDateFromArrayOrNull(): LocalDateTime? =
         toList()
             .let { dateList ->
                 if (dateList.any { it.asText() != "" })
-                    dateList.toLocalDateTime()
+                    dateList.localDateTimeFromArray()
                 else null
             }
 
-    fun JsonNode.toLocalDateTime(): LocalDateTime =
-        toList().toLocalDateTime()
-    private fun List<JsonNode>.toLocalDateTime() = LocalDateTime.of(
-        this[0].asInt(),
-        this[1].asInt(),
-        this[2].asInt(),
-        this[3].asInt(),
-        (if (this.size < 5) null else this[4])?.asInt() ?: 0,
-        (if (this.size < 6) null else this[5])?.asInt() ?: 0
-    )
+    fun JsonNode.toLocalDateTimeFromArray(): LocalDateTime =
+        toList().localDateTimeFromArray()
+
+    private fun List<JsonNode>.localDateTimeFromArray(): LocalDateTime =
+        LocalDateTime.of(
+            this[0].asInt(),
+            this[1].asInt(),
+            this[2].asInt(),
+            this[3].asInt(),
+            (if (this.size < 5) null else this[4])?.asInt() ?: 0,
+            (if (this.size < 6) null else this[5])?.asInt() ?: 0
+        )
+
 }
 
 
