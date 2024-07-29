@@ -2,7 +2,6 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.database.OrganizationRepository
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.datestr
