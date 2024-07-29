@@ -4,10 +4,9 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.OrganizationRepository
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.report.Report
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

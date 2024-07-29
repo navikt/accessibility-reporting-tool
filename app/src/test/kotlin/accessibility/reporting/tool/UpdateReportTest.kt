@@ -15,9 +15,11 @@ import org.junit.jupiter.api.*
 import java.time.LocalDateTime
 import java.util.*
 import accessibility.reporting.tool.rest.ResourceNotFoundException
-import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.perceivable
-import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`1-3 Mulig å tilpasse`
-import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.devTools
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterionInfo.Companion.perceivable
+import accessibility.reporting.tool.wcag.criteria.SucessCriteriaV1.Guidelines.`1-3 Mulig å tilpasse`
+import accessibility.reporting.tool.wcag.criteria.SucessCriteriaV1.Tools.devTools
+import accessibility.reporting.tool.wcag.criteria.levelA
+import accessibility.reporting.tool.wcag.report.Report
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -88,8 +90,6 @@ class UpdateReportTest {
         descriptiveNameUpdate["team"]["name"].asText() shouldBe dummyreport.organizationUnit!!.name
         descriptiveNameUpdate["author"]["email"].asText() shouldBe dummyreport.author.email
         descriptiveNameUpdate["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
-        /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
 
         val newTeamId = testOrg2.id
         val newTeamName = testOrg2.name
@@ -362,20 +362,5 @@ class UpdateReportTest {
                     && it["number"].asText() != "1.3.2"
         }
         otherCriteria.isNotEmpty() shouldBe true
-    }
-
-    private fun Report.assertExists(jsonNode: JsonNode) {
-        jsonNode["reportId"].asText() shouldBe this.reportId
-        jsonNode["url"].asText() shouldBe this.url
-        jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
-        jsonNode["team"].let {
-            it["id"].asText() shouldBe this.organizationUnit?.id
-            it["name"].asText() shouldBe this.organizationUnit?.name
-            it["email"].asText() shouldBe this.organizationUnit?.email
-        }
-        jsonNode["author"].let {
-            it["email"].asText() shouldBe this.author.email
-            it["oid"].asText() shouldBe this.author.oid
-        }
     }
 }

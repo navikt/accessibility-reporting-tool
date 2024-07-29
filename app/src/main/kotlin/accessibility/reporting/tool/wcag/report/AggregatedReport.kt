@@ -1,10 +1,11 @@
-package accessibility.reporting.tool.wcag
+package accessibility.reporting.tool.wcag.report
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
-import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateFromArrayOrNull
-import accessibility.reporting.tool.wcag.ReportType.AGGREGATED
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
+import accessibility.reporting.tool.wcag.OrganizationUnit
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion.Companion.aggregate
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterionSummary
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -44,7 +45,7 @@ class AggregatedReport : Report {
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         contributors = reports.map { it.contributors }.flatten().toMutableList(),
         lastUpdatedBy = null,
-        reportType = AGGREGATED
+        reportType = ReportType.AGGREGATED
     ) {
         fromReports =
             reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url, it.reportType, it.lastChanged) }
@@ -68,7 +69,7 @@ class AggregatedReport : Report {
         lastChanged = report.lastChanged,
         contributors = report.contributors,
         lastUpdatedBy = report.lastUpdatedBy,
-        reportType = AGGREGATED
+        reportType = ReportType.AGGREGATED
     ) {
         this.fromReports = fromReports
         this.fromOrganizations = fromOrganizations
@@ -136,7 +137,7 @@ class AggregatedReport : Report {
         fun deserialize(version: Version, jsonData: JsonNode) =
             AggregatedReport(
                 report = version.deserialize(jsonData)
-                    .also { if (it.reportType != AGGREGATED) throw IllegalArgumentException("rapport av type ${it.reportType} kan ikke deserialiseres til AggregatedReport") },
+                    .also { if (it.reportType != ReportType.AGGREGATED) throw IllegalArgumentException("rapport av type ${it.reportType} kan ikke deserialiseres til AggregatedReport") },
                 fromReports = jsonData["fromReports"].toList()
                     .map { ReportShortSummary.fromJson(it) },
                 fromOrganizations = jsonData["fromOrganizations"].toList()

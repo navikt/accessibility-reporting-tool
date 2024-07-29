@@ -1,16 +1,17 @@
 package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.authenitcation.User.Oid
-import accessibility.reporting.tool.wcag.*
+import accessibility.reporting.tool.wcag.report.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
+import mu.KotlinLogging
 import org.postgresql.util.PGobject
 import java.lang.StringBuilder
 
 
 class ReportRepository(database: Database) : BaseRepository(database) {
     val objectmapper = jacksonObjectMapper()
-
+    val log = KotlinLogging.logger {  }
     fun upsertReport(report: Report) = upsertReportReturning<Report>(report)
     inline fun <reified T : ReportContent> getReport(reportId: String): T? =
         database.query {

@@ -1,9 +1,9 @@
 package accessibility.reporting.tool.wcag
 
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
+import accessibility.reporting.tool.wcag.criteria.*
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion.Companion.aggregate
 import assert
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class SuccessCriterionTest {

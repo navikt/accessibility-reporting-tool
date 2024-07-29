@@ -2,17 +2,14 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.database.OrganizationRepository
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.datestr
+import accessibility.reporting.tool.wcag.report.Report
 import assert
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.http.*
 import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
 import kotliquery.queryOf
@@ -55,7 +52,7 @@ class TeamApiTest {
     @Test
     fun `Hent Team reports`() = setupTestApi(database) {
         client.get("api/teams/${testOrg.id}/reports").assert {
-            status shouldBe HttpStatusCode.OK
+            status shouldBe OK
             val responseBody = bodyAsText()
             val jsonResponse = objectmapper.readTree(responseBody)
             jsonResponse.toList().assert {

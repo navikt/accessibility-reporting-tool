@@ -1,10 +1,11 @@
 package accessibility.reporting.tool.microfrontends
 
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.ReportType
-import accessibility.reporting.tool.wcag.Status
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.deviationCount
-import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.disputedDeviationCount
+
+import accessibility.reporting.tool.wcag.criteria.Status
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion.Companion.deviationCount
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion.Companion.disputedDeviationCount
+import accessibility.reporting.tool.wcag.report.Report
+import accessibility.reporting.tool.wcag.report.ReportType
 
 fun Report.h1() = when (reportType) {
     ReportType.AGGREGATED -> "Tilgjengelighetserklæring (Samlerapport)"

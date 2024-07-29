@@ -6,6 +6,11 @@ import accessibility.reporting.tool.authenitcation.userOrNull
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
+import accessibility.reporting.tool.wcag.criteria.Status
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion
+import accessibility.reporting.tool.wcag.criteria.SucessCriteriaV1
+import accessibility.reporting.tool.wcag.report.Report
+import accessibility.reporting.tool.wcag.report.ReportContent
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -22,7 +27,6 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
         get("/list") {
             call.respond(reportRepository.getReports<ReportListItem>())
         }
-
         get("/{id}") {
 
             val id = call.parameters["id"] ?: throw BadRequestException("Missing id")
@@ -33,7 +37,6 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
             call.respond(result)
         }
-
         post("/new") {
             val report = call.receive<Rapport>()
             val organizationUnit = organizationRepository.getOrganizationUnit(report.teamId)
@@ -60,7 +63,6 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             }
             )
         }
-
         patch("/{id}/update") {
             val id = call.parameters["id"] ?: throw BadPathParameterException("Missing id")
             val updates = call.receive<ReportUpdate>()
@@ -125,20 +127,6 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 }
 data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
 
-class FullReportWithAccessPolicy(
-    override val reportId: String,
-    override val descriptiveName: String?,
-    override val url: String,
-    val team: OrganizationUnit?,
-    val author: Author,
-    val successCriteria: List<SuccessCriterion>,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
-    val created: LocalDateTime,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
-    val lastChanged: LocalDateTime,
-    val hasWriteAccess: Boolean
-) : ReportContent
-
 data class ReportUpdate(
     val descriptiveName: String? = null,
     val team: OrganizationUnit? = null,
@@ -157,16 +145,4 @@ data class SuccessCriterionUpdate(
     val status: String? = null
 )
 
-fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy {
-    return FullReportWithAccessPolicy(
-        reportId = this.reportId,
-        descriptiveName = this.descriptiveName,
-        url = this.url,
-        team = this.organizationUnit,
-        author = this.author,
-        successCriteria = this.successCriteria,
-        created = this.created,
-        lastChanged = this.lastChanged,
-        hasWriteAccess = this.writeAccess(user)
-    )
-}
+

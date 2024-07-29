@@ -1,16 +1,10 @@
-package accessibility.reporting.tool.wcag
+package accessibility.reporting.tool.wcag.criteria
 
+import accessibility.reporting.tool.wcag.report.Version
 import com.fasterxml.jackson.databind.JsonNode
+import mu.KotlinLogging
 
-fun List<SuccessCriterion>.aggregateBreakingTheLaw(): String =
-    filter { it.status == Status.NON_COMPLIANT && it.breakingTheLaw.isNotBlank() }.joinToString("\n") { it.breakingTheLaw }
-
-private fun List<SuccessCriterion>.aggregateLawDoesNotApply(): String =
-    filter { it.status == Status.NON_COMPLIANT && it.lawDoesNotApply.isNotBlank() }.joinToString("\n") { it.lawDoesNotApply }
-
-private fun List<SuccessCriterion>.aggregateTooHardToComply(): String =
-    filter { it.status == Status.NON_COMPLIANT && it.tooHardToComply.isNotBlank() }.joinToString("\n") { it.tooHardToComply }
-
+private val log = KotlinLogging.logger { }
 
 data class SuccessCriterion(
     val name: String,

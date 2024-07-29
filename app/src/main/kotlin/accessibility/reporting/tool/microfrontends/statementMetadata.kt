@@ -1,7 +1,7 @@
 package accessibility.reporting.tool.microfrontends
 
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.report.Report
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 

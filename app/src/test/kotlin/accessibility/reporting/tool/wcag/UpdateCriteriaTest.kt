@@ -1,6 +1,8 @@
 package accessibility.reporting.tool.wcag
 
 import accessibility.reporting.tool.authenitcation.User
+import accessibility.reporting.tool.wcag.criteria.*
+import accessibility.reporting.tool.wcag.report.*
 import org.junit.jupiter.api.Assertions.*
 
 import org.junit.jupiter.api.Test
@@ -8,7 +10,7 @@ import org.junit.jupiter.api.assertAll
 import java.time.LocalDateTime
 import java.util.*
 
-class updateCriteriaTest {
+class UpdateCriteriaTest {
     private val testOrg = OrganizationUnit.createNew(name = "Test organisasjonsenhet", email = "test@nav.no")
     private val testUser =
         User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
@@ -17,7 +19,8 @@ class updateCriteriaTest {
     fun `oppdaterer rapport ved å lage ny kopi`(){
         val updateBy = testUser
 
-        val newCriteria = listOf(SuccessCriterion(
+        val newCriteria = listOf(
+            SuccessCriterion(
             name ="1.1.1",
             description ="Description 1",
             principle ="Principle 1",
@@ -29,7 +32,8 @@ class updateCriteriaTest {
             tooHardToComply ="tull",
             contentGroup ="tull",
             status =Status.NOT_TESTED
-        ))
+        )
+        )
         val initialReport = Report(
             reportId ="tull",
             url ="tull",

@@ -1,8 +1,8 @@
 package accessibility.reporting.tool.microfrontends
 
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.Status
-import accessibility.reporting.tool.wcag.SuccessCriterion
+import accessibility.reporting.tool.wcag.criteria.Status
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion
+import accessibility.reporting.tool.wcag.report.Report
 import kotlinx.html.*
 import java.time.format.DateTimeFormatter
 

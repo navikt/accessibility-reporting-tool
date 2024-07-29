@@ -5,11 +5,9 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.datestr
+import accessibility.reporting.tool.wcag.report.Report
 import assert
 import com.fasterxml.jackson.databind.JsonNode
-import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*

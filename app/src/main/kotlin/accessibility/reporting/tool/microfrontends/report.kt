@@ -2,8 +2,8 @@ package accessibility.reporting.tool.microfrontends
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.ReportContent
+import accessibility.reporting.tool.wcag.report.Report
+import accessibility.reporting.tool.wcag.report.ReportContent
 import kotlinx.html.*
 
 fun BODY.reportContainer(

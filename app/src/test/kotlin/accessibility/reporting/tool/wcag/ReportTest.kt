@@ -3,6 +3,8 @@ package accessibility.reporting.tool.wcag
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.html.toEmail
+import accessibility.reporting.tool.wcag.criteria.Status
+import accessibility.reporting.tool.wcag.criteria.SucessCriteriaV1
 import assert
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.date.shouldBeAfter

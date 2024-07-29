@@ -1,4 +1,4 @@
-package accessibility.reporting.tool.wcag
+package accessibility.reporting.tool.wcag.criteria
 
 class SuccessCriterionInfo {
     lateinit var name: String

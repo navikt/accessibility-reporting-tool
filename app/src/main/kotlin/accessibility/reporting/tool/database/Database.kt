@@ -1,7 +1,10 @@
 package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.rest.ReportListItem
-import accessibility.reporting.tool.wcag.*
+import accessibility.reporting.tool.wcag.report.AggregatedReport
+import accessibility.reporting.tool.wcag.report.PersistableReport
+import accessibility.reporting.tool.wcag.report.ReportShortSummary
+import accessibility.reporting.tool.wcag.report.Version
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.zaxxer.hikari.HikariDataSource
@@ -76,7 +79,6 @@ abstract class BaseRepository(val database: Database) {
             "AggregatedReport" -> AggregatedReport.deserialize(Version.valueOf(row.string("version")), rapportData)
             "Report" -> Version.valueOf(row.string("version"))
                 .deserialize(rapportData)
-
             "ReportShortSummary" -> ReportShortSummary.fromJson(rapportData)
             "ReportListItem" -> ReportListItem.fromJson(rapportData)
             else -> throw IllegalArgumentException("Kan ikke transformere rapport-data til $name")
@@ -87,7 +89,7 @@ abstract class BaseRepository(val database: Database) {
 object LocalDateTimeHelper {
 
     fun nowAtUtc(): LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-    fun JsonNode.toLocalDateFromArrayOrNull(): LocalDateTime? =
+    fun JsonNode.toLocalDateTimeFromArrayOrNull(): LocalDateTime? =
         toList()
             .let { dateList ->
                 if (dateList.any { it.asText() != "" })
@@ -107,7 +109,6 @@ object LocalDateTimeHelper {
             (if (this.size < 5) null else this[4])?.asInt() ?: 0,
             (if (this.size < 6) null else this[5])?.asInt() ?: 0
         )
-
 }
 
 

@@ -4,9 +4,8 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.database.toStringList
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
 import io.kotest.assertions.withClue
-import accessibility.reporting.tool.wcag.*
+import accessibility.reporting.tool.wcag.report.Report
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.statement.*

@@ -1,7 +1,6 @@
 package accessibility.reporting.tool.microfrontends
 
-import accessibility.reporting.tool.wcag.Status
-import accessibility.reporting.tool.wcag.SuccessCriterion
+import accessibility.reporting.tool.wcag.criteria.*
 
 
 fun compliant(id: String) = """<svg width="24" 

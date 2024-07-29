@@ -1,7 +1,10 @@
-package accessibility.reporting.tool.wcag
+package accessibility.reporting.tool.wcag.report
 
 import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTimeFromArray
-import accessibility.reporting.tool.wcag.Report.Companion.currentVersion
+import accessibility.reporting.tool.wcag.Author
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion
+import accessibility.reporting.tool.wcag.criteria.SucessCriteriaV1
+import accessibility.reporting.tool.wcag.report.Report.Companion.currentVersion
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDateTime
 
@@ -33,7 +36,7 @@ object ReportVersions {
         descriptiveName = jsonNode.descriptiveName,
         author = Author.fromJson(jsonNode, "author"),
         created = jsonNode["created"].toLocalDateTimeFromArray(),
-        lastChanged = jsonNode.lastChangedOrDefault(),
+        lastChanged = jsonNode.lastChanged(),
     )
 
 

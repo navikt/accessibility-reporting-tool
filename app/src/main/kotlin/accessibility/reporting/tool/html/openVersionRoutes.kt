@@ -1,10 +1,8 @@
 package accessibility.reporting.tool.html
 
-import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.ReportType
+import accessibility.reporting.tool.wcag.report.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*

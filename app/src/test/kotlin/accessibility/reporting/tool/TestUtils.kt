@@ -5,7 +5,8 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.*
+import accessibility.reporting.tool.wcag.OrganizationUnit
+import accessibility.reporting.tool.wcag.report.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.assertions.withClue
 import io.ktor.server.application.*
@@ -13,6 +14,8 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.testing.*
 import io.mockk.InternalPlatformDsl.toStr
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 val defaultUserEmail = User.Email("tadda@test.tadda")
@@ -97,3 +100,7 @@ fun withJsonClue(jsonField: String, assertFuntion: (String) -> Unit) {
 }
 
 class JsonAssertionFailedException(field: String) : Throwable("field $field is not present in jsonnode")
+fun String.datestr(date: LocalDateTime) = let {
+    val formatter = DateTimeFormatter.ofPattern(this)
+    date.format(formatter)
+}

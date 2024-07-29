@@ -4,7 +4,7 @@ import accessibility.reporting.tool.authenitcation.User.Email
 import accessibility.reporting.tool.dummyReportV2
 import accessibility.reporting.tool.html.toEmail
 import accessibility.reporting.tool.wcag.OrganizationUnit
-import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.report.Report
 import assert
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain

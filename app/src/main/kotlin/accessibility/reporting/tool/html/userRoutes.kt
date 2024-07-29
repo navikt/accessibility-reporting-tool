@@ -5,7 +5,7 @@ import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.NavBarItem
 import accessibility.reporting.tool.microfrontends.reportListItem
 import accessibility.reporting.tool.microfrontends.respondHtmlContent
-import accessibility.reporting.tool.wcag.Report
+import accessibility.reporting.tool.wcag.report.Report
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import kotlinx.html.a

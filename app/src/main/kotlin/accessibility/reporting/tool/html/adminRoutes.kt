@@ -7,6 +7,8 @@ import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.microfrontends.*
 import accessibility.reporting.tool.wcag.*
+import accessibility.reporting.tool.wcag.criteria.SuccessCriterion
+import accessibility.reporting.tool.wcag.report.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
