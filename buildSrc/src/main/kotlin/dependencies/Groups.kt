@@ -83,3 +83,9 @@ object Testdependencies {
         val params = dependency("junit-jupiter-params")
     }
 }
+/*
+2024-07-29 10:03:47: 1 outdated dependencies
+net.logstash.logback:  7.4 -> 8.0
+**Ignored dependencies
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
