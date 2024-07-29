@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.io.Serializable
 import java.time.LocalDateTime
 import kotlin.IllegalArgumentException
 
@@ -15,6 +16,13 @@ interface ReportContent {
     val reportId: String
     val descriptiveName: String?
     val url: String
+}
+
+interface PersistableReport : ReportContent {
+    val lastUpdatedBy: Author?
+    val lastChanged: LocalDateTime
+    val created: LocalDateTime
+    fun toJson(): String
 }
 
 open class Report(
@@ -25,12 +33,12 @@ open class Report(
     val version: Version,
     val author: Author,
     val successCriteria: List<SuccessCriterion>,
-    val created: LocalDateTime,
-    val lastChanged: LocalDateTime,
+    override val created: LocalDateTime,
+    override val lastChanged: LocalDateTime,
     val contributors: MutableList<Author> = mutableListOf(),
-    val lastUpdatedBy: Author?,
+    override val lastUpdatedBy: Author?,
     val reportType: ReportType,
-) : ReportContent {
+) : PersistableReport {
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
             registerModule(JavaTimeModule())
@@ -75,7 +83,7 @@ open class Report(
         if (!isOwner(updateBy)) contributors.add(updateBy.toAuthor())
     }
 
-    open fun toJson(): String =
+    override fun toJson(): String =
         objectMapper.writeValueAsString(this)
 
     fun updateCriterion(

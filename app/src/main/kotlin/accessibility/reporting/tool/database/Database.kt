@@ -1,10 +1,7 @@
 package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.rest.ReportListItem
-import accessibility.reporting.tool.wcag.AggregatedReport
-import accessibility.reporting.tool.wcag.Report
-import accessibility.reporting.tool.wcag.ReportShortSummary
-import accessibility.reporting.tool.wcag.Version
+import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.zaxxer.hikari.HikariDataSource
@@ -39,7 +36,7 @@ interface Database {
 abstract class BaseRepository(val database: Database) {
 
     val repositoryObjectMapper = jacksonObjectMapper()
-    inline fun <reified T : Report> upsertReportReturning(report: T): T {
+    inline fun <reified T : PersistableReport> upsertReportReturning(report: T): T {
         val reports = database.query {
             queryOf(
                 """insert into report (report_id,report_data,created, last_changed) 
