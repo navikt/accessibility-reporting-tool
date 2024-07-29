@@ -43,12 +43,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                     organizationUnit = organizationUnit,
                     reportId = UUID.randomUUID().toString(),
                     url = report.urlTilSiden,
-                    user = User(
-                        email = User.Email(s = "Markia"),
-                        name = null,
-                        oid = User.Oid(s = "Taniqua"),
-                        groups = listOf()
-                    ),
+                    user = call.user,
                     descriptiveName = report.name
                 )
             )
