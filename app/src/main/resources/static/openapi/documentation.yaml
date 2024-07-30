@@ -1,4 +1,4 @@
-openapi: "3.0.3"
+openapi: "3.1.0"
 info:
   title: "accessibility_reporting_tool API"
   description: "accessibility_reporting_tool API"
@@ -60,7 +60,7 @@ paths:
           type: "string"
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: "#/components/schemas/ReportUpdate"
         required: true
@@ -112,7 +112,7 @@ paths:
           type: "string"
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: "#/components/schemas/FullReport"
         required: true
@@ -190,7 +190,7 @@ paths:
       description: ""
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: "#/components/schemas/Rapport"
         required: true
@@ -306,12 +306,61 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/ReportListItem"
+  /api/teams/{id}/update:
+    put:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamUpdate"
+        required: true
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+                Example#2:
+                  value: ""
+                Example#3:
+                  value: ""
+                Example#4:
+                  value: ""
+                Example#5:
+                  value: ""
+                Example#6:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
   /api/teams/new:
     post:
       description: ""
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: "#/components/schemas/NewTeam"
         required: true
@@ -385,6 +434,11 @@ components:
           type: "array"
           items:
             type: "string"
+      required:
+      - "id"
+      - "name"
+      - "email"
+      - "members"
     Author:
       type: "object"
       properties:
@@ -392,6 +446,9 @@ components:
           type: "string"
         oid:
           type: "string"
+      required:
+      - "email"
+      - "oid"
     SuccessCriterion:
       type: "object"
       properties:
@@ -437,6 +494,20 @@ components:
           - "UNKNOWN"
         successCriterionNumber:
           type: "string"
+      required:
+      - "name"
+      - "description"
+      - "principle"
+      - "guideline"
+      - "tools"
+      - "number"
+      - "breakingTheLaw"
+      - "lawDoesNotApply"
+      - "tooHardToComply"
+      - "contentGroup"
+      - "status"
+      - "wcagVersion"
+      - "successCriterionNumber"
     FullReportWithAccessPolicy:
       type: "object"
       properties:
@@ -462,6 +533,13 @@ components:
           format: "date-time"
         hasWriteAccess:
           type: "boolean"
+      required:
+      - "reportId"
+      - "url"
+      - "author"
+      - "successCriteria"
+      - "created"
+      - "lastChanged"
     SuccessCriterionUpdate:
       type: "object"
       properties:
@@ -477,6 +555,8 @@ components:
           type: "string"
         status:
           type: "string"
+      required:
+      - "number"
     ReportUpdate:
       type: "object"
       properties:
@@ -517,6 +597,13 @@ components:
         lastChanged:
           type: "string"
           format: "date-time"
+      required:
+      - "reportId"
+      - "url"
+      - "author"
+      - "successCriteria"
+      - "created"
+      - "lastChanged"
     ReportListItem:
       type: "object"
       properties:
@@ -530,8 +617,15 @@ components:
           type: "string"
         teamName:
           type: "string"
-        date:
+        lastChanged:
           type: "string"
+          format: "date-time"
+      required:
+      - "reportId"
+      - "url"
+      - "teamId"
+      - "teamName"
+      - "lastChanged"
     Rapport:
       type: "object"
       properties:
@@ -541,6 +635,10 @@ components:
           type: "string"
         teamId:
           type: "string"
+      required:
+      - "name"
+      - "urlTilSiden"
+      - "teamId"
     TeamSummary:
       type: "object"
       properties:
@@ -550,6 +648,25 @@ components:
           type: "string"
         email:
           type: "string"
+      required:
+      - "id"
+      - "name"
+      - "email"
+    TeamUpdate:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+        email:
+          type: "string"
+        members:
+          type: "array"
+          items:
+            type: "string"
+      required:
+      - "id"
     NewTeam:
       type: "object"
       properties:
@@ -561,6 +678,10 @@ components:
           type: "array"
           items:
             type: "string"
+      required:
+      - "name"
+      - "email"
+      - "members"
     UserDetails:
       type: "object"
       properties:
@@ -576,3 +697,8 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/OrganizationUnit"
+      required:
+      - "name"
+      - "email"
+      - "reports"
+      - "teams"

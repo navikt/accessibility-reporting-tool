@@ -73,7 +73,7 @@ class OrganizationRepository(database: Database) : BaseRepository(database) {
         database.update {
             queryOf(
                 """INSERT INTO organization_unit (organization_unit_id, name, email) 
-                    VALUES (:id,:name,:email) on conflict (organization_unit_id) do update set member=:members , email=:email
+                    VALUES (:id,:name,:email) on conflict (organization_unit_id) do update set member=:members , email=:email, name=:name
                 """.trimMargin(),
                 mapOf(
                     "id" to organizationUnit.id,
