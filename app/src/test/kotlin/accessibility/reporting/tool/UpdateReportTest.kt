@@ -185,6 +185,7 @@ class UpdateReportTest {
             contentType(ContentType.Application.Json)
         }
         teamUpdatePatchRequest.status shouldBe HttpStatusCode.OK
+
         database.update {
             queryOf(
                 """INSERT INTO organization_unit (organization_unit_id, name, email) 
