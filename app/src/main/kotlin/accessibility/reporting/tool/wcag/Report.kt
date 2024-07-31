@@ -4,6 +4,7 @@ import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.rest.NewTeam
+import accessibility.reporting.tool.rest.TeamUpdate
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -140,6 +141,11 @@ data class OrganizationUnit(
     fun isMember(user: User) = members.any { it == user.email.str().comparable() }
     fun addMember(userEmail: User.Email) = members.add(userEmail.str().comparable())
     fun removeMember(userEmail: String) = members.removeIf { userEmail.comparable() == it.comparable() }
+    fun update(updateValues: TeamUpdate) = copy(
+        name = updateValues.name ?: name,
+        email = updateValues.email ?: email,
+        members = updateValues.members ?: members
+    )
 
     companion object {
         fun createNew(name: String, email: String, shortName: String? = null) = OrganizationUnit(

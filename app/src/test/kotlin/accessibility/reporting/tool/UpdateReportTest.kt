@@ -2,9 +2,7 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.rest.FullReport
 import accessibility.reporting.tool.wcag.*
-import assert
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.request.*
 import com.fasterxml.jackson.databind.JsonNode
