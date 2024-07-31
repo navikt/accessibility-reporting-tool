@@ -36,7 +36,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
         }
 
         post("/new") {
-            val report = call.receive<Rapport>()
+            val report = call.receive<NewReport>()
             val organizationUnit = organizationRepository.getOrganizationUnit(report.teamId)
 
             val newReport = reportRepository.upsertReport(
@@ -103,25 +103,14 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
                 updatedReport = updatedReport.updateCriteria(newCriteria, call.user)
             }
-            updatedReport = updatedReport.copy(lastUpdatedBy = call.user.toAuthor())
 
-            val result = reportRepository.upsertReport(updatedReport).toFullReport()
-            call.respond(HttpStatusCode.OK, result)
+            reportRepository.upsertReport(updatedReport)
+            call.respond(HttpStatusCode.OK)
         }
     }
 }
 
-data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
-data class FullReport(
-    override val reportId: String,
-    override val descriptiveName: String?,
-    override val url: String,
-    val team: OrganizationUnit?,
-    val author: Author,
-    val successCriteria: List<SuccessCriterion>,
-    val created: LocalDateTime,
-    val lastChanged: LocalDateTime,
-) : ReportContent
+data class NewReport(val name: String, val urlTilSiden: String, val teamId: String)
 
 class FullReportWithAccessPolicy(
     override val reportId: String,
@@ -137,20 +126,6 @@ class FullReportWithAccessPolicy(
     val hasWriteAccess: Boolean,
     val lastUpdatedBy: String
 ) : ReportContent
-
-
-fun Report.toFullReport(): FullReport {
-    return FullReport(
-        reportId = this.reportId,
-        descriptiveName = this.descriptiveName,
-        url = this.url,
-        team = this.organizationUnit,
-        author = this.author,
-        successCriteria = this.successCriteria,
-        created = this.created,
-        lastChanged = this.lastChanged
-    )
-}
 
 data class ReportUpdate(
     val descriptiveName: String? = null,
