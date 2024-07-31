@@ -7,12 +7,16 @@ import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import io.kotest.assertions.withClue
 import accessibility.reporting.tool.wcag.*
+import com.fasterxml.jackson.databind.JsonNode
 
 import io.kotest.matchers.shouldBe
+import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotliquery.queryOf
 import org.junit.jupiter.api.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -71,33 +75,54 @@ class GetReportTest {
     fun `get Report`() = setupTestApi(database) {
         val responseForAuthor = client.getWithJwtUser(testUser.original, "api/reports/${dummyreport.reportId}")
         dummyreport.assertListItemExists(responseForAuthor, testUser.original, true)
+
+        val updateDescriptiveName = """
+        {
+            "reportId": "${dummyreport.reportId}",
+            "descriptiveName": "newName"
+        }
+    """.trimIndent()
+        val updatedReport = dummyreport.copy(
+            descriptiveName = "newName",
+            lastUpdatedBy = Author(email = testUserAdmin.original.email.str(), oid = testUserAdmin.original.oid.str())
+        )
+
+        client.patchWithJwtUser(testUserAdmin.original, "api/reports/${dummyreport.reportId}/update") {
+            setBody(updateDescriptiveName)
+            contentType(ContentType.Application.Json)
+        }.also { require(it.status == HttpStatusCode.OK) }
+
         val responseForAuthorCapitalised =
             client.getWithJwtUser(testUser.capitalized, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForAuthorCapitalised, testUser.capitalized, true)
+        updatedReport.assertListItemExists(responseForAuthorCapitalised, testUser.capitalized, true)
 
         val responseForAdmin = client.getWithJwtUser(testUserAdmin.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForAdmin, testUserAdmin.original, true)
+        updatedReport.assertListItemExists(responseForAdmin, testUserAdmin.original, true)
         val responseForAdminCapitalized =
             client.getWithJwtUser(testUserAdmin.capitalized, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForAdminCapitalized, testUserAdmin.capitalized, true)
+        updatedReport.assertListItemExists(responseForAdminCapitalized, testUserAdmin.capitalized, true)
 
         val responseForTeamMember = client.getWithJwtUser(teamMember.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForTeamMember, teamMember.original, true)
+        updatedReport.assertListItemExists(responseForTeamMember, teamMember.original, true)
         val responseForTeamMemberCapitalized =
             client.getWithJwtUser(teamMember.capitalized, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForTeamMemberCapitalized, teamMember.capitalized, true)
+        updatedReport.assertListItemExists(responseForTeamMemberCapitalized, teamMember.capitalized, true)
 
         val responseForNonTeamMember =
             client.getWithJwtUser(notTeamMember.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForNonTeamMember, notTeamMember.original, false)
+        updatedReport.assertListItemExists(responseForNonTeamMember, notTeamMember.original, false)
         val responseForNonTeamMemberCapitalized =
             client.getWithJwtUser(notTeamMember.capitalized, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForNonTeamMemberCapitalized, notTeamMember.capitalized, false)
+        updatedReport.assertListItemExists(responseForNonTeamMemberCapitalized, notTeamMember.capitalized, false)
 
     }
 }
 
-private suspend fun Report.assertListItemExists(response: HttpResponse, user: User, shouldHaveWriteAccess: Boolean) {
+private suspend fun Report.assertListItemExists(
+    response: HttpResponse,
+    user: User,
+    shouldHaveWriteAccess: Boolean,
+) {
     response.status shouldBe HttpStatusCode.OK
     val jsonNode = objectmapper.readTree(response.bodyAsText())
     jsonNode["reportId"].asText() shouldBe this.reportId
@@ -115,8 +140,16 @@ private suspend fun Report.assertListItemExists(response: HttpResponse, user: Us
     withClue("${user.email.str()} has incorrect permissions on report") {
         jsonNode["hasWriteAccess"].asBoolean() shouldBe shouldHaveWriteAccess
     }
-    val dateFormat = "yyyy.MM.dd HH:mm:ss"
-    jsonNode["created"].asText() shouldBe dateFormat.datestr(this.created)
-    jsonNode["lastChanged"].asText() shouldBe dateFormat.datestr(this.lastChanged)
+    jsonNode["created"].toLocalDateTime() shouldWithinTheSameMinuteAs this.created
+    jsonNode["lastChanged"].toLocalDateTime() shouldWithinTheSameMinuteAs this.lastChanged
+    jsonNode["lastUpdatedBy"].asText() shouldBe (lastUpdatedBy?.email ?: author.email)
 }
+
+private infix fun LocalDateTime.shouldWithinTheSameMinuteAs(date: LocalDateTime) {
+    val dateformat = "yyyy-MM-dd HH:mm"
+    dateformat.datestr(this) shouldBe dateformat.datestr(date)
+}
+
+private fun JsonNode.toLocalDateTime() =
+    LocalDateTime.parse(asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))
 
