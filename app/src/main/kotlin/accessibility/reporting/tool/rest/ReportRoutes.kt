@@ -3,6 +3,7 @@ package accessibility.reporting.tool.rest
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.authenitcation.userOrNull
+import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
@@ -55,19 +56,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             }
             )
         }
-        put("/{id}/update") {
-            val id =
-                call.parameters["id"] ?: throw BadPathParameterException("Missing id")
-            val updatedCriteria = call.receive<FullReport>()
 
-            val existingReport =
-                reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
-
-            val updatedReport = existingReport.updateCriteria(updatedCriteria.successCriteria, call.user)
-            val result = reportRepository.upsertReport(updatedReport).toFullReport()
-            call.respond(HttpStatusCode.OK, result)
-
-        }
         patch("/{id}/update") {
             val id = call.parameters["id"] ?: throw BadPathParameterException("Missing id")
             val updates = call.receive<ReportUpdate>()
@@ -75,23 +64,13 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             val existingReport =
                 reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
 
-            var updatedReport = existingReport
-
-            updates.descriptiveName?.let {
-                updatedReport = updatedReport.copy(descriptiveName = it)
-            }
-            updates.team?.let {
-                updatedReport = updatedReport.copy(organizationUnit = it)
-            }
-            updates.author?.let {
-                updatedReport = updatedReport.copy(author = it)
-            }
-            updates.created?.let {
-                updatedReport = updatedReport.copy(created = LocalDateTime.parse(it))
-            }
-            updates.lastChanged?.let {
-                updatedReport = updatedReport.copy(lastChanged = LocalDateTime.parse(it))
-            }
+            var updatedReport = existingReport.copy(
+                descriptiveName = updates.descriptiveName,
+                organizationUnit = updates.team,
+                author = updates.author,
+                lastChanged = LocalDateTimeHelper.nowAtUtc(),
+                lastUpdatedBy = call.user.toAuthor()
+            )
 
             updates.successCriteria?.let { pendingUpdateList ->
                 val currentCriteria = existingReport.successCriteria
