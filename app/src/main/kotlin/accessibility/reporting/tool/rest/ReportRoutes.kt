@@ -124,12 +124,14 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
                 updatedReport = updatedReport.updateCriteria(newCriteria, call.user)
             }
+            updatedReport = updatedReport.copy(lastUpdatedBy = call.user.toAuthor())
 
             val result = reportRepository.upsertReport(updatedReport).toFullReport()
             call.respond(HttpStatusCode.OK, result)
         }
     }
 }
+
 data class Rapport(val name: String, val urlTilSiden: String, val teamId: String)
 data class FullReport(
     override val reportId: String,
@@ -149,11 +151,12 @@ class FullReportWithAccessPolicy(
     val team: OrganizationUnit?,
     val author: Author,
     val successCriteria: List<SuccessCriterion>,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     val created: LocalDateTime,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     val lastChanged: LocalDateTime,
-    val hasWriteAccess: Boolean
+    val hasWriteAccess: Boolean,
+    val lastUpdatedBy: String
 ) : ReportContent
 
 
@@ -198,6 +201,7 @@ fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy
         successCriteria = this.successCriteria,
         created = this.created,
         lastChanged = this.lastChanged,
-        hasWriteAccess = this.writeAccess(user)
+        hasWriteAccess = this.writeAccess(user),
+        lastUpdatedBy = lastUpdatedBy?.email ?: author.email
     )
 }
