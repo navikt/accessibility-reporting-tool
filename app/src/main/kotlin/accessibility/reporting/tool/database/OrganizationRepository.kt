@@ -13,7 +13,8 @@ class OrganizationRepository(database: Database) : BaseRepository(database) {
 
     fun getOrganizationUnit(id: String) = database.query {
         queryOf(
-            """select * from organization_unit where organization_unit_id=:id""",
+            //"""select * from organization_unit where organization_unit_id=:id""",
+            """select organization_unit_id, name, email, member from organization_unit where organization_unit_id=:id""",
             mapOf("id" to id)
         ).map { row -> organizationUnit(row) }.asSingle
     }
