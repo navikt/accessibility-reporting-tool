@@ -72,6 +72,7 @@ class OrganizationRepository(database: Database) : BaseRepository(database) {
     }
 
     fun upsertOrganizationUnit(organizationUnit: OrganizationUnit) {
+        println(organizationUnit.members.toStringList())
         logger("Organization unit upserted: $organizationUnit")
         database.update {
             queryOf(
