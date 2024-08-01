@@ -115,7 +115,8 @@ class ApiTest {
             setBody(
                 """{
                 "name": "team 2",
-                "email": "abdd@gmail.no"
+                "email": "abdd@gmail.no",
+                "members": ["abc","def","ghi"]
               }  
       """.trimMargin()
             )
