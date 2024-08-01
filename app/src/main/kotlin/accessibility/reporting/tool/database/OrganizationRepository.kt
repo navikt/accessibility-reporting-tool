@@ -8,6 +8,7 @@ import accessibility.reporting.tool.wcag.ReportContent
 import accessibility.reporting.tool.wcag.ReportType
 import kotliquery.Row
 import kotliquery.queryOf
+import mu.KotlinLogging.logger
 
 class OrganizationRepository(database: Database) : BaseRepository(database) {
 
@@ -71,6 +72,7 @@ class OrganizationRepository(database: Database) : BaseRepository(database) {
     }
 
     fun upsertOrganizationUnit(organizationUnit: OrganizationUnit) {
+        logger("Organization unit upserted: $organizationUnit")
         database.update {
             queryOf(
                 """INSERT INTO organization_unit (organization_unit_id, name, email) 
