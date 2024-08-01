@@ -56,7 +56,7 @@ fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
 data class NewTeam(
     val name: String,
     val email: String,
-    val members: List<String>
+    val members: MutableSet<String>
 )
 
 data class TeamSummary(
