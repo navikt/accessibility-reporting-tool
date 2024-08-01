@@ -21,6 +21,7 @@ fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
         post("new") {
             val newTeam = call.receive<NewTeam>()
             organizationRepository.upsertOrganizationUnit(OrganizationUnit.createNew(newTeam))
+            println(newTeam)
             call.respond(HttpStatusCode.OK)
         }
 
@@ -36,6 +37,7 @@ fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
                     "team",
                     teamId
                 )
+                println(teamDetails)
                 call.respond(teamDetails)
             }
             put("update") {
