@@ -3,6 +3,7 @@ package accessibility.reporting.tool.microfrontends
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.Admins
+import accessibility.reporting.tool.html.NewPage
 import accessibility.reporting.tool.microfrontends.NavBarItem.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
@@ -42,6 +43,19 @@ suspend fun ApplicationCall.respondHtmlContent(
         }
 
         body(classes) {
+            div {
+                id = "flytta-div"
+                p {
+                    +"Denne siden er erstattet og vil ikke lenger bli oppdatert!"
+                }
+                p {
+                    +"Gå til den "
+                    a {
+                        href = NewPage.url
+                        +"nye rapporteringsløsninga"
+                    }
+                }
+            }
             p { +"Innlogget som ${user.email.str()}" }
             navbar(navBarItem, user)
             contentbuilder()
@@ -131,3 +145,4 @@ fun Route.faqRoute() {
         }
     }
 }
+

@@ -8,7 +8,7 @@ App for rapportering av tilgjengelighet fra team på NAV sine sider. For api doc
 * start app med VM-option: `-Dlogback.configurationFile=logback-dev.xml` og miljøvaribler:
 
 ```
-AZURE_APP_CLIENT_ID=a11y;AZURE_APP_WELL_KNOWN_URL=http://host.docker.internal:8080/issueissue/.well-known/openid-configuration;DB_DATABASE=a11y;DB_HOST=localhost;DB_PASSWORD=a11y;DB_PORT=5432;DB_USERNAME=postgres;CORS_ALLOWED_ORIGIN: *'
+AZURE_APP_CLIENT_ID=a11y;AZURE_APP_WELL_KNOWN_URL=http://host.docker.internal:8080/issueissue/.well-known/openid-configuration;DB_DATABASE=a11y;DB_HOST=localhost;DB_PASSWORD=a11y;DB_PORT=5432;DB_USERNAME=postgres;CORS_ALLOWED_ORIGIN:*
 ```
 * Appen kan nås på `http://localhost:3000`
 
@@ -36,4 +36,4 @@ Du kan oppdatere manuelt eller bruke en plugin (f.eks openapi generator for ktor
 ## Troubleshooting
 ### Unresolved Network Adress når du prøver å starte appen (mac)
 1. Åpne /etc/host `open /etc/hosts`
-2. Legg inn på ny linje: `127.0.0.1 host.docker.internal``
+2. Legg inn på ny linje: `127.0.0.1 host.docker.internal`
