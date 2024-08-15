@@ -56,14 +56,13 @@ object Ktor : Dependency("2.3.12", groupId = "io.ktor") {
     val serverCors = dependency("ktor-server-cors")
     val serverHostJvm = dependency("ktor-server-host-common-jvm")
     val ktorServerTestHost = dependency("ktor-server-test-host-jvm")
-    val ktorOpenApi = dependency("ktor-server-openapi")
 
 }
 
 object Testdependencies {
 
     const val MOCKK = "io.mockk:mockk:1.13.12"
-    object TestContainers : Dependency(version = "1.20.0", groupId = "org.testcontainers") {
+    object TestContainers : Dependency(version = "1.20.1", groupId = "org.testcontainers") {
         val containers = dependency("testcontainers")
         val jupiterRunner = dependency("junit-jupiter")
         val postgres = dependency("postgresql")

@@ -12,7 +12,6 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.testing.*
-import io.mockk.InternalPlatformDsl.toStr
 import java.util.*
 
 val defaultUserEmail = User.Email("tadda@test.tadda")
@@ -42,11 +41,13 @@ fun dummyReportV2(
 
 fun dummyAggregatedReportV2(
     orgUnit: OrganizationUnit? = null,
+    user: User? = null,
+    descriptiveName: String? = null
 ) =
     AggregatedReport(
         url = "https://aggregated.test",
-        descriptiveName = "Aggregated dummy report",
-        user = User(email = defaultUserEmail, name = defaultUserName, oid = defaultUserOid, groups = listOf()),
+        descriptiveName = descriptiveName ?: "Aggregated dummy report",
+        user = user ?: User(email = defaultUserEmail, name = defaultUserName, oid = defaultUserOid, groups = listOf()),
         organizationUnit = orgUnit,
         reports = listOf(
             dummyReportV2(),
@@ -56,13 +57,15 @@ fun dummyAggregatedReportV2(
 
 fun setupTestApi(
     database: LocalPostgresDatabase,
+    orgRepository: OrganizationRepository? = null,
+    reportRepository: ReportRepository? = null,
     withEmptyAuth: Boolean = false,
     block: suspend ApplicationTestBuilder.() -> Unit
 ) = testApplication {
     application {
         api(
-            reportRepository = ReportRepository(database),
-            organizationRepository = OrganizationRepository(database),
+            reportRepository = reportRepository ?: ReportRepository(database),
+            organizationRepository = orgRepository ?: OrganizationRepository(database),
             corsAllowedOrigins = listOf("*.this.shitt"),
             corsAllowedSchemes = listOf("http", "https")
         ) {
@@ -79,11 +82,21 @@ fun Application.mockEmptyAuth() = authentication {
         skipWhen { true }
     }
 }
-fun uuidStr() = UUID.randomUUID().toStr()
-class TestUser(email: String, name: String, groups: List<String> = listOf()) {
+
+class TestUser(email: String? = null, name: String, groups: List<String> = listOf()) {
+    private val emailStr = email ?: "$name@test.nav"
     val original =
-        User(email = User.Email(s = email), name = name, oid = User.Oid(UUID.randomUUID().toString()), groups = groups)
-    val capitalized = original.copy(email = User.Email(email.replaceFirstChar(Char::titlecase)))
+        User(
+            email = User.Email(s = emailStr),
+            name = name,
+            oid = User.Oid(UUID.randomUUID().toString()),
+            groups = groups
+        )
+    val capitalized = original.copy(email = User.Email(emailStr.replaceFirstChar(Char::titlecase)))
+
+    companion object {
+        fun createAdminUser(email: String? = null, name: String) = TestUser(email, name, listOf("test_admin"))
+    }
 }
 
 fun withJsonClue(jsonField: String, assertFuntion: (String) -> Unit) {

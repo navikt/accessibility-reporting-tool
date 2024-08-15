@@ -1,9 +1,6 @@
 package accessibility.reporting.tool.html
 
-import accessibility.reporting.tool.TestUser
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.getWithJwtUser
-import accessibility.reporting.tool.uuidStr
 import io.kotest.matchers.shouldBe
 import io.ktor.http.*
 import org.junit.jupiter.api.Test

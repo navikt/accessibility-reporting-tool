@@ -67,7 +67,7 @@ class TeamApiTest {
     }
 
     @Test
-    fun `Returns the details of a team`() = setupTestApi(database, true) {
+    fun `Returns the details of a team`() = setupTestApi(database, withEmptyAuth = true) {
         testOrg2.addMember(Email("tadda@nav.no"))
         testOrg2.addMember(Email("tadda1@nav.no"))
         testOrg2.addMember(Email("tadda2@nav.no"))
