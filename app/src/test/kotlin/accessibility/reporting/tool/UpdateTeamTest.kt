@@ -63,7 +63,7 @@ class UpdateTeamTest: TestApi() {
 
         val teamNameGetRequest = client.get("api/teams/${testOrg.id}/details")
         teamNameGetRequest.status shouldBe HttpStatusCode.OK
-        val teamNameUpdate = objectmapper.readTree(teamNameGetRequest.bodyAsText())
+        val teamNameUpdate = testApiObjectmapper.readTree(teamNameGetRequest.bodyAsText())
 
         teamNameUpdate["name"].asText() shouldBe updateName
 
@@ -87,7 +87,7 @@ class UpdateTeamTest: TestApi() {
 
         val teamEmailGetRequest = client.get("api/teams/${testOrg.id}/details")
         teamEmailGetRequest.status shouldBe HttpStatusCode.OK
-        val teamEmailUpdate = objectmapper.readTree(teamEmailGetRequest.bodyAsText())
+        val teamEmailUpdate = testApiObjectmapper.readTree(teamEmailGetRequest.bodyAsText())
 
         teamEmailUpdate["email"].asText() shouldBe "teamdolly@test.com"
 
@@ -109,7 +109,7 @@ class UpdateTeamTest: TestApi() {
 
         val teamMembersGetRequest = client.get("api/teams/${testOrg.id}/details")
         teamMembersGetRequest.status shouldBe HttpStatusCode.OK
-        val teamMemberUpdate = objectmapper.readTree(teamMembersGetRequest.bodyAsText())
+        val teamMemberUpdate = testApiObjectmapper.readTree(teamMembersGetRequest.bodyAsText())
         teamMemberUpdate["members"].toList().assert {
             this.size shouldBe 1
             first().asText() shouldBe "testuser2@nav.no"

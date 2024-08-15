@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GetReportTest: TestApi() {
+class GetReportTest : TestApi() {
 
     private val testUser = TestUser(
         email = "tadda@test.tadda", name = "Tadda Taddasen",
@@ -64,7 +64,7 @@ class GetReportTest: TestApi() {
     }
 
     @Test
-    fun `get Report`() = withTestApi{
+    fun `get Report`() = withTestApi {
         val responseForAuthor = client.getWithJwtUser(testUser, "api/reports/${dummyReport.reportId}")
         dummyReport.assertListItemExists(responseForAuthor, testUser.original, true)
 
@@ -108,33 +108,33 @@ class GetReportTest: TestApi() {
         updatedReport.assertListItemExists(responseForNonTeamMemberCapitalized, notTeamMember.capitalized, false)
 
     }
-}
 
-private suspend fun Report.assertListItemExists(
-    response: HttpResponse,
-    user: User,
-    shouldHaveWriteAccess: Boolean,
-) {
-    response.status shouldBe HttpStatusCode.OK
-    val jsonNode = objectmapper.readTree(response.bodyAsText())
-    jsonNode["reportId"].asText() shouldBe this.reportId
-    jsonNode["url"].asText() shouldBe this.url
-    jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
-    jsonNode["team"].let {
-        it["id"].asText() shouldBe this.organizationUnit?.id
-        it["name"].asText() shouldBe this.organizationUnit?.name
-        it["email"].asText() shouldBe this.organizationUnit?.email
+    private suspend fun Report.assertListItemExists(
+        response: HttpResponse,
+        user: User,
+        shouldHaveWriteAccess: Boolean,
+    ) {
+        response.status shouldBe HttpStatusCode.OK
+        val jsonNode = testApiObjectmapper.readTree(response.bodyAsText())
+        jsonNode["reportId"].asText() shouldBe this.reportId
+        jsonNode["url"].asText() shouldBe this.url
+        jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
+        jsonNode["team"].let {
+            it["id"].asText() shouldBe this.organizationUnit?.id
+            it["name"].asText() shouldBe this.organizationUnit?.name
+            it["email"].asText() shouldBe this.organizationUnit?.email
+        }
+        jsonNode["author"].let {
+            it["email"].asText() shouldBe this.author.email
+            it["oid"].asText() shouldBe this.author.oid
+        }
+        withClue("${user.email.str()} has incorrect permissions on report") {
+            jsonNode["hasWriteAccess"].asBoolean() shouldBe shouldHaveWriteAccess
+        }
+        jsonNode["created"].toLocalDateTime() shouldWithinTheSameMinuteAs this.created
+        jsonNode["lastChanged"].toLocalDateTime() shouldWithinTheSameMinuteAs this.lastChanged
+        jsonNode["lastUpdatedBy"].asText() shouldBe (lastUpdatedBy?.email ?: author.email)
     }
-    jsonNode["author"].let {
-        it["email"].asText() shouldBe this.author.email
-        it["oid"].asText() shouldBe this.author.oid
-    }
-    withClue("${user.email.str()} has incorrect permissions on report") {
-        jsonNode["hasWriteAccess"].asBoolean() shouldBe shouldHaveWriteAccess
-    }
-    jsonNode["created"].toLocalDateTime() shouldWithinTheSameMinuteAs this.created
-    jsonNode["lastChanged"].toLocalDateTime() shouldWithinTheSameMinuteAs this.lastChanged
-    jsonNode["lastUpdatedBy"].asText() shouldBe (lastUpdatedBy?.email ?: author.email)
 }
 
 private infix fun LocalDateTime.shouldWithinTheSameMinuteAs(date: LocalDateTime) {

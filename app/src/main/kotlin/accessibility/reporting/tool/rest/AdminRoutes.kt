@@ -2,7 +2,9 @@ package accessibility.reporting.tool.rest
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.rest.Admin.isAdmin
+import accessibility.reporting.tool.wcag.ReportType
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -10,12 +12,17 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.jsonapiadmin() {
+fun Route.jsonapiadmin(reportRepository: ReportRepository) {
     route("admin") {
         install(AdminCheck)
         route("reports") {
             get {
-                call.respond(HttpStatusCode.OK)
+                call.respond(
+                    AdminReportList(
+                        reports = reportRepository.getReports<ReportListItem>(type = ReportType.SINGLE),
+                        aggregatedReports = reportRepository.getReports<ReportListItem>(type = ReportType.AGGREGATED)
+                    )
+                )
             }
             route("aggregated") {
 
@@ -55,3 +62,5 @@ object Admin {
     private val adminAzureGroup = System.getenv("ADMIN_GROUP")
     fun isAdmin(user: User) = user.groups.contains(System.getenv("ADMIN_GROUP"))
 }
+
+private class AdminReportList(val reports: List<ReportListItem>, val aggregatedReports: List<ReportListItem>)

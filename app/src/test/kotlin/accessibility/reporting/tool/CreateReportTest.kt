@@ -64,11 +64,11 @@ class CreateReportTest: TestApi() {
             )
         }
         response.status shouldBe HttpStatusCode.OK
-        val id = objectmapper.readTree(response.bodyAsText())["id"].asText()
+        val id = testApiObjectmapper.readTree(response.bodyAsText())["id"].asText()
         id shouldNotBe null
         client.getWithJwtUser(testUser.original, "api/reports/$id").assert {
             status shouldBe HttpStatusCode.OK
-            objectmapper.readTree(bodyAsText()).assert {
+            testApiObjectmapper.readTree(bodyAsText()).assert {
                 this["author"]["email"].asText() shouldBe testUser.original.email.str()
                 this["hasWriteAccess"].asBoolean() shouldBe true
             }
@@ -83,13 +83,15 @@ class CreateReportTest: TestApi() {
         client.run { assertCorrectAccess(id, noWriteUser.capitalized, false) }
         client.run { assertCorrectAccess(id, noWriteUser.original, false) }
     }
-}
 
-private suspend fun HttpClient.assertCorrectAccess(id: String, user: User, expected: Boolean) {
-    getWithJwtUser(user, "api/reports/$id").assert {
-        status shouldBe HttpStatusCode.OK
-        withClue("${user.email.str()} has inncorrect access to report") {
-            objectmapper.readTree(bodyAsText())["hasWriteAccess"].asBoolean() shouldBe expected
+    private suspend fun HttpClient.assertCorrectAccess(id: String, user: User, expected: Boolean) {
+        getWithJwtUser(user, "api/reports/$id").assert {
+            status shouldBe HttpStatusCode.OK
+            withClue("${user.email.str()} has inncorrect access to report") {
+                testApiObjectmapper.readTree(bodyAsText())["hasWriteAccess"].asBoolean() shouldBe expected
+            }
         }
     }
 }
+
+

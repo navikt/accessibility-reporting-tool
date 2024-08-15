@@ -6,6 +6,7 @@ import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.assertions.withClue
 import io.ktor.server.application.*
@@ -15,10 +16,10 @@ import io.ktor.server.testing.*
 import kotliquery.queryOf
 import java.util.*
 
-val defaultUserEmail = User.Email("tadda@test.tadda")
-const val defaultUserName = "Tadda Taddasen"
-val defaultUserOid = User.Oid(UUID.randomUUID().toString())
-val objectmapper = jacksonObjectMapper()
+private val defaultUserEmail = User.Email("tadda@test.tadda")
+private const val defaultUserName = "Tadda Taddasen"
+private val defaultUserOid = User.Oid(UUID.randomUUID().toString())
+
 fun dummyReportV2(
     url: String = "http://dummyurl.test",
     orgUnit: OrganizationUnit? = null,
@@ -77,26 +78,6 @@ fun dummyAggregatedReportV2(
         )
     )
 
-fun setupTestApi(
-    orgRepository: OrganizationRepository,
-    reportRepository: ReportRepository,
-    withEmptyAuth: Boolean = false,
-    block: suspend ApplicationTestBuilder.() -> Unit
-) = testApplication {
-    application {
-        api(
-            reportRepository = reportRepository,
-            organizationRepository = orgRepository,
-            corsAllowedOrigins = listOf("*.this.shitt"),
-            corsAllowedSchemes = listOf("http", "https")
-        ) {
-            if (withEmptyAuth) {
-                mockEmptyAuth()
-            } else installJwtTestAuth()
-        }
-    }
-    block()
-}
 
 fun Application.mockEmptyAuth() = authentication {
     jwt {
@@ -160,6 +141,12 @@ open class TestApi {
             }
             block()
         }
+
+    companion object {
+       val testApiObjectmapper = jacksonObjectMapper().apply {
+            registerModule(JavaTimeModule())
+        }
+    }
 }
 
 class JsonAssertionFailedException(field: String) : Throwable("field $field is not present in jsonnode")

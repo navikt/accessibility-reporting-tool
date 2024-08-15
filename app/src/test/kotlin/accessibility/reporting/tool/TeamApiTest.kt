@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User.Email
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.datestr
 import assert
@@ -47,7 +46,7 @@ class TeamApiTest: TestApi() {
         client.get("api/teams/${testOrg.id}/reports").assert {
             status shouldBe OK
             val responseBody = bodyAsText()
-            val jsonResponse = objectmapper.readTree(responseBody)
+            val jsonResponse = testApiObjectmapper.readTree(responseBody)
             jsonResponse.toList().assert {
                 this.size shouldBe 2
                 testorgsReports.forEach {
@@ -67,7 +66,7 @@ class TeamApiTest: TestApi() {
 
         client.get("/api/teams/${testOrg2.id}/details").assert {
             status shouldBe OK
-            objectmapper.readTree(bodyAsText()).assert {
+            testApiObjectmapper.readTree(bodyAsText()).assert {
                 this["id"].asText() shouldBe testOrg2.id
                 this["name"].asText() shouldBe testOrg2.name
                 this["email"].asText() shouldBe testOrg2.email
@@ -77,7 +76,7 @@ class TeamApiTest: TestApi() {
 
         client.get("/api/teams/${testOrg.id}/details").assert {
             status shouldBe OK
-            objectmapper.readTree(bodyAsText()).assert {
+            testApiObjectmapper.readTree(bodyAsText()).assert {
                 this["id"].asText() shouldBe testOrg.id
                 this["name"].asText() shouldBe testOrg.name
                 this["email"].asText() shouldBe testOrg.email

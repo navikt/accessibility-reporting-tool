@@ -58,7 +58,7 @@ class UserApiTest: TestApi() {
         client.getWithJwtUser(testUser, "api/users/details").assert {
             status shouldBe HttpStatusCode.OK
             val responseBody = bodyAsText()
-            val jsonResponse = objectmapper.readTree(responseBody)
+            val jsonResponse = testApiObjectmapper.readTree(responseBody)
             println("Response JSON: $jsonResponse")
             jsonResponse["email"].asText() shouldBe testUser.email.str()
             jsonResponse["reports"].toList().assert {

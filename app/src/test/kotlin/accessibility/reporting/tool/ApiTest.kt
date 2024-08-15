@@ -1,7 +1,5 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.datestr
 import assert
@@ -53,7 +51,7 @@ class ApiTest : TestApi() {
     fun `Returns a summary of of all reports`() = withTestApi {
         client.get("api/reports/list").assert {
             status shouldBe HttpStatusCode.OK
-            objectmapper.readTree(bodyAsText()).toList().assert {
+            testApiObjectmapper.readTree(bodyAsText()).toList().assert {
                 this.size shouldBe 3
                 initialReports.forEach {
                     it.assertListItemExists(this)
@@ -66,7 +64,7 @@ class ApiTest : TestApi() {
     fun `Returns a summary of of all teams`() = withTestApi {
         client.get("api/teams").assert {
             status shouldBe HttpStatusCode.OK
-            objectmapper.readTree(bodyAsText()).toList().assert {
+            testApiObjectmapper.readTree(bodyAsText()).toList().assert {
                 this.size shouldBe 2
                 val org = this.find { it["id"].asText() == testOrg.id }
                 require(org != null) { "org is null" }
@@ -117,7 +115,7 @@ class ApiTest : TestApi() {
         }
         client.get("api/teams").assert {
             status shouldBe HttpStatusCode.OK
-            objectmapper.readTree(bodyAsText()).toList().assert {
+            testApiObjectmapper.readTree(bodyAsText()).toList().assert {
                 this.size shouldBe 4
                 val org = this.find { it["name"].asText() == "team 1" }
                 require(org != null) { "org is null" }

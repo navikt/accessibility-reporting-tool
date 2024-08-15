@@ -126,7 +126,7 @@ fun Application.api(
                 jsonApiReports(organizationRepository = organizationRepository, reportRepository = reportRepository)
                 jsonapiteams(organizationRepository = organizationRepository)
                 jsonApiUsers(organizationRepository = organizationRepository, reportRepository = reportRepository)
-                jsonapiadmin()
+                jsonapiadmin(reportRepository = reportRepository)
             }
         }
         meta(prometehusRegistry)
