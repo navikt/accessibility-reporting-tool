@@ -1,8 +1,6 @@
 package accessibility.reporting.tool.rest
 
 import accessibility.reporting.tool.*
-import accessibility.reporting.tool.database.OrganizationRepository
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import assert
 import io.kotest.assertions.withClue
@@ -11,16 +9,12 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kotliquery.queryOf
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-class AdminJsonApiTest {
+class AdminJsonApiTest : TestApi() {
     private val adminRoute = "api/admin"
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val reportRepository = ReportRepository(database)
-    private val organizationRepository = OrganizationRepository(database)
     private val testOrg = OrganizationUnit(
         id = "1234567",
         name = "Testorganisation",
@@ -49,9 +43,7 @@ class AdminJsonApiTest {
 
     @BeforeEach()
     fun populateDb() {
-        database.update { queryOf("delete from changelog") }
-        database.update { queryOf("delete from report") }
-        database.update { queryOf("delete from organization_unit") }
+        cleanDb()
         organizationRepository.upsertOrganizationUnit(testOrg)
         organizationRepository.upsertOrganizationUnit(testOrg2)
         initialReports.forEach { report ->
@@ -60,45 +52,45 @@ class AdminJsonApiTest {
     }
 
     @Test
-    fun `returns all reports grouped by type`() = testApi {
+    fun `returns all reports grouped by type`() = withTestApi {
         assertGetWithAdminIsOk("$adminRoute/reports")
     }
 
     @Test
-    fun `creates a new aggregated report`() = testApi {
+    fun `creates a new aggregated report`() = withTestApi {
         assertGetWithAdminIsOk("$adminRoute/reports/aggregated/new")
         assertPostWithAdminIsOk("$adminRoute/reports/aggregated/new")
     }
 
     @Test
-    fun `updates metadata of an aggregated report`() = testApi {
+    fun `updates metadata of an aggregated report`() = withTestApi{
         assertPatchWithAdminIsOk("$adminRoute/reports/aggregated/${testAggregatedReport.reportId}")
     }
 
     @Disabled("todo")
     @Test
-    fun `updates metadata of a report`() = testApi {
+    fun `updates metadata of a report`() = withTestApi{
     }
 
     @Test
-    fun `updates a successcriterion in an aggregated report`() = testApi {
+    fun `updates a successcriterion in an aggregated report`() = withTestApi{
         assertPatchWithAdminIsOk("$adminRoute/reports/aggregated/${testAggregatedReport.reportId}")
     }
 
     @Disabled("todo")
     @Test
-    fun `updates a single successcriterion in a report`() = testApi {
+    fun `updates a single successcriterion in a report`() = withTestApi{
         assertPatchWithAdminIsOk("reports/${testReport.reportId}")
     }
 
     @Test
-    fun `deletes an aggregated report`() = testApi {
+    fun `deletes an aggregated report`() = withTestApi{
         assertDeleteWithAdminIsOk("$adminRoute/reports/aggregated/${testAggregatedReport.reportId}")
 
     }
 
     @Test
-    fun `deletes a report`() = testApi {
+    fun `deletes a report`() = withTestApi{
         assertDeleteWithAdminIsOk("reports/${testReport.reportId}")
     }
 
@@ -122,10 +114,10 @@ class AdminJsonApiTest {
             withClue("user without admin check fails for $url") { status shouldBe HttpStatusCode.Forbidden }
         }
         client.patch(url).assert {
-            withClue("unauthenicated user check fails for $url"){ status shouldBe HttpStatusCode.Unauthorized}
+            withClue("unauthenicated user check fails for $url") { status shouldBe HttpStatusCode.Unauthorized }
         }
         val adminResponse = client.patchWithJwtUser(adminUser, url)
-        withClue("admin user check fails for $url"){ adminResponse.status shouldBe expectedAdminStatusCode}
+        withClue("admin user check fails for $url") { adminResponse.status shouldBe expectedAdminStatusCode }
         return adminResponse
     }
 
@@ -137,10 +129,10 @@ class AdminJsonApiTest {
             withClue("user without admin check fails for $url") { status shouldBe HttpStatusCode.Forbidden }
         }
         client.post(url).assert {
-            withClue("unauthenicated user check fails for $url"){ status shouldBe HttpStatusCode.Unauthorized}
+            withClue("unauthenicated user check fails for $url") { status shouldBe HttpStatusCode.Unauthorized }
         }
         val adminResponse = client.postWithJwtUser(adminUser, url)
-        withClue("admin user check fails for $url"){ adminResponse.status shouldBe expectedAdminStatusCode}
+        withClue("admin user check fails for $url") { adminResponse.status shouldBe expectedAdminStatusCode }
         return adminResponse
     }
 
@@ -152,18 +144,10 @@ class AdminJsonApiTest {
             withClue("user without admin check fails for $url") { status shouldBe HttpStatusCode.Forbidden }
         }
         client.delete(url).assert {
-            withClue("unauthenicated user check fails for $url"){ status shouldBe HttpStatusCode.Unauthorized}
+            withClue("unauthenicated user check fails for $url") { status shouldBe HttpStatusCode.Unauthorized }
         }
         val adminResponse = client.deleteWithJwtUser(adminUser, url)
-        withClue("admin user check fails for $url"){ adminResponse.status shouldBe expectedAdminStatusCode}
+        withClue("admin user check fails for $url") { adminResponse.status shouldBe expectedAdminStatusCode }
         return adminResponse
     }
-
-    private fun testApi(block: suspend ApplicationTestBuilder.() -> Unit) =
-        setupTestApi(
-            database = database,
-            reportRepository = reportRepository,
-            orgRepository = organizationRepository,
-            block = block
-        )
 }

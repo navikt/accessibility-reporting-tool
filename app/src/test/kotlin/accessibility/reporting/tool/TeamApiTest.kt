@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User.Email
-import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.datestr
@@ -11,20 +10,16 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.http.*
 import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
-import kotliquery.queryOf
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
-class TeamApiTest {
+class TeamApiTest: TestApi() {
 
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = OrganizationRepository(database)
     private val testOrg = OrganizationUnit(
         id = "1234567",
         name = "Testorganisation",
@@ -40,21 +35,19 @@ class TeamApiTest {
 
     @BeforeEach()
     fun populateDb() {
-        database.update { queryOf("delete from changelog") }
-        database.update { queryOf("delete from report") }
-        database.update { queryOf("delete from organization_unit") }
-        repository.upsertOrganizationUnit(testOrg)
-        repository.upsertOrganizationUnit(testOrg2)
+        cleanDb()
+        organizationRepository.upsertOrganizationUnit(testOrg)
+        organizationRepository.upsertOrganizationUnit(testOrg2)
         testorgsReports.forEach { report ->
-            repository.upsertReportReturning<Report>(report)
+            reportRepository.upsertReportReturning<Report>(report)
         }
-        repository.upsertReportReturning<Report>(dummyReportV2(orgUnit = testOrg2))
+        reportRepository.upsertReportReturning<Report>(dummyReportV2(orgUnit = testOrg2))
     }
 
     @Test
-    fun `Hent Team reports`() = setupTestApi(database) {
+    fun `Hent Team reports`() = withTestApi{
         client.get("api/teams/${testOrg.id}/reports").assert {
-            status shouldBe HttpStatusCode.OK
+            status shouldBe OK
             val responseBody = bodyAsText()
             val jsonResponse = objectmapper.readTree(responseBody)
             jsonResponse.toList().assert {
@@ -67,12 +60,12 @@ class TeamApiTest {
     }
 
     @Test
-    fun `Returns the details of a team`() = setupTestApi(database, withEmptyAuth = true) {
+    fun `Returns the details of a team`() = withTestApi(withEmptyAuth = true) {
         testOrg2.addMember(Email("tadda@nav.no"))
         testOrg2.addMember(Email("tadda1@nav.no"))
         testOrg2.addMember(Email("tadda2@nav.no"))
         testOrg2.addMember(Email("tadda3@nav.no"))
-        repository.upsertOrganizationUnit(testOrg2)
+        organizationRepository.upsertOrganizationUnit(testOrg2)
 
         client.get("/api/teams/${testOrg2.id}/details").assert {
             status shouldBe OK

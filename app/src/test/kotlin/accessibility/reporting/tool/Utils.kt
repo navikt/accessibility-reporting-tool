@@ -12,6 +12,8 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.testing.*
+import kotliquery.Query
+import kotliquery.queryOf
 import java.util.*
 
 val defaultUserEmail = User.Email("tadda@test.tadda")
@@ -56,16 +58,15 @@ fun dummyAggregatedReportV2(
     )
 
 fun setupTestApi(
-    database: LocalPostgresDatabase,
-    orgRepository: OrganizationRepository? = null,
-    reportRepository: ReportRepository? = null,
+    orgRepository: OrganizationRepository,
+    reportRepository: ReportRepository,
     withEmptyAuth: Boolean = false,
     block: suspend ApplicationTestBuilder.() -> Unit
 ) = testApplication {
     application {
         api(
-            reportRepository = reportRepository ?: ReportRepository(database),
-            organizationRepository = orgRepository ?: OrganizationRepository(database),
+            reportRepository = reportRepository,
+            organizationRepository = orgRepository,
             corsAllowedOrigins = listOf("*.this.shitt"),
             corsAllowedSchemes = listOf("http", "https")
         ) {
@@ -107,6 +108,35 @@ fun withJsonClue(jsonField: String, assertFuntion: (String) -> Unit) {
             throw JsonAssertionFailedException(jsonField)
         }
     }
+}
+
+open class TestApi {
+    protected val database = LocalPostgresDatabase.cleanDb()
+    protected val reportRepository = ReportRepository(database)
+    protected val organizationRepository = OrganizationRepository(database)
+
+    fun cleanDb() {
+        database.update { queryOf("delete from changelog") }
+        database.update { queryOf("delete from report") }
+        database.update { queryOf("delete from organization_unit") }
+    }
+
+    fun withTestApi(withEmptyAuth: Boolean = false, block: suspend ApplicationTestBuilder.() -> Unit) =
+        testApplication {
+            application {
+                api(
+                    reportRepository = reportRepository,
+                    organizationRepository = organizationRepository,
+                    corsAllowedOrigins = listOf("*.this.shitt"),
+                    corsAllowedSchemes = listOf("http", "https")
+                ) {
+                    if (withEmptyAuth) {
+                        mockEmptyAuth()
+                    } else installJwtTestAuth()
+                }
+            }
+            block()
+        }
 }
 
 class JsonAssertionFailedException(field: String) : Throwable("field $field is not present in jsonnode")

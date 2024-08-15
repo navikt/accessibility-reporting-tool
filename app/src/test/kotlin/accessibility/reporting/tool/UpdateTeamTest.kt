@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.toStringList
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import assert
@@ -9,9 +8,6 @@ import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
 import kotliquery.queryOf
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +16,7 @@ import org.junit.jupiter.api.TestInstance
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UpdateTeamTest {
+class UpdateTeamTest: TestApi() {
     private val testOrg = OrganizationUnit(
         id = UUID.randomUUID().toString(),
         name = "DummyOrg",
@@ -28,8 +24,6 @@ class UpdateTeamTest {
         members = mutableSetOf()
     )
 
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = OrganizationRepository(database)
     private val testUser =
         User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
     private val testUser2 =
@@ -56,11 +50,11 @@ class UpdateTeamTest {
     @BeforeEach
     fun populateDb() {
         database.update { queryOf("delete from organization_unit ") }
-        repository.upsertOrganizationUnit(testOrg)
+        organizationRepository.upsertOrganizationUnit(testOrg)
     }
 
     @Test
-    fun `update team`() = setupTestApi(database) {
+    fun `update team`() = withTestApi {
 
         val updateName = "team dolly"
         val updatedTeamName = """

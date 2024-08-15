@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.database.toStringList
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
@@ -20,10 +19,8 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GetReportTest {
+class GetReportTest: TestApi() {
 
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = ReportRepository(database)
     private val testUser = TestUser(
         email = "tadda@test.tadda", name = "Tadda Taddasen",
     )
@@ -68,20 +65,20 @@ class GetReportTest {
                 )
             )
         }
-        repository.upsertReport(dummyreport)
+        reportRepository.upsertReport(dummyreport)
     }
 
     @Test
-    fun `get Report`() = setupTestApi(database) {
+    fun `get Report`() = withTestApi{
         val responseForAuthor = client.getWithJwtUser(testUser.original, "api/reports/${dummyreport.reportId}")
         dummyreport.assertListItemExists(responseForAuthor, testUser.original, true)
 
         val updateDescriptiveName = """
-        {
-            "reportId": "${dummyreport.reportId}",
-            "descriptiveName": "newName"
-        }
-    """.trimIndent()
+            {
+                "reportId": "${dummyreport.reportId}",
+                "descriptiveName": "newName"
+            }
+        """.trimIndent()
         val updatedReport = dummyreport.copy(
             descriptiveName = "newName",
             lastUpdatedBy = Author(email = testUserAdmin.original.email.str(), oid = testUserAdmin.original.oid.str())

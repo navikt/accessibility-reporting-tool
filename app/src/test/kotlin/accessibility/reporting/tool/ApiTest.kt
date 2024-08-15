@@ -1,15 +1,11 @@
 package accessibility.reporting.tool
 
-import LocalPostgresDatabase
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.OrganizationRepository
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import accessibility.reporting.tool.wcag.datestr
 import assert
 import com.fasterxml.jackson.databind.JsonNode
-import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -21,11 +17,8 @@ import org.junit.jupiter.api.TestInstance
 import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ApiTest {
+class ApiTest : TestApi() {
 
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val reportRepository = ReportRepository(database)
-    private val organizationRepository = OrganizationRepository(database)
     private val testOrg = OrganizationUnit(
         id = "1234567",
         name = "Testorganisation",
@@ -61,7 +54,7 @@ class ApiTest {
     }
 
     @Test
-    fun `Returns a summary of of all reports`() = setupTestApi(database) {
+    fun `Returns a summary of of all reports`() = withTestApi {
         client.get("api/reports/list").assert {
             status shouldBe HttpStatusCode.OK
             objectmapper.readTree(bodyAsText()).toList().assert {
@@ -74,7 +67,7 @@ class ApiTest {
     }
 
     @Test
-    fun `Returns a summary of of all teams`() = setupTestApi(database) {
+    fun `Returns a summary of of all teams`() = withTestApi {
         client.get("api/teams").assert {
             status shouldBe HttpStatusCode.OK
             objectmapper.readTree(bodyAsText()).toList().assert {
@@ -93,17 +86,17 @@ class ApiTest {
     }
 
     @Test
-    fun `Create a new team `() = setupTestApi(database) {
+    fun `Create a new team `() = withTestApi {
 
         client.postWithJwtUser(testUser, "api/teams/new") {
             setBody(
                 """{
-                "name": "team 1",
-                "email": "abc@gmail.no",
-                "members": ["abc","def","ghi"]
-                }
-                
-            """.trimMargin()
+                    "name": "team 1",
+                    "email": "abc@gmail.no",
+                    "members": ["abc","def","ghi"]
+                    }
+                    
+                """.trimMargin()
             )
             contentType(
                 ContentType.Application.Json
@@ -114,11 +107,11 @@ class ApiTest {
         client.postWithJwtUser(testUser, "api/teams/new") {
             setBody(
                 """{
-                "name": "team 2",
-                "email": "abdd@gmail.no",
-                "members": ["abc","def","ghi"]
-              }  
-      """.trimMargin()
+                    "name": "team 2",
+                    "email": "abdd@gmail.no",
+                    "members": ["abc","def","ghi"]
+                  }  
+          """.trimMargin()
             )
             contentType(
                 ContentType.Application.Json
@@ -149,7 +142,7 @@ private fun Report.assertListItemExists(jsonList: List<JsonNode>) {
     require(result != null)
 
     withJsonClue("title") { titleField ->
-       result[titleField].asText() shouldBe descriptiveName
+        result[titleField].asText() shouldBe descriptiveName
     }
     withJsonClue("teamName") { teamNameField ->
         result[teamNameField].asText() shouldBe this.organizationUnit!!.name

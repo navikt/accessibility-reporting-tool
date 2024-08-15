@@ -1,8 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.OrganizationRepository
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import assert
 import io.kotest.matchers.shouldBe
@@ -18,10 +16,8 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
-class UserApiTest {
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val reportRepository = ReportRepository(database)
-    private val organizationRepository = OrganizationRepository(database)
+class UserApiTest: TestApi() {
+
     private val testOrg = OrganizationUnit(
         id = UUID.randomUUID().toString(),
         name = "DummyOrg",
@@ -66,7 +62,7 @@ class UserApiTest {
 
 
     @Test
-    fun `Hent User Summary`() = setupTestApi(database) {
+    fun `Hent User Summary`() = withTestApi {
         client.getWithJwtUser(testUser, "api/users/details").assert {
             status shouldBe HttpStatusCode.OK
             val responseBody = bodyAsText()

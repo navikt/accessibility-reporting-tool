@@ -20,9 +20,8 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
 
-class CreateReportTest {
+class CreateReportTest: TestApi() {
 
-    private val database = LocalPostgresDatabase.cleanDb()
     private val testUser = TestUser(email = "author.tadda@test.nav", name = "Author")
     private val adminUser = TestUser(email = "admin.tadda@test.nav", name = "Admin", groups = listOf("test_admin"))
     private val teamMemberUser = TestUser(email = "member.tadda@test.nav", name = "Member")
@@ -53,17 +52,17 @@ class CreateReportTest {
 
 
     @Test
-    fun `Creates a new report`() = setupTestApi(database) {
+    fun `Creates a new report`() = withTestApi{
         val response = client.postWithJwtUser(testUser.original, "api/reports/new") {
             contentType(ContentType.Application.Json)
             setBody(
                 """{
-                "name": "Rrrreport",
-                "urlTilSiden": "https://some.page.nav.no",
-                "teamId": "${testOrg.id}"
-                }
-                
-            """.trimMargin()
+                    "name": "Rrrreport",
+                    "urlTilSiden": "https://some.page.nav.no",
+                    "teamId": "${testOrg.id}"
+                    }
+                    
+                """.trimMargin()
             )
         }
         response.status shouldBe HttpStatusCode.OK

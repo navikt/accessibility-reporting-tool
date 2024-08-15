@@ -1,7 +1,6 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.request.*
@@ -21,7 +20,7 @@ import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.devTools
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UpdateReportTest {
+class UpdateReportTest: TestApi() {
     private val testOrg = OrganizationUnit(
         id = UUID.randomUUID().toString(),
         name = "DummyOrg",
@@ -34,8 +33,6 @@ class UpdateReportTest {
         email = "teamdolly@test.com",
         members = mutableSetOf()
     )
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = ReportRepository(database)
     private val testUser =
         User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
     private val dummyreport = dummyReportV2(orgUnit = testOrg)
@@ -61,11 +58,11 @@ class UpdateReportTest {
 
     @BeforeEach
     fun populateDb() {
-        repository.upsertReport(dummyreport)
+        reportRepository.upsertReport(dummyreport)
     }
 
     @Test
-    fun `partial updates metadata`() = setupTestApi(database) {
+    fun `partial updates metadata`() = withTestApi {
         val newDescriptiveName = "Updated Report Title"
         val updateDescriptiveName = """
         {
@@ -203,7 +200,7 @@ class UpdateReportTest {
     }
 
     @Test
-    fun `partial updates singleCriterion`() = setupTestApi(database) {
+    fun `partial updates singleCriterion`() = withTestApi {
 
         val originalCriteria = 1.perceivable("1.3.1", "Informasjon og relasjoner") {
             description = "Ting skal være kodet som det ser ut som."
@@ -268,7 +265,7 @@ class UpdateReportTest {
     }
 
     @Test
-    fun `partial updates multipleCriteria`() = setupTestApi(database) {
+    fun `partial updates multipleCriteria`() = withTestApi {
 
         val originalCriterion1 = 1.perceivable("1.3.1", "Informasjon og relasjoner") {
             description = "Ting skal være kodet som det ser ut som."
