@@ -1,8 +1,6 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.toStringList
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
@@ -13,22 +11,14 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UpdateTeamTest: TestApi() {
-    private val testOrg = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+    private val testOrg = createTestOrg(
         name = "DummyOrg",
-        email = "test@nav.no",
-        members = mutableSetOf()
+        email = "test@nav.no"
     )
-
-    private val testUser =
-        User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
-    private val testUser2 =
-        User(User.Email("testuser2@nav.no"), "Test User2", User.Oid(UUID.randomUUID().toString()), groups = listOf())
-
+    private val testUser = TestUser(email = "testuser@nav.no", name = "Test User")
 
     @BeforeAll
     fun setup() {
@@ -60,7 +50,7 @@ class UpdateTeamTest: TestApi() {
         val updatedTeamName = """
              {
             "id": "${testOrg.id}",
-            "name": "${updateName}"
+            "name": "$updateName"
             }
             """.trimIndent()
 
@@ -84,7 +74,7 @@ class UpdateTeamTest: TestApi() {
         val updatedEmail = """
              {
             "id": "${testOrg.id}",
-            "email": "${updateEmail}"
+            "email": "$updateEmail"
            }
            
         """.trimIndent()

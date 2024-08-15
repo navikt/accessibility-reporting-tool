@@ -20,13 +20,11 @@ import org.junit.jupiter.api.TestInstance
 
 class TeamApiTest: TestApi() {
 
-    private val testOrg = OrganizationUnit(
-        id = "1234567",
+    private val testOrg = createTestOrg(
         name = "Testorganisation",
         email = "testorganisation@nav.no"
     )
-    private val testOrg2 = OrganizationUnit(
-        id = "one-two-three",
+    private val testOrg2 = createTestOrg(
         name = "Testorganization",
         email = "testorganization@nav.no"
     )

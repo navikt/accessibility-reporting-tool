@@ -2,7 +2,6 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.toStringList
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import io.kotest.assertions.withClue
 import accessibility.reporting.tool.wcag.*
@@ -16,7 +15,6 @@ import kotliquery.queryOf
 import org.junit.jupiter.api.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GetReportTest: TestApi() {
@@ -28,20 +26,17 @@ class GetReportTest: TestApi() {
         email = "teammember@test.an",
         name = "Teamy Tems",
     )
-    private val testOrg = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+    private val testOrg = createTestOrg(
         name = "DummyOrg",
-        email = "test@nav.no"
-    ).apply {
-        addMember(teamMember.original.email)
-    }
+        email = "test@nav.no",
+        teamMember.email.str()
+    )
 
-    private val dummyreport = dummyReportV2(orgUnit = testOrg, user = testUser.original)
+    private val dummyReport = dummyReportV2(orgUnit = testOrg, user = testUser)
 
-    private val testUserAdmin = TestUser(
+    private val testUserAdmin = TestUser.createAdminUser(
         email = "admin@test.an",
         name = "Admin adminson",
-        groups = listOf(System.getenv("ADMIN_GROUP"))
     )
 
 
@@ -65,51 +60,51 @@ class GetReportTest: TestApi() {
                 )
             )
         }
-        reportRepository.upsertReport(dummyreport)
+        reportRepository.upsertReport(dummyReport)
     }
 
     @Test
     fun `get Report`() = withTestApi{
-        val responseForAuthor = client.getWithJwtUser(testUser.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForAuthor, testUser.original, true)
+        val responseForAuthor = client.getWithJwtUser(testUser, "api/reports/${dummyReport.reportId}")
+        dummyReport.assertListItemExists(responseForAuthor, testUser.original, true)
 
         val updateDescriptiveName = """
             {
-                "reportId": "${dummyreport.reportId}",
+                "reportId": "${dummyReport.reportId}",
                 "descriptiveName": "newName"
             }
         """.trimIndent()
-        val updatedReport = dummyreport.copy(
+        val updatedReport = dummyReport.copy(
             descriptiveName = "newName",
-            lastUpdatedBy = Author(email = testUserAdmin.original.email.str(), oid = testUserAdmin.original.oid.str())
+            lastUpdatedBy = Author(email = testUserAdmin.email.str(), oid = testUserAdmin.oid.str())
         )
 
-        client.patchWithJwtUser(testUserAdmin.original, "api/reports/${dummyreport.reportId}/update") {
+        client.patchWithJwtUser(testUserAdmin.original, "api/reports/${dummyReport.reportId}/update") {
             setBody(updateDescriptiveName)
             contentType(ContentType.Application.Json)
         }.also { require(it.status == HttpStatusCode.OK) }
 
         val responseForAuthorCapitalised =
-            client.getWithJwtUser(testUser.capitalized, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(testUser.capitalized, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForAuthorCapitalised, testUser.capitalized, true)
 
-        val responseForAdmin = client.getWithJwtUser(testUserAdmin.original, "api/reports/${dummyreport.reportId}")
+        val responseForAdmin = client.getWithJwtUser(testUserAdmin.original, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForAdmin, testUserAdmin.original, true)
         val responseForAdminCapitalized =
-            client.getWithJwtUser(testUserAdmin.capitalized, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(testUserAdmin.capitalized, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForAdminCapitalized, testUserAdmin.capitalized, true)
 
-        val responseForTeamMember = client.getWithJwtUser(teamMember.original, "api/reports/${dummyreport.reportId}")
+        val responseForTeamMember = client.getWithJwtUser(teamMember.original, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForTeamMember, teamMember.original, true)
         val responseForTeamMemberCapitalized =
-            client.getWithJwtUser(teamMember.capitalized, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(teamMember.capitalized, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForTeamMemberCapitalized, teamMember.capitalized, true)
 
         val responseForNonTeamMember =
-            client.getWithJwtUser(notTeamMember.original, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(notTeamMember.original, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForNonTeamMember, notTeamMember.original, false)
         val responseForNonTeamMemberCapitalized =
-            client.getWithJwtUser(notTeamMember.capitalized, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(notTeamMember.capitalized, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForNonTeamMemberCapitalized, notTeamMember.capitalized, false)
 
     }

@@ -2,7 +2,6 @@ package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.toStringList
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import assert
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
@@ -26,11 +25,10 @@ class CreateReportTest: TestApi() {
     private val adminUser = TestUser(email = "admin.tadda@test.nav", name = "Admin", groups = listOf("test_admin"))
     private val teamMemberUser = TestUser(email = "member.tadda@test.nav", name = "Member")
     private val noWriteUser = TestUser(email = "nowrite.adda@test.nav", name = "No Write")
-    private val testOrg = OrganizationUnit(
-        id = "hello",
+    private val testOrg = createTestOrg(
         name = "Hello Reports",
         email = "Russel",
-        members = mutableSetOf(teamMemberUser.original.email.str())
+        teamMemberUser.email.str()
     )
 
     @BeforeAll

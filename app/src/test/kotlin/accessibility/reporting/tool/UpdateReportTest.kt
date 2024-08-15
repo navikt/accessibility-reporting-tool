@@ -21,20 +21,15 @@ import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.devTools
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UpdateReportTest: TestApi() {
-    private val testOrg = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+    private val testOrg = createTestOrg(
         name = "DummyOrg",
         email = "test@nav.no",
-        members = mutableSetOf()
     )
-    private val testOrg2 = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+    private val testOrg2 = createTestOrg(
         name = "Team-dolly",
         email = "teamdolly@test.com",
-        members = mutableSetOf()
     )
-    private val testUser =
-        User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
+    private val testUser = TestUser(email="testuser@nav.no", name = "Test User")
     private val dummyreport = dummyReportV2(orgUnit = testOrg)
     private val objectmapper = jacksonObjectMapper().apply {
         registerModule(JavaTimeModule())
@@ -361,20 +356,5 @@ class UpdateReportTest: TestApi() {
                     && it["number"].asText() != "1.3.2"
         }
         otherCriteria.isNotEmpty() shouldBe true
-    }
-
-    private fun Report.assertExists(jsonNode: JsonNode) {
-        jsonNode["reportId"].asText() shouldBe this.reportId
-        jsonNode["url"].asText() shouldBe this.url
-        jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
-        jsonNode["team"].let {
-            it["id"].asText() shouldBe this.organizationUnit?.id
-            it["name"].asText() shouldBe this.organizationUnit?.name
-            it["email"].asText() shouldBe this.organizationUnit?.email
-        }
-        jsonNode["author"].let {
-            it["email"].asText() shouldBe this.author.email
-            it["oid"].asText() shouldBe this.author.oid
-        }
     }
 }

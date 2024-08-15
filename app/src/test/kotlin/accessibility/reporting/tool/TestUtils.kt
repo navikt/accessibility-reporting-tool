@@ -12,7 +12,6 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.testing.*
-import kotliquery.Query
 import kotliquery.queryOf
 import java.util.*
 
@@ -33,6 +32,27 @@ fun dummyReportV2(
     organizationUnit = orgUnit,
     version = Version.V2,
     author = user.toAuthor(),
+    successCriteria = Version.V2.criteria,
+    lastChanged = LocalDateTimeHelper.nowAtUtc(),
+    created = LocalDateTimeHelper.nowAtUtc(),
+    lastUpdatedBy = null,
+    descriptiveName = descriptiveName,
+    reportType = reportType
+)
+
+fun dummyReportV2(
+    url: String = "http://dummyurl.test",
+    orgUnit: OrganizationUnit? = null,
+    user: TestUser,
+    reportType: ReportType = ReportType.SINGLE,
+    id: String = UUID.randomUUID().toString(),
+    descriptiveName: String = "Dummynavn"
+) = Report(
+    reportId = id,
+    url = url,
+    organizationUnit = orgUnit,
+    version = Version.V2,
+    author = user.original.toAuthor(),
     successCriteria = Version.V2.criteria,
     lastChanged = LocalDateTimeHelper.nowAtUtc(),
     created = LocalDateTimeHelper.nowAtUtc(),
@@ -84,13 +104,16 @@ fun Application.mockEmptyAuth() = authentication {
     }
 }
 
-class TestUser(email: String? = null, name: String, groups: List<String> = listOf()) {
-    private val emailStr = email ?: "$name@test.nav"
+class TestUser(email: String? = null, val name: String, groups: List<String> = listOf()) {
+    private val emailStr: String = email ?: "$name@test.nav"
+    val email: User.Email = User.Email(s = emailStr)
+    val oid = User.Oid(UUID.randomUUID().toString())
+
     val original =
         User(
-            email = User.Email(s = emailStr),
+            email = this.email,
             name = name,
-            oid = User.Oid(UUID.randomUUID().toString()),
+            oid = oid,
             groups = groups
         )
     val capitalized = original.copy(email = User.Email(emailStr.replaceFirstChar(Char::titlecase)))
@@ -140,3 +163,6 @@ open class TestApi {
 }
 
 class JsonAssertionFailedException(field: String) : Throwable("field $field is not present in jsonnode")
+
+fun createTestOrg(name: String, email: String, vararg members: String) =
+    OrganizationUnit(name = name, email = email, members = members.toMutableSet(), id = UUID.randomUUID().toString())

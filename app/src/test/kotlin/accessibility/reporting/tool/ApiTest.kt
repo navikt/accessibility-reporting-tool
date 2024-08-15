@@ -19,23 +19,19 @@ import java.time.LocalDateTime
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApiTest : TestApi() {
 
-    private val testOrg = OrganizationUnit(
-        id = "1234567",
+    private val testOrg = createTestOrg(
         name = "Testorganisation",
         email = "testorganisation@nav.no"
     )
 
-    private val testUser = User(
-        email = User.Email(s = "test@test.nav"),
+    private val testUser = TestUser(
+        email = "test@test.nav",
         name = "Test Testlin",
-        oid = User.Oid(s = "testoid"),
-        groups = listOf()
     )
 
-    private val testOrg2 = OrganizationUnit(
-        id = "1234568",
-        name = "Testorganization",
-        email = "testorganization@nav.no"
+    private val testOrg2 = createTestOrg(
+        name = "Testorganization2",
+        email = "testorganization2@nav.no"
     )
     private val initialReports =
         listOf(dummyReportV2(orgUnit = testOrg), dummyReportV2(orgUnit = testOrg), dummyReportV2(orgUnit = testOrg))
@@ -72,14 +68,14 @@ class ApiTest : TestApi() {
             status shouldBe HttpStatusCode.OK
             objectmapper.readTree(bodyAsText()).toList().assert {
                 this.size shouldBe 2
-                val org = this.find { it["id"].asText() == "1234567" }
+                val org = this.find { it["id"].asText() == testOrg.id }
                 require(org != null) { "org is null" }
-                org["name"].asText() shouldBe "Testorganisation"
-                org["email"].asText() shouldBe "testorganisation@nav.no"
-                val org2 = this.find { it["id"].asText() == "1234568" }
+                org["name"].asText() shouldBe testOrg.name
+                org["email"].asText() shouldBe testOrg.email
+                val org2 = this.find { it["id"].asText() == testOrg2.id }
                 require(org2 != null) { "org is null" }
-                org2["name"].asText() shouldBe "Testorganization"
-                org2["email"].asText() shouldBe "testorganization@nav.no"
+                org2["name"].asText() shouldBe testOrg2.name
+                org2["email"].asText() shouldBe testOrg2.email
 
             }
         }
