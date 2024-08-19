@@ -65,11 +65,23 @@ suspend fun HttpClient.getWithJwtUser(user: User, urlString: String, block: Http
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }
+suspend fun HttpClient.getWithJwtUser(user: TestUser, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    get(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user.original)}")
+    }
 
 suspend fun HttpClient.postWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     post(urlString) {
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+        header("Origin","https://fuck.this.shitt")
+    }
+
+suspend fun HttpClient.postWithJwtUser(user: TestUser, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    post(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user.original)}")
         header("Origin","https://fuck.this.shitt")
     }
 
@@ -79,10 +91,21 @@ suspend fun HttpClient.putWithJwtUser(user: User, urlString: String, block: Http
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }
 
+suspend fun HttpClient.putWithJwtUser(user: TestUser, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    put(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user.original)}")
+    }
+
 suspend fun HttpClient.deleteWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     delete(urlString) {
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+    }
+suspend fun HttpClient.deleteWithJwtUser(user: TestUser, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    delete(urlString) {
+        block()
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user.original)}")
     }
 
 suspend fun HttpClient.patchWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
@@ -90,9 +113,8 @@ suspend fun HttpClient.patchWithJwtUser(user: User, urlString: String, block: Ht
         block()
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
     }
-
-suspend fun HttpClient.optionsWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
-    options(urlString) {
+suspend fun HttpClient.patchWithJwtUser(user: TestUser, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
+    patch(urlString) {
         block()
-        header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
+        header("Authorization", "Bearer ${JwtConfig.generateToken(user.original)}")
     }

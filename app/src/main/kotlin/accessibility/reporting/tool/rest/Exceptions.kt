@@ -11,4 +11,10 @@ class BadPathParameterException(paramName: String) :
     RequestException(HttpStatusCode.BadRequest, "$paramName is missing or malformed")
 
 class MissingPrincipalException(route: String, expectedPrincipal: String) :
-    RequestException(HttpStatusCode.Unauthorized, "Error in request to $route: Principal does not contain $expectedPrincipal")
+    RequestException(
+        HttpStatusCode.Unauthorized,
+        "Error in request to $route: Principal does not contain $expectedPrincipal"
+    )
+
+class NotAdminUserException(route: String, userName: String) :
+    RequestException(HttpStatusCode.Forbidden, "Error in request to $route: '$userName' is not admin")

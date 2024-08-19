@@ -1,9 +1,7 @@
 package accessibility.reporting.tool
 
 import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.database.toStringList
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
 import io.kotest.assertions.withClue
 import accessibility.reporting.tool.wcag.*
@@ -17,13 +15,10 @@ import kotliquery.queryOf
 import org.junit.jupiter.api.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GetReportTest {
+class GetReportTest : TestApi() {
 
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = ReportRepository(database)
     private val testUser = TestUser(
         email = "tadda@test.tadda", name = "Tadda Taddasen",
     )
@@ -31,20 +26,17 @@ class GetReportTest {
         email = "teammember@test.an",
         name = "Teamy Tems",
     )
-    private val testOrg = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+    private val testOrg = createTestOrg(
         name = "DummyOrg",
-        email = "test@nav.no"
-    ).apply {
-        addMember(teamMember.original.email)
-    }
+        email = "test@nav.no",
+        teamMember.email.str()
+    )
 
-    private val dummyreport = dummyReportV2(orgUnit = testOrg, user = testUser.original)
+    private val dummyReport = dummyReportV2(orgUnit = testOrg, user = testUser)
 
-    private val testUserAdmin = TestUser(
+    private val testUserAdmin = TestUser.createAdminUser(
         email = "admin@test.an",
         name = "Admin adminson",
-        groups = listOf(System.getenv("ADMIN_GROUP"))
     )
 
 
@@ -68,81 +60,81 @@ class GetReportTest {
                 )
             )
         }
-        repository.upsertReport(dummyreport)
+        reportRepository.upsertReport(dummyReport)
     }
 
     @Test
-    fun `get Report`() = setupTestApi(database) {
-        val responseForAuthor = client.getWithJwtUser(testUser.original, "api/reports/${dummyreport.reportId}")
-        dummyreport.assertListItemExists(responseForAuthor, testUser.original, true)
+    fun `get Report`() = withTestApi {
+        val responseForAuthor = client.getWithJwtUser(testUser, "api/reports/${dummyReport.reportId}")
+        dummyReport.assertListItemExists(responseForAuthor, testUser.original, true)
 
         val updateDescriptiveName = """
-        {
-            "reportId": "${dummyreport.reportId}",
-            "descriptiveName": "newName"
-        }
-    """.trimIndent()
-        val updatedReport = dummyreport.copy(
+            {
+                "reportId": "${dummyReport.reportId}",
+                "descriptiveName": "newName"
+            }
+        """.trimIndent()
+        val updatedReport = dummyReport.copy(
             descriptiveName = "newName",
-            lastUpdatedBy = Author(email = testUserAdmin.original.email.str(), oid = testUserAdmin.original.oid.str())
+            lastUpdatedBy = Author(email = testUserAdmin.email.str(), oid = testUserAdmin.oid.str())
         )
 
-        client.patchWithJwtUser(testUserAdmin.original, "api/reports/${dummyreport.reportId}/update") {
+        client.patchWithJwtUser(testUserAdmin.original, "api/reports/${dummyReport.reportId}/update") {
             setBody(updateDescriptiveName)
             contentType(ContentType.Application.Json)
         }.also { require(it.status == HttpStatusCode.OK) }
 
         val responseForAuthorCapitalised =
-            client.getWithJwtUser(testUser.capitalized, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(testUser.capitalized, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForAuthorCapitalised, testUser.capitalized, true)
 
-        val responseForAdmin = client.getWithJwtUser(testUserAdmin.original, "api/reports/${dummyreport.reportId}")
+        val responseForAdmin = client.getWithJwtUser(testUserAdmin.original, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForAdmin, testUserAdmin.original, true)
         val responseForAdminCapitalized =
-            client.getWithJwtUser(testUserAdmin.capitalized, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(testUserAdmin.capitalized, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForAdminCapitalized, testUserAdmin.capitalized, true)
 
-        val responseForTeamMember = client.getWithJwtUser(teamMember.original, "api/reports/${dummyreport.reportId}")
+        val responseForTeamMember = client.getWithJwtUser(teamMember.original, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForTeamMember, teamMember.original, true)
         val responseForTeamMemberCapitalized =
-            client.getWithJwtUser(teamMember.capitalized, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(teamMember.capitalized, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForTeamMemberCapitalized, teamMember.capitalized, true)
 
         val responseForNonTeamMember =
-            client.getWithJwtUser(notTeamMember.original, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(notTeamMember.original, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForNonTeamMember, notTeamMember.original, false)
         val responseForNonTeamMemberCapitalized =
-            client.getWithJwtUser(notTeamMember.capitalized, "api/reports/${dummyreport.reportId}")
+            client.getWithJwtUser(notTeamMember.capitalized, "api/reports/${dummyReport.reportId}")
         updatedReport.assertListItemExists(responseForNonTeamMemberCapitalized, notTeamMember.capitalized, false)
 
     }
-}
 
-private suspend fun Report.assertListItemExists(
-    response: HttpResponse,
-    user: User,
-    shouldHaveWriteAccess: Boolean,
-) {
-    response.status shouldBe HttpStatusCode.OK
-    val jsonNode = objectmapper.readTree(response.bodyAsText())
-    jsonNode["reportId"].asText() shouldBe this.reportId
-    jsonNode["url"].asText() shouldBe this.url
-    jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
-    jsonNode["team"].let {
-        it["id"].asText() shouldBe this.organizationUnit?.id
-        it["name"].asText() shouldBe this.organizationUnit?.name
-        it["email"].asText() shouldBe this.organizationUnit?.email
+    private suspend fun Report.assertListItemExists(
+        response: HttpResponse,
+        user: User,
+        shouldHaveWriteAccess: Boolean,
+    ) {
+        response.status shouldBe HttpStatusCode.OK
+        val jsonNode = testApiObjectmapper.readTree(response.bodyAsText())
+        jsonNode["reportId"].asText() shouldBe this.reportId
+        jsonNode["url"].asText() shouldBe this.url
+        jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
+        jsonNode["team"].let {
+            it["id"].asText() shouldBe this.organizationUnit?.id
+            it["name"].asText() shouldBe this.organizationUnit?.name
+            it["email"].asText() shouldBe this.organizationUnit?.email
+        }
+        jsonNode["author"].let {
+            it["email"].asText() shouldBe this.author.email
+            it["oid"].asText() shouldBe this.author.oid
+        }
+        withClue("${user.email.str()} has incorrect permissions on report") {
+            jsonNode["hasWriteAccess"].asBoolean() shouldBe shouldHaveWriteAccess
+        }
+        jsonNode["created"].toLocalDateTime() shouldWithinTheSameMinuteAs this.created
+        jsonNode["lastChanged"].toLocalDateTime() shouldWithinTheSameMinuteAs this.lastChanged
+        jsonNode["lastUpdatedBy"].asText() shouldBe (lastUpdatedBy?.email ?: author.email)
     }
-    jsonNode["author"].let {
-        it["email"].asText() shouldBe this.author.email
-        it["oid"].asText() shouldBe this.author.oid
-    }
-    withClue("${user.email.str()} has incorrect permissions on report") {
-        jsonNode["hasWriteAccess"].asBoolean() shouldBe shouldHaveWriteAccess
-    }
-    jsonNode["created"].toLocalDateTime() shouldWithinTheSameMinuteAs this.created
-    jsonNode["lastChanged"].toLocalDateTime() shouldWithinTheSameMinuteAs this.lastChanged
-    jsonNode["lastUpdatedBy"].asText() shouldBe (lastUpdatedBy?.email ?: author.email)
 }
 
 private infix fun LocalDateTime.shouldWithinTheSameMinuteAs(date: LocalDateTime) {

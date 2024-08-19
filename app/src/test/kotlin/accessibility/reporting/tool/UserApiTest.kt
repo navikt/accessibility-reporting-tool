@@ -1,9 +1,5 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.OrganizationRepository
-import accessibility.reporting.tool.database.ReportRepository
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.statement.*
@@ -14,35 +10,27 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
-class UserApiTest {
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val reportRepository = ReportRepository(database)
-    private val organizationRepository = OrganizationRepository(database)
-    private val testOrg = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+class UserApiTest: TestApi() {
+
+    private val testOrg = createTestOrg(
         name = "DummyOrg",
-        email = "test@nav.no",
-        members = mutableSetOf()
+        email = "test@nav.no"
     )
 
-    private val testOrg2 = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+    private val testOrg2 = createTestOrg(
         name = "DummyOrg1",
         email = "test@nav1.no",
-        members = mutableSetOf()
     )
 
-    private val testUser = User(
-        email = User.Email(s = "test@test.nav"),
+    private val testUser = TestUser(
+        email =  "test@test.nav",
         name = "Test Testlin",
-        oid = User.Oid(s = "1234568"),
-        groups = listOf()
     )
-    val testReport = dummyReportV2(orgUnit = testOrg, user = testUser, descriptiveName = "report1")
+
+    private val testReport = dummyReportV2(orgUnit = testOrg, user = testUser, descriptiveName = "report1")
     private val initialReports =
         listOf(
             testReport,
@@ -50,7 +38,7 @@ class UserApiTest {
             dummyReportV2(orgUnit = testOrg)
         )
 
-    @BeforeEach()
+    @BeforeEach
     fun populateDb() {
         database.update { queryOf("delete from changelog") }
         database.update { queryOf("delete from report") }
@@ -66,11 +54,11 @@ class UserApiTest {
 
 
     @Test
-    fun `Hent User Summary`() = setupTestApi(database) {
+    fun `Hent User Summary`() = withTestApi {
         client.getWithJwtUser(testUser, "api/users/details").assert {
             status shouldBe HttpStatusCode.OK
             val responseBody = bodyAsText()
-            val jsonResponse = objectmapper.readTree(responseBody)
+            val jsonResponse = testApiObjectmapper.readTree(responseBody)
             println("Response JSON: $jsonResponse")
             jsonResponse["email"].asText() shouldBe testUser.email.str()
             jsonResponse["reports"].toList().assert {

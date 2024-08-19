@@ -8,10 +8,7 @@ import accessibility.reporting.tool.database.PostgresDatabase
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.html.*
 import accessibility.reporting.tool.microfrontends.faqRoute
-import accessibility.reporting.tool.rest.RequestException
-import accessibility.reporting.tool.rest.jsonApiReports
-import accessibility.reporting.tool.rest.jsonapiteams
-import accessibility.reporting.tool.rest.jsonApiUsers
+import accessibility.reporting.tool.rest.*
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*
@@ -66,9 +63,11 @@ fun Application.api(
 
     val log = KotlinLogging.logger { }
     authInstaller()
-    install(MicrometerMetrics) {
+
+    //TODO: Finn ut av metricsbug
+    /*install(MicrometerMetrics) {
         registry = prometehusRegistry
-    }
+    }*/
     install(ContentNegotiation) {
         jackson {
             registerModule(JavaTimeModule())
@@ -127,6 +126,7 @@ fun Application.api(
                 jsonApiReports(organizationRepository = organizationRepository, reportRepository = reportRepository)
                 jsonapiteams(organizationRepository = organizationRepository)
                 jsonApiUsers(organizationRepository = organizationRepository, reportRepository = reportRepository)
+                jsonapiadmin(reportRepository = reportRepository)
             }
         }
         meta(prometehusRegistry)

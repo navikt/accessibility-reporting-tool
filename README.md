@@ -37,3 +37,10 @@ Du kan oppdatere manuelt eller bruke en plugin (f.eks openapi generator for ktor
 ### Unresolved Network Adress når du prøver å starte appen (mac)
 1. Åpne /etc/host `open /etc/hosts`
 2. Legg inn på ny linje: `127.0.0.1 host.docker.internal`
+
+### Could not find a valid Docker environment når du prøver å kjøre tester på mac (med colima)
+
+1. `sudo ln -s $HOME/.docker/run/docker.sock /var/run/docker.sock
+2. `colima stop`
+3. `colima start --network-address`
+

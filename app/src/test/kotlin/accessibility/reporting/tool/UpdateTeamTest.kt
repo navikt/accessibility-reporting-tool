@@ -1,40 +1,24 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.toStringList
-import accessibility.reporting.tool.wcag.OrganizationUnit
 import assert
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
 import kotliquery.queryOf
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UpdateTeamTest {
-    private val testOrg = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+class UpdateTeamTest: TestApi() {
+    private val testOrg = createTestOrg(
         name = "DummyOrg",
-        email = "test@nav.no",
-        members = mutableSetOf()
+        email = "test@nav.no"
     )
-
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = OrganizationRepository(database)
-    private val testUser =
-        User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
-    private val testUser2 =
-        User(User.Email("testuser2@nav.no"), "Test User2", User.Oid(UUID.randomUUID().toString()), groups = listOf())
-
+    private val testUser = TestUser(email = "testuser@nav.no", name = "Test User")
 
     @BeforeAll
     fun setup() {
@@ -56,17 +40,17 @@ class UpdateTeamTest {
     @BeforeEach
     fun populateDb() {
         database.update { queryOf("delete from organization_unit ") }
-        repository.upsertOrganizationUnit(testOrg)
+        organizationRepository.upsertOrganizationUnit(testOrg)
     }
 
     @Test
-    fun `update team`() = setupTestApi(database) {
+    fun `update team`() = withTestApi {
 
         val updateName = "team dolly"
         val updatedTeamName = """
              {
             "id": "${testOrg.id}",
-            "name": "${updateName}"
+            "name": "$updateName"
             }
             """.trimIndent()
 
@@ -79,7 +63,7 @@ class UpdateTeamTest {
 
         val teamNameGetRequest = client.get("api/teams/${testOrg.id}/details")
         teamNameGetRequest.status shouldBe HttpStatusCode.OK
-        val teamNameUpdate = objectmapper.readTree(teamNameGetRequest.bodyAsText())
+        val teamNameUpdate = testApiObjectmapper.readTree(teamNameGetRequest.bodyAsText())
 
         teamNameUpdate["name"].asText() shouldBe updateName
 
@@ -90,7 +74,7 @@ class UpdateTeamTest {
         val updatedEmail = """
              {
             "id": "${testOrg.id}",
-            "email": "${updateEmail}"
+            "email": "$updateEmail"
            }
            
         """.trimIndent()
@@ -103,7 +87,7 @@ class UpdateTeamTest {
 
         val teamEmailGetRequest = client.get("api/teams/${testOrg.id}/details")
         teamEmailGetRequest.status shouldBe HttpStatusCode.OK
-        val teamEmailUpdate = objectmapper.readTree(teamEmailGetRequest.bodyAsText())
+        val teamEmailUpdate = testApiObjectmapper.readTree(teamEmailGetRequest.bodyAsText())
 
         teamEmailUpdate["email"].asText() shouldBe "teamdolly@test.com"
 
@@ -125,7 +109,7 @@ class UpdateTeamTest {
 
         val teamMembersGetRequest = client.get("api/teams/${testOrg.id}/details")
         teamMembersGetRequest.status shouldBe HttpStatusCode.OK
-        val teamMemberUpdate = objectmapper.readTree(teamMembersGetRequest.bodyAsText())
+        val teamMemberUpdate = testApiObjectmapper.readTree(teamMembersGetRequest.bodyAsText())
         teamMemberUpdate["members"].toList().assert {
             this.size shouldBe 1
             first().asText() shouldBe "testuser2@nav.no"

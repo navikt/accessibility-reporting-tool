@@ -1,19 +1,13 @@
 package accessibility.reporting.tool
 
-import accessibility.reporting.tool.authenitcation.User
-import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.wcag.*
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.request.*
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.shouldBe
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotliquery.queryOf
 import org.junit.jupiter.api.*
 import java.time.LocalDateTime
-import java.util.*
 import accessibility.reporting.tool.rest.ResourceNotFoundException
 import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.perceivable
 import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`1-3 Mulig å tilpasse`
@@ -21,27 +15,17 @@ import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.devTools
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UpdateReportTest {
-    private val testOrg = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+class UpdateReportTest: TestApi() {
+    private val testOrg = createTestOrg(
         name = "DummyOrg",
         email = "test@nav.no",
-        members = mutableSetOf()
     )
-    private val testOrg2 = OrganizationUnit(
-        id = UUID.randomUUID().toString(),
+    private val testOrg2 = createTestOrg(
         name = "Team-dolly",
         email = "teamdolly@test.com",
-        members = mutableSetOf()
     )
-    private val database = LocalPostgresDatabase.cleanDb()
-    private val repository = ReportRepository(database)
-    private val testUser =
-        User(User.Email("testuser@nav.no"), "Test User", User.Oid(UUID.randomUUID().toString()), groups = listOf())
+    private val testUser = TestUser(email="testuser@nav.no", name = "Test User")
     private val dummyreport = dummyReportV2(orgUnit = testOrg)
-    private val objectmapper = jacksonObjectMapper().apply {
-        registerModule(JavaTimeModule())
-    }
 
     @BeforeAll
     fun setup() {
@@ -61,11 +45,11 @@ class UpdateReportTest {
 
     @BeforeEach
     fun populateDb() {
-        repository.upsertReport(dummyreport)
+        reportRepository.upsertReport(dummyreport)
     }
 
     @Test
-    fun `partial updates metadata`() = setupTestApi(database) {
+    fun `partial updates metadata`() = withTestApi {
         val newDescriptiveName = "Updated Report Title"
         val updateDescriptiveName = """
         {
@@ -82,7 +66,7 @@ class UpdateReportTest {
 
         val descriptiveNameGetRequest = client.get("api/reports/${dummyreport.reportId}")
         descriptiveNameGetRequest.status shouldBe HttpStatusCode.OK
-        val descriptiveNameUpdate = objectmapper.readTree(descriptiveNameGetRequest.bodyAsText())
+        val descriptiveNameUpdate = testApiObjectmapper.readTree(descriptiveNameGetRequest.bodyAsText())
 
         descriptiveNameUpdate["descriptiveName"].asText() shouldBe "Updated Report Title"
 
@@ -127,7 +111,7 @@ class UpdateReportTest {
 
         val teamUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
         teamUpdateGetRequest.status shouldBe HttpStatusCode.OK
-        val teamUpdate = objectmapper.readTree(teamUpdateGetRequest.bodyAsText())
+        val teamUpdate = testApiObjectmapper.readTree(teamUpdateGetRequest.bodyAsText())
 
         teamUpdate["team"]["name"].asText() shouldBe "Team-dolly"
         teamUpdate["team"]["email"].asText() shouldBe "teamdolly@test.com"
@@ -158,7 +142,7 @@ class UpdateReportTest {
 
         val authorUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
         authorUpdateGetRequest.status shouldBe HttpStatusCode.OK
-        val authorUpdate = objectmapper.readTree(authorUpdateGetRequest.bodyAsText())
+        val authorUpdate = testApiObjectmapper.readTree(authorUpdateGetRequest.bodyAsText())
 
         authorUpdate["author"]["email"].asText() shouldBe "author@test.com"
 
@@ -193,7 +177,7 @@ class UpdateReportTest {
 
         val metadataUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
         metadataUpdateGetRequest.status shouldBe HttpStatusCode.OK
-        val metadataUpdate = objectmapper.readTree(metadataUpdateGetRequest.bodyAsText())
+        val metadataUpdate = testApiObjectmapper.readTree(metadataUpdateGetRequest.bodyAsText())
 
         metadataUpdate["descriptiveName"].asText() shouldBe "Updated Report Title"
         metadataUpdate["team"]["name"].asText() shouldBe "Team-dolly"
@@ -203,7 +187,7 @@ class UpdateReportTest {
     }
 
     @Test
-    fun `partial updates singleCriterion`() = setupTestApi(database) {
+    fun `partial updates singleCriterion`() = withTestApi {
 
         val originalCriteria = 1.perceivable("1.3.1", "Informasjon og relasjoner") {
             description = "Ting skal være kodet som det ser ut som."
@@ -241,7 +225,7 @@ class UpdateReportTest {
 
         val singleCriterionGetRequest = client.get("api/reports/${dummyreport.reportId}")
         singleCriterionGetRequest.status shouldBe HttpStatusCode.OK
-        val singleCriterionUpdateJsonResponse = objectmapper.readTree(singleCriterionGetRequest.bodyAsText())
+        val singleCriterionUpdateJsonResponse = testApiObjectmapper.readTree(singleCriterionGetRequest.bodyAsText())
 
 
         val criteriaList = singleCriterionUpdateJsonResponse["successCriteria"].toList()
@@ -268,7 +252,7 @@ class UpdateReportTest {
     }
 
     @Test
-    fun `partial updates multipleCriteria`() = setupTestApi(database) {
+    fun `partial updates multipleCriteria`() = withTestApi {
 
         val originalCriterion1 = 1.perceivable("1.3.1", "Informasjon og relasjoner") {
             description = "Ting skal være kodet som det ser ut som."
@@ -326,7 +310,7 @@ class UpdateReportTest {
         val multipleCriteriaUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
         multipleCriteriaUpdateGetRequest.status shouldBe HttpStatusCode.OK
         val multipleCriteriaUpdate = multipleCriteriaUpdateGetRequest.bodyAsText()
-        val multipleCriteriaJsonResponse = objectmapper.readTree(multipleCriteriaUpdate)
+        val multipleCriteriaJsonResponse = testApiObjectmapper.readTree(multipleCriteriaUpdate)
 
         val criteriaList = multipleCriteriaJsonResponse["successCriteria"].toList()
         criteriaList.size shouldBe 49
@@ -364,20 +348,5 @@ class UpdateReportTest {
                     && it["number"].asText() != "1.3.2"
         }
         otherCriteria.isNotEmpty() shouldBe true
-    }
-
-    private fun Report.assertExists(jsonNode: JsonNode) {
-        jsonNode["reportId"].asText() shouldBe this.reportId
-        jsonNode["url"].asText() shouldBe this.url
-        jsonNode["descriptiveName"].asText() shouldBe this.descriptiveName
-        jsonNode["team"].let {
-            it["id"].asText() shouldBe this.organizationUnit?.id
-            it["name"].asText() shouldBe this.organizationUnit?.name
-            it["email"].asText() shouldBe this.organizationUnit?.email
-        }
-        jsonNode["author"].let {
-            it["email"].asText() shouldBe this.author.email
-            it["oid"].asText() shouldBe this.author.oid
-        }
     }
 }
