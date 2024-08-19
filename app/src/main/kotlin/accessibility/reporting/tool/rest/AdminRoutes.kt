@@ -2,6 +2,7 @@ package accessibility.reporting.tool.rest
 
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
+import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.rest.Admin.isAdmin
 import accessibility.reporting.tool.wcag.ReportType
@@ -12,7 +13,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.jsonapiadmin(reportRepository: ReportRepository) {
+fun Route.jsonapiadmin(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
     route("admin") {
         install(AdminCheck)
         route("reports") {
@@ -46,6 +47,10 @@ fun Route.jsonapiadmin(reportRepository: ReportRepository) {
                     }
                 }
             }
+        }
+        delete("teams/{id}") {
+            organizationRepository.deleteOrgUnit(call.parameters["id"] ?: throw BadPathParameterException("id"))
+            call.respond(HttpStatusCode.OK)
         }
     }
 }
