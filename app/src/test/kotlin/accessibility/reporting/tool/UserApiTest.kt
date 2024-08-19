@@ -30,12 +30,12 @@ class UserApiTest: TestApi() {
         name = "Test Testlin",
     )
 
-    private val testReport = dummyReportV2(orgUnit = testOrg, user = testUser, descriptiveName = "report1")
+    private val testReport = dummyReportV4(orgUnit = testOrg, user = testUser, descriptiveName = "report1")
     private val initialReports =
         listOf(
             testReport,
-            dummyReportV2(orgUnit = testOrg2),
-            dummyReportV2(orgUnit = testOrg)
+            dummyReportV4(orgUnit = testOrg2),
+            dummyReportV4(orgUnit = testOrg)
         )
 
     @BeforeEach

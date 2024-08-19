@@ -40,19 +40,21 @@ object SucessCriteriaV1 {
         reportId: String,
         url: String,
         user: User,
-        descriptiveName: String
+        descriptiveName: String,
+        isPartOfNavNo:Boolean = true, //TODO
     ) = Report(
         organizationUnit = organizationUnit,
         reportId = reportId,
         successCriteria = criteriaTemplate,
         url = url,
         author = user.toAuthor(),
-        version = Version.V2,
+        version = Version.V4,
         created = LocalDateTimeHelper.nowAtUtc(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = null,
         descriptiveName = descriptiveName,
-        reportType = ReportType.SINGLE
+        reportType = ReportType.SINGLE,
+        isPartOfNavNo = isPartOfNavNo,
     )
 
     private object ContentGroups {

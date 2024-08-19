@@ -22,13 +22,14 @@ class AggregatedReport : Report {
         descriptiveName: String,
         user: User,
         organizationUnit: OrganizationUnit?,
-        reports: List<Report>
+        reports: List<Report>,
+        isPartOfNavNo: Boolean
     ) : super(
         reportId = UUID.randomUUID().toString(),
         url = url,
         descriptiveName = descriptiveName,
         organizationUnit = organizationUnit,
-        version = Version.V2,
+        version = Version.V4,
         author = user.toAuthor(),
         successCriteria = reports.map { report ->
             report.successCriteria.map { criterion ->
@@ -44,7 +45,8 @@ class AggregatedReport : Report {
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         contributors = reports.map { it.contributors }.flatten().toMutableList(),
         lastUpdatedBy = null,
-        reportType = AGGREGATED
+        reportType = AGGREGATED,
+        isPartOfNavNo = isPartOfNavNo
     ) {
         fromReports =
             reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url, it.reportType, it.lastChanged) }
@@ -68,7 +70,8 @@ class AggregatedReport : Report {
         lastChanged = report.lastChanged,
         contributors = report.contributors,
         lastUpdatedBy = report.lastUpdatedBy,
-        reportType = AGGREGATED
+        reportType = AGGREGATED,
+        isPartOfNavNo = report.isPartOfNavNo
     ) {
         this.fromReports = fromReports
         this.fromOrganizations = fromOrganizations

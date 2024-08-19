@@ -158,14 +158,15 @@ class ReportRepositoryTest {
         reportId = id,
         url = url,
         organizationUnit = orgUnit,
-        version = Version.V2,
+        version = Version.V4,
         author = user.toAuthor(),
         successCriteria = Version.V2.criteria,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         created = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = null,
         descriptiveName = "Dummyname",
-        reportType = reportType
+        reportType = reportType,
+        isPartOfNavNo = false,
     )
 
     private fun dummyAggregatedReportV2(
@@ -179,7 +180,8 @@ class ReportRepositoryTest {
             reports = listOf(
                 dummyReportV2(),
                 dummyReportV2(orgUnit = OrganizationUnit("something", "something", "something"))
-            )
+            ),
+            isPartOfNavNo = false,
         )
 
 }

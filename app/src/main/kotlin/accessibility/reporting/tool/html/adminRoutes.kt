@@ -211,7 +211,7 @@ fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository
 
             post {
                 val formParameters = call.receiveParameters()
-
+                //TODO
                 AggregatedReport(
                     url = formParameters["page-url"].toString(),
                     descriptiveName = formParameters["descriptive-name"].toString(),
@@ -220,7 +220,8 @@ fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository
                     },
                     user = call.adminUser,
                     reports = reportRepository.getReports<Report>(ids = formParameters.getAll("report"))
-                        .sortedBy { it.descriptiveName }
+                        .sortedBy { it.descriptiveName },
+                    isPartOfNavNo = true
                 ).let {
                     reportRepository.upsertReportReturning<AggregatedReport>(it)
                 }.apply {

@@ -20,7 +20,7 @@ private val defaultUserEmail = User.Email("tadda@test.tadda")
 private const val defaultUserName = "Tadda Taddasen"
 private val defaultUserOid = User.Oid(UUID.randomUUID().toString())
 
-fun dummyReportV2(
+fun dummyReportV4(
     url: String = "http://dummyurl.test",
     orgUnit: OrganizationUnit? = null,
     user: User = User(email = defaultUserEmail, name = defaultUserName, oid = defaultUserOid, groups = listOf()),
@@ -31,17 +31,18 @@ fun dummyReportV2(
     reportId = id,
     url = url,
     organizationUnit = orgUnit,
-    version = Version.V2,
+    version = Version.V4,
     author = user.toAuthor(),
-    successCriteria = Version.V2.criteria,
+    successCriteria = Version.V4.criteria,
     lastChanged = LocalDateTimeHelper.nowAtUtc(),
     created = LocalDateTimeHelper.nowAtUtc(),
     lastUpdatedBy = null,
     descriptiveName = descriptiveName,
-    reportType = reportType
+    reportType = reportType,
+    isPartOfNavNo = true
 )
 
-fun dummyReportV2(
+fun dummyReportV4(
     url: String = "http://dummyurl.test",
     orgUnit: OrganizationUnit? = null,
     user: TestUser,
@@ -52,14 +53,15 @@ fun dummyReportV2(
     reportId = id,
     url = url,
     organizationUnit = orgUnit,
-    version = Version.V2,
+    version = Version.V4,
     author = user.original.toAuthor(),
-    successCriteria = Version.V2.criteria,
+    successCriteria = Version.V4.criteria,
     lastChanged = LocalDateTimeHelper.nowAtUtc(),
     created = LocalDateTimeHelper.nowAtUtc(),
     lastUpdatedBy = null,
     descriptiveName = descriptiveName,
-    reportType = reportType
+    reportType = reportType,
+    isPartOfNavNo = true
 )
 
 fun dummyAggregatedReportV2(
@@ -73,9 +75,10 @@ fun dummyAggregatedReportV2(
         user = user ?: User(email = defaultUserEmail, name = defaultUserName, oid = defaultUserOid, groups = listOf()),
         organizationUnit = orgUnit,
         reports = listOf(
-            dummyReportV2(),
-            dummyReportV2(orgUnit = OrganizationUnit("something", "something", "something"))
-        )
+            dummyReportV4(),
+            dummyReportV4(orgUnit = OrganizationUnit("something", "something", "something"))
+        ),
+        isPartOfNavNo = false
     )
 
 

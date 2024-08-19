@@ -28,7 +28,7 @@ class TeamApiTest: TestApi() {
         email = "testorganization@nav.no"
     )
 
-    private val testorgsReports = listOf(dummyReportV2(orgUnit = testOrg), dummyReportV2(orgUnit = testOrg))
+    private val testorgsReports = listOf(dummyReportV4(orgUnit = testOrg), dummyReportV4(orgUnit = testOrg))
 
     @BeforeEach()
     fun populateDb() {
@@ -38,7 +38,7 @@ class TeamApiTest: TestApi() {
         testorgsReports.forEach { report ->
             reportRepository.upsertReportReturning<Report>(report)
         }
-        reportRepository.upsertReportReturning<Report>(dummyReportV2(orgUnit = testOrg2))
+        reportRepository.upsertReportReturning<Report>(dummyReportV4(orgUnit = testOrg2))
     }
 
     @Test

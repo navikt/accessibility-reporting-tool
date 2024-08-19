@@ -32,7 +32,7 @@ class GetReportTest : TestApi() {
         teamMember.email.str()
     )
 
-    private val dummyReport = dummyReportV2(orgUnit = testOrg, user = testUser)
+    private val dummyReport = dummyReportV4(orgUnit = testOrg, user = testUser)
 
     private val testUserAdmin = TestUser.createAdminUser(
         email = "admin@test.an",

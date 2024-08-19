@@ -32,7 +32,7 @@ class ApiTest : TestApi() {
         email = "testorganization2@nav.no"
     )
     private val initialReports =
-        listOf(dummyReportV2(orgUnit = testOrg), dummyReportV2(orgUnit = testOrg), dummyReportV2(orgUnit = testOrg))
+        listOf(dummyReportV4(orgUnit = testOrg), dummyReportV4(orgUnit = testOrg), dummyReportV4(orgUnit = testOrg))
 
 
     @BeforeEach()

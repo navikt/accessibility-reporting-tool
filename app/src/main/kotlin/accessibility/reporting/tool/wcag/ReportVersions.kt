@@ -11,6 +11,7 @@ object ReportVersions {
      * Changelog: v1 -> V2 field[user -> author] V2 -> V3 field
      * deleted[filters] field deleted[testData] (fields not in use) Assumptions
      * v3: fields descriptiveName, created and author is always present
+     *v4: new field: isPartOfNavNo, defaults to true in older versions
      */
     fun migrateFromJsonVersion1(jsonNode: JsonNode) = deserialize(
         jsonNode = jsonNode,
@@ -18,6 +19,7 @@ object ReportVersions {
         author = Author.fromJsonOrNull(jsonNode, "user")!!,
         lastChanged = jsonNode.lastChangedOrDefault(),
         created = jsonNode.createdOrDefault(),
+        isPartOfNavNo = true
     )
 
     fun migrateFromJsonVersion2(jsonNode: JsonNode): Report = deserialize(
@@ -25,7 +27,8 @@ object ReportVersions {
         lastChanged = jsonNode.lastChangedOrDefault(),
         descriptiveName = jsonNode.descriptiveNameOrDefault,
         created = jsonNode.createdOrDefault(),
-        author = Author.fromJsonOrNull(jsonNode, "author")!!
+        author = Author.fromJsonOrNull(jsonNode, "author")!!,
+        isPartOfNavNo = true
     )
 
     fun fromJsonVersion3(jsonNode: JsonNode) = deserialize(
@@ -34,6 +37,16 @@ object ReportVersions {
         author = Author.fromJson(jsonNode, "author"),
         created = jsonNode["created"].toLocalDateTime(),
         lastChanged = jsonNode.lastChangedOrDefault(),
+        isPartOfNavNo = true
+    )
+
+    fun fromJsonVersion4(jsonNode: JsonNode) = deserialize(
+        jsonNode = jsonNode,
+        descriptiveName = jsonNode.descriptiveName,
+        author = Author.fromJson(jsonNode, "author"),
+        created = jsonNode["created"].toLocalDateTime(),
+        lastChanged = jsonNode.lastChangedOrDefault(),
+        isPartOfNavNo = jsonNode["isPartOfNavNo"].asBoolean()
     )
 
 
@@ -42,7 +55,8 @@ object ReportVersions {
         lastChanged: LocalDateTime,
         descriptiveName: String,
         created: LocalDateTime,
-        author: Author
+        author: Author,
+        isPartOfNavNo: Boolean
     ) = Report(
         reportId = jsonNode.reportId,
         url = jsonNode.url,
@@ -54,7 +68,8 @@ object ReportVersions {
         lastChanged = lastChanged,
         created = created,
         lastUpdatedBy = Author.fromJsonOrNull(jsonNode, "lastUpdatedBy"),
-        reportType = ReportType.valueFromJson(jsonNode)
+        reportType = ReportType.valueFromJson(jsonNode),
+        isPartOfNavNo = isPartOfNavNo
     )
 
 }
@@ -66,5 +81,6 @@ enum class Version(
 ) {
     V1(ReportVersions::migrateFromJsonVersion1, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion),
     V2(ReportVersions::migrateFromJsonVersion2, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion),
-    V3(ReportVersions::fromJsonVersion3, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion);
+    V3(ReportVersions::fromJsonVersion3, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion),
+    V4(ReportVersions::fromJsonVersion4, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion);
 }

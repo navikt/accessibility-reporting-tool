@@ -41,7 +41,6 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
             val newReport = reportRepository.upsertReport(
                 SucessCriteriaV1.newReport(
-
                     organizationUnit = organizationUnit,
                     reportId = UUID.randomUUID().toString(),
                     url = report.urlTilSiden,

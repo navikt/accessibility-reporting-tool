@@ -25,7 +25,7 @@ class UpdateReportTest: TestApi() {
         email = "teamdolly@test.com",
     )
     private val testUser = TestUser(email="testuser@nav.no", name = "Test User")
-    private val dummyreport = dummyReportV2(orgUnit = testOrg)
+    private val dummyreport = dummyReportV4(orgUnit = testOrg)
 
     @BeforeAll
     fun setup() {
