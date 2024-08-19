@@ -52,7 +52,7 @@ jobs:
       - name: Create new PR
         if: ${{ fromJson(steps.dependency-check.outputs.exitcode) != 0 }}
         run: |
-          git branch -a | awk '/remotes\/origin\/pending-updates/ {split($0,arr,"/"); print arr[3]}' | xargs git push -d origin
+          git branch -a | awk '/remotes\/origin\/pending-updates/ {split($0,arr,"/"); print arr[3]}' |  xargs --no-run-if-empty git push -d origin
           echo "Found ${{ steps.dependency-check.outputs.exitcode }} pending updates, creating PR"
           git config user.email "${{ github.run_id }}+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
