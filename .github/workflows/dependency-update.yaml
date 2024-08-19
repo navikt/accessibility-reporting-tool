@@ -67,6 +67,6 @@ jobs:
       - name: No pending dependency updates
         if: ${{ fromJson(steps.dependency-check.outputs.exitcode) == 0 }}
         run: |
-          git branch -a | awk '/remotes\/origin\/pending-updates/ {split($0,arr,"/"); print arr[3]}' | xargs git push -d origin
+          git branch -a | awk '/remotes\/origin\/pending-updates/ {split($0,arr,"/"); print arr[3]}' | xargs --no-run-if-empty git push -d origin
           echo "Gradle dependency scan at $(date -u +%Y-%m-%dT%H%M) completed without finding any outdated dependencies"
           echo "No outdated dependencies found " >> $GITHUB_STEP_SUMMARY
