@@ -86,7 +86,7 @@ fun Application.mockEmptyAuth() = authentication {
 }
 
 class TestUser(email: String? = null, val name: String, groups: List<String> = listOf()) {
-    private val emailStr: String = email ?: "$name@test.nav"
+    private val emailStr: String = email ?: "${name.replace(" ", ".")}@test.nav"
     val email: User.Email = User.Email(s = emailStr)
     val oid = User.Oid(UUID.randomUUID().toString())
 
@@ -143,7 +143,7 @@ open class TestApi {
         }
 
     companion object {
-       val testApiObjectmapper = jacksonObjectMapper().apply {
+        val testApiObjectmapper = jacksonObjectMapper().apply {
             registerModule(JavaTimeModule())
         }
     }
@@ -153,3 +153,11 @@ class JsonAssertionFailedException(field: String) : Throwable("field $field is n
 
 fun createTestOrg(name: String, email: String, vararg members: String) =
     OrganizationUnit(name = name, email = email, members = members.toMutableSet(), id = UUID.randomUUID().toString())
+
+fun createTestOrg(testUser: TestUser, members: List<User.Email>) =
+    OrganizationUnit(
+        name = "${testUser.name}s org",
+        email = testUser.email.str(),
+        members = members.map { it.str() }.toMutableSet(),
+        id = UUID.randomUUID().toString()
+    )
