@@ -56,7 +56,8 @@ class updateCriteriaTest {
             created = LocalDateTime.now(),
             lastChanged =LocalDateTime.now(),
             lastUpdatedBy =testUser.toAuthor(),
-            reportType =ReportType.SINGLE
+            reportType =ReportType.SINGLE,
+            isPartOfNavNo = true
         )
         val updatedReport = initialReport.updateCriteria(newCriteria,updateBy)
 

@@ -69,9 +69,10 @@ fun Route.reports(reportRepository: ReportRepository, organizationRepository: Or
                 val descriptiveName = formParameters["descriptive-name"].toString()
 
                 val newReportId = UUID.randomUUID().toString()
+                //TODO
                 reportRepository.upsertReport(
                     SucessCriteriaV1.newReport(
-                        organizationUnit, newReportId, url, call.user, descriptiveName
+                        organizationUnit, newReportId, url, call.user, descriptiveName, true
                     )
                 )
                 call.response.header("HX-Redirect", "/reports/$newReportId")

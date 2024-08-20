@@ -4,7 +4,6 @@ import accessibility.reporting.tool.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import assert
 import io.kotest.assertions.withClue
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
@@ -37,9 +36,9 @@ class AdminJsonApiTest : TestApi() {
 
     private val testReports =
         listOf(
-            dummyReportV2(orgUnit = testOrg, user = testUser, descriptiveName = "dummyReport1"),
-            dummyReportV2(orgUnit = testOrg, descriptiveName = "dummyRepoort2"),
-            dummyReportV2(orgUnit = testOrg, descriptiveName = "dummyreport3"),
+            dummyReportV4(orgUnit = testOrg, user = testUser, descriptiveName = "dummyReport1"),
+            dummyReportV4(orgUnit = testOrg, descriptiveName = "dummyRepoort2"),
+            dummyReportV4(orgUnit = testOrg, descriptiveName = "dummyreport3"),
 
             )
 

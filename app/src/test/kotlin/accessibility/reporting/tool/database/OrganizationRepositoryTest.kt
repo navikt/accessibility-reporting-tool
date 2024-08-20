@@ -1,7 +1,7 @@
 package accessibility.reporting.tool.database
 
 import accessibility.reporting.tool.authenitcation.User.Email
-import accessibility.reporting.tool.dummyReportV2
+import accessibility.reporting.tool.dummyReportV4
 import accessibility.reporting.tool.html.toEmail
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.Report
@@ -68,7 +68,7 @@ class OrganizationRepositoryTest {
             OrganizationUnit("some-id-thats-this", "Grandchild unit", "something@nav.no")
 
         repository.upsertOrganizationUnit(testOrg1)
-        repository.upsertReportReturning<Report>(dummyReportV2(orgUnit = testOrg1))
+        repository.upsertReportReturning<Report>(dummyReportV4(orgUnit = testOrg1))
         testOrg1.addMember("testMember@test.ko".toEmail())
         repository.upsertOrganizationUnit(testOrg1)
 
@@ -115,10 +115,10 @@ class OrganizationRepositoryTest {
 
     @Test
     fun `get reports for unit`() {
-        repository.upsertReportReturning<Report>(dummyReportV2(orgUnit = testOrg))
-        repository.upsertReportReturning<Report>(dummyReportV2("http://dummyurl2.test", testOrg))
-        repository.upsertReportReturning<Report>(dummyReportV2("http://dummyurl3.test", testOrg))
-        repository.upsertReportReturning<Report>(dummyReportV2("http://dummyurl4.test", testOrg))
+        repository.upsertReportReturning<Report>(dummyReportV4(orgUnit = testOrg))
+        repository.upsertReportReturning<Report>(dummyReportV4("http://dummyurl2.test", testOrg))
+        repository.upsertReportReturning<Report>(dummyReportV4("http://dummyurl3.test", testOrg))
+        repository.upsertReportReturning<Report>(dummyReportV4("http://dummyurl4.test", testOrg))
 
         repository.getReportForOrganizationUnit<Report>(testOrg.id).assert {
             require(first != null)
