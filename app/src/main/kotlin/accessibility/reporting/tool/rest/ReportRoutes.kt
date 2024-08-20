@@ -20,6 +20,10 @@ import java.util.UUID
 fun Route.jsonApiReports(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
 
     route("reports") {
+        get {
+            call.respond(reportRepository.getReports<ReportListItem>())
+        }
+        //TODO: remove
         get("/list") {
             call.respond(reportRepository.getReports<ReportListItem>())
         }
