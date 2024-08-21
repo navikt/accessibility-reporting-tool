@@ -1,0 +1,12 @@
+Som admin ønsker jeg å kunne slette en rapport uansett hvem som er eier slik at jeg kan vedlikeholde løsningens data
+Som admin ønsker jeg å kunne arkivere ett team slik at data fra utdaterte team ikke blir en del av statistikken
+?Som admin ønsker jeg å kunne se rapporter for arkiverte team slik at jeg kan...
+
+
+Som admin vil jeg kunne se en oversikt over alle samlerapporter slik at jeg kan få en oversikt over UU-tilstanden til organisasjonen og redigere rapporter jeg allerede har opprettet
+Som admin vil jeg kunne lage sammslåtte rapporter slik at jeg kan få ett bedre bilde av UU-tilstanden i organisasjonen
+Som admin vil jeg kunne velge hvilke rapporter jeg vil bruke som datagrunnlag for en ny samslåt rapport slik at jeg kan få en mer granulær oversikt over UU-tilstand i organisasjonen
+Som admin vil jeg kunne velge raporter fra team som datagrunnlag for en en samslått rapport slik at jeg kan få en mer granulær oversikt over UU-tilstand i organisasjonen
+Som admin vil jeg kunne lage en samslått rapport som kun er basert på rapporter fra nav.no domenet slik at jeg kan vite mer om UU-tilstanden spesifikt på nav.no
+Som admin vil jeg kunne bruke en sammslåttrapport som utgangspunkt for en ny rapport slik at jeg kan lage en ny rapport med mindre manuelt arbeid
+Som admin vil jeg kunne lage rapporter basert på domene slik at jeg kan få en oversikt av UU-tilstanden på alle domenene NAV utvikler på
