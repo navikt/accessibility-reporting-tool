@@ -61,7 +61,7 @@ class UpdateTeamTest: TestApi() {
         }
         teamIdPatchRequest.status shouldBe HttpStatusCode.OK
 
-        val teamNameGetRequest = client.get("api/teams/${testOrg.id}/details")
+        val teamNameGetRequest = client.get("api/teams/${testOrg.id}")
         teamNameGetRequest.status shouldBe HttpStatusCode.OK
         val teamNameUpdate = testApiObjectmapper.readTree(teamNameGetRequest.bodyAsText())
 
@@ -85,7 +85,7 @@ class UpdateTeamTest: TestApi() {
         }
         teamEmailPatchRequest.status shouldBe HttpStatusCode.OK
 
-        val teamEmailGetRequest = client.get("api/teams/${testOrg.id}/details")
+        val teamEmailGetRequest = client.get("api/teams/${testOrg.id}")
         teamEmailGetRequest.status shouldBe HttpStatusCode.OK
         val teamEmailUpdate = testApiObjectmapper.readTree(teamEmailGetRequest.bodyAsText())
 
@@ -107,7 +107,7 @@ class UpdateTeamTest: TestApi() {
         }
         teamMemberUpdateRequest.status shouldBe HttpStatusCode.OK
 
-        val teamMembersGetRequest = client.get("api/teams/${testOrg.id}/details")
+        val teamMembersGetRequest = client.get("api/teams/${testOrg.id}")
         teamMembersGetRequest.status shouldBe HttpStatusCode.OK
         val teamMemberUpdate = testApiObjectmapper.readTree(teamMembersGetRequest.bodyAsText())
         teamMemberUpdate["members"].toList().assert {

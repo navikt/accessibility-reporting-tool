@@ -27,7 +27,7 @@ class AdminTeamApiTest : TestApi() {
             status shouldBe HttpStatusCode.OK
         }
 
-        client.getWithJwtUser(testAdmin, "/api/teams/${adminTestOrg.id}/details").assert {
+        client.getWithJwtUser(testAdmin, "/api/teams/${adminTestOrg.id}").assert {
             status shouldBe HttpStatusCode.NotFound
         }
 
@@ -35,14 +35,14 @@ class AdminTeamApiTest : TestApi() {
         client.deleteWithJwtUser(testTeamMember,"/api/admin/teams/${userTestOrg.id}").assert {
             status shouldBe HttpStatusCode.Forbidden
         }
-        client.getWithJwtUser(testAdmin, "/api/teams/${userTestOrg.id}/details").assert {
+        client.getWithJwtUser(testAdmin, "/api/teams/${userTestOrg.id}").assert {
             status shouldBe HttpStatusCode.OK
         }
         client.deleteWithJwtUser(testTeamOwner,"/api/admin/teams/${userTestOrg.id}").assert {
             status shouldBe HttpStatusCode.Forbidden
         }
 
-        client.getWithJwtUser(testAdmin, "/api/teams/${userTestOrg.id}/details").assert {
+        client.getWithJwtUser(testAdmin, "/api/teams/${userTestOrg.id}").assert {
             status shouldBe HttpStatusCode.OK
         }
 
@@ -50,7 +50,7 @@ class AdminTeamApiTest : TestApi() {
             status shouldBe HttpStatusCode.OK
         }
 
-        client.getWithJwtUser(testAdmin, "/api/teams/${userTestOrg.id}/details").assert {
+        client.getWithJwtUser(testAdmin, "/api/teams/${userTestOrg.id}").assert {
             status shouldBe HttpStatusCode.NotFound
         }
 
