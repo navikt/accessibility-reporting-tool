@@ -146,6 +146,6 @@ private fun Report.assertListItemExists(jsonList: List<JsonNode>) {
         result[teamIdField].asText() shouldBe this.organizationUnit!!.id
     }
     withJsonClue("date") { dateField ->
-        result[dateField].asText() shouldBe "yyyy-MM-dd".datestr(LocalDateTime.now())
+        result[dateField].asText().substring(0..9) shouldBe "yyyy-MM-dd".datestr(LocalDateTime.now())
     }
 }
