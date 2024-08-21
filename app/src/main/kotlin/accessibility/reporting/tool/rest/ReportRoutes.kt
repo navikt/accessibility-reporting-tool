@@ -23,22 +23,6 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
         get {
             call.respond(reportRepository.getReports<ReportListItem>())
         }
-        //TODO: remove
-        get("/list") {
-            call.respond(reportRepository.getReports<ReportListItem>())
-        }
-
-        get("/{id}") {
-
-            val id = call.parameters["id"] ?: throw BadRequestException("Missing id")
-
-            val result = reportRepository.getReport<Report>(id)
-                ?.toFullReportWithAccessPolicy(call.userOrNull)
-                ?: throw ResourceNotFoundException("report", id)
-
-            call.respond(result)
-        }
-
         post("/new") {
             val report = call.receive<NewReport>()
             val organizationUnit = organizationRepository.getOrganizationUnit(report.teamId)
@@ -58,6 +42,73 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
             """.trimMargin()
             }
             )
+        }
+        route("{id}") {
+            get {
+                val id = call.parameters["id"] ?: throw BadRequestException("Missing id")
+
+                val result = reportRepository.getReport<Report>(id)
+                    ?.toFullReportWithAccessPolicy(call.userOrNull)
+                    ?: throw ResourceNotFoundException("report", id)
+
+                call.respond(result)
+            }
+            patch {
+                val id = call.parameters["id"] ?: throw BadPathParameterException("Missing id")
+                val updates = call.receive<ReportUpdate>()
+
+                val existingReport =
+                    reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException(type = "Report", id = id)
+
+                var updatedReport = existingReport.copy(
+                    descriptiveName = updates.descriptiveName,
+                    organizationUnit = updates.team,
+                    author = updates.author,
+                    lastChanged = LocalDateTimeHelper.nowAtUtc(),
+                    lastUpdatedBy = call.user.toAuthor()
+                )
+
+                updates.successCriteria?.let { pendingUpdateList ->
+                    val currentCriteria = existingReport.successCriteria
+                    val newCriteria = currentCriteria.map { currentCriterion ->
+                        val updatedCriterion = pendingUpdateList.find { it.number == currentCriterion.number }
+                        if (updatedCriterion != null) {
+                            SuccessCriterion(
+                                name = currentCriterion.name,
+                                description = currentCriterion.description,
+                                principle = currentCriterion.principle,
+                                guideline = currentCriterion.guideline,
+                                tools = currentCriterion.tools,
+                                number = currentCriterion.number,
+                                breakingTheLaw = updatedCriterion.breakingTheLaw ?: currentCriterion.breakingTheLaw,
+                                lawDoesNotApply = updatedCriterion.lawDoesNotApply ?: currentCriterion.lawDoesNotApply,
+                                tooHardToComply = updatedCriterion.tooHardToComply ?: currentCriterion.tooHardToComply,
+                                contentGroup = updatedCriterion.contentGroup ?: currentCriterion.contentGroup,
+                                status = updatedCriterion.status?.let { Status.valueOf(it) }
+                                    ?: currentCriterion.status,
+                                wcagUrl = currentCriterion.wcagUrl,
+                                helpUrl = currentCriterion.helpUrl,
+                                wcagVersion = currentCriterion.wcagVersion
+                            ).apply {
+                                wcagLevel = currentCriterion.wcagLevel
+                            }
+                        } else {
+                            currentCriterion
+                        }
+                    }
+
+                    updatedReport = updatedReport.updateCriteria(newCriteria, call.user)
+                }
+
+                reportRepository.upsertReport(updatedReport)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+
+        //TODO: remove
+        get("/list") {
+            call.respond(reportRepository.getReports<ReportListItem>())
         }
 
         patch("/{id}/update") {
