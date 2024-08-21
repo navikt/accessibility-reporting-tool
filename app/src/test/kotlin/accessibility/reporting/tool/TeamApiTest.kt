@@ -73,6 +73,7 @@ class TeamApiTest: TestApi() {
                 this["members"].toList().map { it.asText() } shouldContainAll testOrg2.members
             }
         }
+        client.get("/api/teams/${testOrg.id}/details").status shouldBe OK
 
         client.get("/api/teams/${testOrg.id}").assert {
             status shouldBe OK

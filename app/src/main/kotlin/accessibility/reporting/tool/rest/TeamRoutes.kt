@@ -33,6 +33,14 @@ fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
                 )
                 call.respond(teamDetails)
             }
+            get("details") {
+                val teamId = call.parameters["id"] ?: throw BadPathParameterException("id")
+                val teamDetails = organizationRepository.getOrganizationUnit(teamId) ?: throw ResourceNotFoundException(
+                    "team",
+                    teamId
+                )
+                call.respond(teamDetails)
+            }
             get("reports") {
                 val teamId = call.parameters["id"] ?: throw BadPathParameterException("id")
                 val reports = organizationRepository.getReportForOrganizationUnit<ReportListItem>(teamId).second
