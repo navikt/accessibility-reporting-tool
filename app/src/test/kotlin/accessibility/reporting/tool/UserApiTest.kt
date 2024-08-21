@@ -12,8 +12,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
-class UserApiTest: TestApi() {
+class UserApiTest : TestApi() {
 
     private val testOrg = createTestOrg(
         name = "DummyOrg",
@@ -26,7 +25,7 @@ class UserApiTest: TestApi() {
     )
 
     private val testUser = TestUser(
-        email =  "test@test.nav",
+        email = "test@test.nav",
         name = "Test Testlin",
     )
 
@@ -55,12 +54,11 @@ class UserApiTest: TestApi() {
 
     @Test
     fun `Hent User Summary`() = withTestApi {
-        client.getWithJwtUser(testUser, "api/users/details").assert {
+        client.getWithJwtUser(testUser, "api/user").assert {
             status shouldBe HttpStatusCode.OK
-            val responseBody = bodyAsText()
-            val jsonResponse = testApiObjectmapper.readTree(responseBody)
-            println("Response JSON: $jsonResponse")
+            val jsonResponse = testApiObjectmapper.readTree(bodyAsText())
             jsonResponse["email"].asText() shouldBe testUser.email.str()
+            jsonResponse["isAdmin"].asBoolean() shouldBe false
             jsonResponse["reports"].toList().assert {
                 this.size shouldBe 1
                 val report = find { jsonNode -> jsonNode["title"].asText() == "report1" }
@@ -79,6 +77,10 @@ class UserApiTest: TestApi() {
                 }
             }
             jsonResponse["name"].asText() shouldBe testUser.name
+        }
+        client.getWithJwtUser(TestUser.createAdminUser(), "api/user").assert {
+            val jsonResponse = testApiObjectmapper.readTree(this.bodyAsText())
+            jsonResponse["isAdmin"].asBoolean() shouldBe true
         }
     }
 }

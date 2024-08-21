@@ -49,7 +49,8 @@ class ApiTest : TestApi() {
 
     @Test
     fun `Returns a summary of of all reports`() = withTestApi {
-        client.get("api/reports/list").assert {
+        client.get("api/reports/list").status shouldBe HttpStatusCode.OK
+        client.get("api/reports").assert {
             status shouldBe HttpStatusCode.OK
             testApiObjectmapper.readTree(bodyAsText()).toList().assert {
                 this.size shouldBe 3

@@ -58,7 +58,7 @@ class UpdateReportTest: TestApi() {
         }
     """.trimIndent()
 
-        val descriptiveNamePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val descriptiveNamePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}") {
             setBody(updateDescriptiveName)
             contentType(ContentType.Application.Json)
         }
@@ -90,7 +90,7 @@ class UpdateReportTest: TestApi() {
         }
     """.trimIndent()
 
-        val teamUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val teamUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}") {
             setBody(updateTeam)
             contentType(ContentType.Application.Json)
         }
@@ -134,7 +134,7 @@ class UpdateReportTest: TestApi() {
         }
     """.trimIndent()
 
-        val authorUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val authorUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}") {
             setBody(updateAuthor)
             contentType(ContentType.Application.Json)
         }
@@ -169,7 +169,7 @@ class UpdateReportTest: TestApi() {
             "lastChanged": "${LocalDateTime.now()}"
                 }""".trimMargin()
 
-        val metadataUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val metadataUpdatePatchRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}") {
             setBody(metadataTest)
             contentType(ContentType.Application.Json)
         }
@@ -217,7 +217,7 @@ class UpdateReportTest: TestApi() {
         }
     """.trimIndent()
 
-        val singleCriterionUpdateRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val singleCriterionUpdateRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}") {
             setBody(singleCriterionUpdate)
             contentType(ContentType.Application.Json)
         }
@@ -301,7 +301,7 @@ class UpdateReportTest: TestApi() {
         }
     """.trimIndent()
 
-        val multipleCriteriaUpdateRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}/update") {
+        val multipleCriteriaUpdateRequest = client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}") {
             setBody(updatedMultipleCriteria)
             contentType(ContentType.Application.Json)
         }

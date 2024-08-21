@@ -55,13 +55,13 @@ class UpdateTeamTest: TestApi() {
             """.trimIndent()
 
 
-        val teamIdPatchRequest = client.putWithJwtUser(testUser, "api/teams/${testOrg.id}/update") {
+        val teamIdPatchRequest = client.patchWithJwtUser(testUser, "api/teams/${testOrg.id}") {
             setBody(updatedTeamName)
             contentType(ContentType.Application.Json)
         }
         teamIdPatchRequest.status shouldBe HttpStatusCode.OK
 
-        val teamNameGetRequest = client.get("api/teams/${testOrg.id}/details")
+        val teamNameGetRequest = client.get("api/teams/${testOrg.id}")
         teamNameGetRequest.status shouldBe HttpStatusCode.OK
         val teamNameUpdate = testApiObjectmapper.readTree(teamNameGetRequest.bodyAsText())
 
@@ -79,13 +79,13 @@ class UpdateTeamTest: TestApi() {
            
         """.trimIndent()
 
-        val teamEmailPatchRequest = client.putWithJwtUser(testUser, "api/teams/${testOrg.id}/update") {
+        val teamEmailPatchRequest = client.patchWithJwtUser(testUser, "api/teams/${testOrg.id}") {
             setBody(updatedEmail)
             contentType(ContentType.Application.Json)
         }
         teamEmailPatchRequest.status shouldBe HttpStatusCode.OK
 
-        val teamEmailGetRequest = client.get("api/teams/${testOrg.id}/details")
+        val teamEmailGetRequest = client.get("api/teams/${testOrg.id}")
         teamEmailGetRequest.status shouldBe HttpStatusCode.OK
         val teamEmailUpdate = testApiObjectmapper.readTree(teamEmailGetRequest.bodyAsText())
 
@@ -101,13 +101,13 @@ class UpdateTeamTest: TestApi() {
             }
         """.trimIndent()
 
-        val teamMemberUpdateRequest = client.putWithJwtUser(testUser, "api/teams/${testOrg.id}/update") {
+        val teamMemberUpdateRequest = client.patchWithJwtUser(testUser, "api/teams/${testOrg.id}") {
             setBody(updatedMembers)
             contentType(ContentType.Application.Json)
         }
         teamMemberUpdateRequest.status shouldBe HttpStatusCode.OK
 
-        val teamMembersGetRequest = client.get("api/teams/${testOrg.id}/details")
+        val teamMembersGetRequest = client.get("api/teams/${testOrg.id}")
         teamMembersGetRequest.status shouldBe HttpStatusCode.OK
         val teamMemberUpdate = testApiObjectmapper.readTree(teamMembersGetRequest.bodyAsText())
         teamMemberUpdate["members"].toList().assert {

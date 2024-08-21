@@ -25,10 +25,13 @@ fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
         }
 
         route("{id}") {
-            get("reports") {
+            get {
                 val teamId = call.parameters["id"] ?: throw BadPathParameterException("id")
-                val reports = organizationRepository.getReportForOrganizationUnit<ReportListItem>(teamId).second
-                call.respond(reports)
+                val teamDetails = organizationRepository.getOrganizationUnit(teamId) ?: throw ResourceNotFoundException(
+                    "team",
+                    teamId
+                )
+                call.respond(teamDetails)
             }
             get("details") {
                 val teamId = call.parameters["id"] ?: throw BadPathParameterException("id")
@@ -37,6 +40,25 @@ fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
                     teamId
                 )
                 call.respond(teamDetails)
+            }
+            get("reports") {
+                val teamId = call.parameters["id"] ?: throw BadPathParameterException("id")
+                val reports = organizationRepository.getReportForOrganizationUnit<ReportListItem>(teamId).second
+                call.respond(reports)
+            }
+
+            patch {
+                val id = call.parameters["id"] ?: throw BadPathParameterException("id")
+                val updates = call.receive<TeamUpdate>()
+
+                val existingTeam = organizationRepository.getOrganizationUnit(id) ?: throw ResourceNotFoundException(
+                    type = "Team",
+                    id = id
+                )
+
+                val result = organizationRepository.upsertOrganizationUnit(existingTeam.update(updates))
+                call.respond(HttpStatusCode.OK, result)
+
             }
             put("update") {
                 val id = call.parameters["id"] ?: throw BadPathParameterException("id")
@@ -53,6 +75,7 @@ fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
         }
     }
 }
+
 data class NewTeam(
     val name: String,
     val email: String,

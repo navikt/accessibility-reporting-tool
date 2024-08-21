@@ -64,7 +64,7 @@ class TeamApiTest: TestApi() {
         testOrg2.addMember(Email("tadda3@nav.no"))
         organizationRepository.upsertOrganizationUnit(testOrg2)
 
-        client.get("/api/teams/${testOrg2.id}/details").assert {
+        client.get("/api/teams/${testOrg2.id}").assert {
             status shouldBe OK
             testApiObjectmapper.readTree(bodyAsText()).assert {
                 this["id"].asText() shouldBe testOrg2.id
@@ -73,8 +73,9 @@ class TeamApiTest: TestApi() {
                 this["members"].toList().map { it.asText() } shouldContainAll testOrg2.members
             }
         }
+        client.get("/api/teams/${testOrg.id}/details").status shouldBe OK
 
-        client.get("/api/teams/${testOrg.id}/details").assert {
+        client.get("/api/teams/${testOrg.id}").assert {
             status shouldBe OK
             testApiObjectmapper.readTree(bodyAsText()).assert {
                 this["id"].asText() shouldBe testOrg.id
@@ -84,7 +85,7 @@ class TeamApiTest: TestApi() {
             }
         }
 
-        client.get("/api/teams/no-exists/details").status shouldBe NotFound
+        client.get("/api/teams/no-exists").status shouldBe NotFound
     }
 }
 
