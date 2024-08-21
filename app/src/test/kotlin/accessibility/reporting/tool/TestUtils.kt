@@ -103,7 +103,7 @@ class TestUser(email: String? = null, val name: String, groups: List<String> = l
     val capitalized = original.copy(email = User.Email(emailStr.replaceFirstChar(Char::titlecase)))
 
     companion object {
-        fun createAdminUser(email: String? = null, name: String) = TestUser(email, name, listOf("test_admin"))
+        fun createAdminUser(email: String? = null, name: String="Admin adminson") = TestUser(email, name, listOf("test_admin"))
     }
 }
 

@@ -10,6 +10,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.jsonApiUsers(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
+    //TODO remove
     route("users") {
         get("details") {
             val reports = reportRepository.getReportsForUser<ReportListItem>(call.user.oid)
@@ -20,6 +21,15 @@ fun Route.jsonApiUsers(reportRepository: ReportRepository, organizationRepositor
             call.respond(userDetails)
         }
     }
+
+    get("user") {
+        val reports = reportRepository.getReportsForUser<ReportListItem>(call.user.oid)
+            .sortedBy { it.descriptiveName?.lowercase() ?: it.url }
+        val teams = organizationRepository.getOrganizationForUser(call.user.email)
+        val userDetails =
+            UserDetails(call.user, reports = reports, teams = teams)
+        call.respond(userDetails)
+    }
 }
 
 class UserDetails(
@@ -29,5 +39,6 @@ class UserDetails(
 ) {
     val name = user.name
     val email = user.email
+    val isAdmin = Admin.isAdmin(user)
 }
 
