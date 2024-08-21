@@ -33,7 +33,8 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                     reportId = UUID.randomUUID().toString(),
                     url = report.urlTilSiden,
                     user = call.user,
-                    descriptiveName = report.name
+                    descriptiveName = report.name,
+                    isPartOfNavNo = report.isPartOfNavNo ?: true
                 )
             )
             call.respondText(status = HttpStatusCode.OK, provider = {
@@ -164,7 +165,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
     }
 }
 
-data class NewReport(val name: String, val urlTilSiden: String, val teamId: String)
+class NewReport(val name: String, val urlTilSiden: String, val teamId: String, val isPartOfNavNo: Boolean? = null)
 
 class FullReportWithAccessPolicy(
     override val reportId: String,
@@ -178,7 +179,8 @@ class FullReportWithAccessPolicy(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     val lastChanged: LocalDateTime,
     val hasWriteAccess: Boolean,
-    val lastUpdatedBy: String
+    val lastUpdatedBy: String,
+    val isPartOfNavNo: Boolean,
 ) : ReportContent
 
 data class ReportUpdate(
@@ -187,7 +189,8 @@ data class ReportUpdate(
     val author: Author? = null,
     val created: String? = null,
     val lastChanged: String? = null,
-    val successCriteria: List<SuccessCriterionUpdate>? = null
+    val successCriteria: List<SuccessCriterionUpdate>? = null,
+    val isPartOfNavNo: Boolean? = null
 )
 
 data class SuccessCriterionUpdate(
@@ -210,6 +213,7 @@ fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy
         created = this.created,
         lastChanged = this.lastChanged,
         hasWriteAccess = this.writeAccess(user),
-        lastUpdatedBy = lastUpdatedBy?.email ?: author.email
+        lastUpdatedBy = lastUpdatedBy?.email ?: author.email,
+        isPartOfNavNo = this.isPartOfNavNo,
     )
 }

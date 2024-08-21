@@ -25,7 +25,8 @@ class ReportTest {
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
             user = testUser,
-            descriptiveName = "Some name"
+            descriptiveName = "Some name",
+            isPartOfNavNo = false
         )
 
         testReport.findCriterion("1.1.1") shouldBe SucessCriteriaV1.criteriaTemplate.first()
@@ -41,7 +42,8 @@ class ReportTest {
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
             user = testUser,
-            descriptiveName = "some name 2"
+            descriptiveName = "some name 2",
+            isPartOfNavNo = false
         )
 
         val testUpdatedCriterion = SucessCriteriaV1.criteriaTemplate.find { it.number == "1.3.2" }!!.copy(
@@ -111,7 +113,8 @@ class ReportTest {
             reportId = UUID.randomUUID().toString(),
             url = "https://test.nav.no",
             user = testUser,
-            descriptiveName = "Some name"
+            descriptiveName = "Some name",
+            isPartOfNavNo = true
         )
         testReport.writeAccess(testUser) shouldBe true
         testReport.writeAccess(memberUser) shouldBe false

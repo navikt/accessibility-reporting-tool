@@ -57,7 +57,8 @@ class CreateReportTest: TestApi() {
                 """{
                     "name": "Rrrreport",
                     "urlTilSiden": "https://some.page.nav.no",
-                    "teamId": "${testOrg.id}"
+                    "teamId": "${testOrg.id}",
+                    "isPartOfNavNo": "false"
                     }
                     
                 """.trimMargin()
@@ -71,6 +72,7 @@ class CreateReportTest: TestApi() {
             testApiObjectmapper.readTree(bodyAsText()).assert {
                 this["author"]["email"].asText() shouldBe testUser.original.email.str()
                 this["hasWriteAccess"].asBoolean() shouldBe true
+                this["isPartOfNavNo"].asBoolean() shouldBe false
             }
         }
 

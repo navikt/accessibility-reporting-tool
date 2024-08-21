@@ -15,7 +15,7 @@ import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.devTools
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UpdateReportTest: TestApi() {
+class UpdateReportTest : TestApi() {
     private val testOrg = createTestOrg(
         name = "DummyOrg",
         email = "test@nav.no",
@@ -24,7 +24,7 @@ class UpdateReportTest: TestApi() {
         name = "Team-dolly",
         email = "teamdolly@test.com",
     )
-    private val testUser = TestUser(email="testuser@nav.no", name = "Test User")
+    private val testUser = TestUser(email = "testuser@nav.no", name = "Test User")
     private val dummyreport = dummyReportV4(orgUnit = testOrg)
 
     @BeforeAll
@@ -73,8 +73,6 @@ class UpdateReportTest: TestApi() {
         descriptiveNameUpdate["team"]["name"].asText() shouldBe dummyreport.organizationUnit!!.name
         descriptiveNameUpdate["author"]["email"].asText() shouldBe dummyreport.author.email
         descriptiveNameUpdate["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
-        /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
 
         val newTeamId = testOrg2.id
         val newTeamName = testOrg2.name
@@ -86,7 +84,8 @@ class UpdateReportTest: TestApi() {
                 "id": "${newTeamId}",
                 "name": "${newTeamName}",
                 "email": "${newTeamEmail}"
-            }
+            },
+            "isPartOfNavNo":"false"
         }
     """.trimIndent()
 
@@ -95,19 +94,6 @@ class UpdateReportTest: TestApi() {
             contentType(ContentType.Application.Json)
         }
         teamUpdatePatchRequest.status shouldBe HttpStatusCode.OK
-
-        database.update {
-            queryOf(
-                """INSERT INTO organization_unit (organization_unit_id, name, email) 
-                    VALUES (:id,:name, :email) 
-                """.trimMargin(),
-                mapOf(
-                    "id" to newTeamId,
-                    "name" to newTeamName,
-                    "email" to newTeamEmail
-                )
-            )
-        }
 
         val teamUpdateGetRequest = client.get("api/reports/${dummyreport.reportId}")
         teamUpdateGetRequest.status shouldBe HttpStatusCode.OK
@@ -119,8 +105,7 @@ class UpdateReportTest: TestApi() {
         teamUpdate["descriptiveName"].asText() shouldBe newDescriptiveName
         teamUpdate["author"]["email"].asText() shouldBe dummyreport.author.email
         teamUpdate["successCriteria"].toList().size shouldBe dummyreport.successCriteria.size
-        /*updatedJsonResponse5["created"].asText() shouldBe dummyreport.created
-        updatedJsonResponse5["lastChanged"].asText() shouldBe dummyreport.lastChanged*/
+        teamUpdate["isPartOfNavNo"].asBoolean() shouldBe true
 
 
         val newAuthorEmail = "author@test.com"

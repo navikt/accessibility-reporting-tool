@@ -41,7 +41,7 @@ object SucessCriteriaV1 {
         url: String,
         user: User,
         descriptiveName: String,
-        isPartOfNavNo:Boolean = true, //TODO
+        isPartOfNavNo:Boolean
     ) = Report(
         organizationUnit = organizationUnit,
         reportId = reportId,
