@@ -15,7 +15,7 @@ class ReportListItem(
     override val url: String,
     val teamId: String,
     val teamName:String,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     @JsonProperty("date")
     val lastChanged: LocalDateTime
 ) : ReportContent {

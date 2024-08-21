@@ -94,6 +94,6 @@ private fun Report.assertListItemExists(jsonList: List<JsonNode>) {
     require(result != null) { "Could not find report with id $reportId! Available nodes: ${jsonList.map { it.toString() }}" }
     result["teamId"].asText() shouldBe organizationUnit!!.id
     result["title"].asText() shouldBe descriptiveName
-    result["date"].asText() shouldBe "yyyy-MM-dd".datestr(lastChanged)
+    result["date"].asText().substring(0..9) shouldBe "yyyy-MM-dd".datestr(lastChanged)
 
 }

@@ -65,7 +65,7 @@ class UserApiTest : TestApi() {
                 require(report != null)
                 report["title"].asText() shouldBe testReport.descriptiveName
                 report["id"].asText() shouldBe testReport.reportId
-                report["date"].asText() shouldBe "yyyy-MM-dd".today()
+                report["date"].asText().substring(0..9) shouldBe "yyyy-MM-dd".today()
                 report["teamId"].asText() shouldBe testReport.organizationUnit!!.id
             }
             jsonResponse["teams"].toList().assert {
