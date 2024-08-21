@@ -38,6 +38,20 @@ fun Route.jsonapiteams(organizationRepository: OrganizationRepository) {
                 val reports = organizationRepository.getReportForOrganizationUnit<ReportListItem>(teamId).second
                 call.respond(reports)
             }
+
+            patch {
+                val id = call.parameters["id"] ?: throw BadPathParameterException("id")
+                val updates = call.receive<TeamUpdate>()
+
+                val existingTeam = organizationRepository.getOrganizationUnit(id) ?: throw ResourceNotFoundException(
+                    type = "Team",
+                    id = id
+                )
+
+                val result = organizationRepository.upsertOrganizationUnit(existingTeam.update(updates))
+                call.respond(HttpStatusCode.OK, result)
+
+            }
             put("update") {
                 val id = call.parameters["id"] ?: throw BadPathParameterException("id")
                 val updates = call.receive<TeamUpdate>()

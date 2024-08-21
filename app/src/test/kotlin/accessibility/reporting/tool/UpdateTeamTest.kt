@@ -55,7 +55,7 @@ class UpdateTeamTest: TestApi() {
             """.trimIndent()
 
 
-        val teamIdPatchRequest = client.putWithJwtUser(testUser, "api/teams/${testOrg.id}/update") {
+        val teamIdPatchRequest = client.patchWithJwtUser(testUser, "api/teams/${testOrg.id}") {
             setBody(updatedTeamName)
             contentType(ContentType.Application.Json)
         }
@@ -79,7 +79,7 @@ class UpdateTeamTest: TestApi() {
            
         """.trimIndent()
 
-        val teamEmailPatchRequest = client.putWithJwtUser(testUser, "api/teams/${testOrg.id}/update") {
+        val teamEmailPatchRequest = client.patchWithJwtUser(testUser, "api/teams/${testOrg.id}") {
             setBody(updatedEmail)
             contentType(ContentType.Application.Json)
         }
@@ -101,7 +101,7 @@ class UpdateTeamTest: TestApi() {
             }
         """.trimIndent()
 
-        val teamMemberUpdateRequest = client.putWithJwtUser(testUser, "api/teams/${testOrg.id}/update") {
+        val teamMemberUpdateRequest = client.patchWithJwtUser(testUser, "api/teams/${testOrg.id}") {
             setBody(updatedMembers)
             contentType(ContentType.Application.Json)
         }
