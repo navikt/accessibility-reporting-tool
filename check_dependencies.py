@@ -10,7 +10,7 @@ json_file_name = 'app/build/dependencyUpdates/dependencies.json'
 date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 dependency_log_file = f'dependency_updates/{datetime.now().strftime("%Y-%m")}.txt'
 dependency_definition_file = "buildSrc/src/main/kotlin/dependencies/Groups.kt"
-ignore_list = ["org.jetbrains.kotlin", "org.gradle.kotlin.kotlin-dsl"]
+ignore_list = ["org.jetbrains.kotlin", "org.gradle.kotlin.kotlin-dsl","io.micrometer"]
 
 
 def run_checks():
