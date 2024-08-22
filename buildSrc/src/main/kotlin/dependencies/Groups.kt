@@ -15,7 +15,7 @@ object Kotlin {
     const val VERSION = "1.9.23"
 }
 object Database {
-    object Flyway : Dependency(version = "10.17.0", groupId = "org.flywaydb") {
+    object Flyway : Dependency(version = "10.17.1", groupId = "org.flywaydb") {
 
         val core = dependency("flyway-core")
         val postgres = dependency("flyway-database-postgresql")
@@ -33,7 +33,7 @@ object Jackson : Dependency(version = "2.17.2", groupId = "com.fasterxml.jackson
     val datatypeJsr310 = dependency("jackson-datatype-jsr310", ".datatype")
 }
 
-object Logback : Dependency(version = "1.5.6", groupId = "ch.qos.logback") {
+object Logback : Dependency(version = "1.5.7", groupId = "ch.qos.logback") {
 
     val logbackCore = dependency("logback-core")
     val logbackClassic = dependency("logback-classic")
@@ -74,7 +74,7 @@ object Testdependencies {
         val assertionsCore = dependency("kotest-assertions-core")
     }
 
-    object Jupiter : Dependency("5.10.3", "org.junit.jupiter") {
+    object Jupiter : Dependency("5.11.0", "org.junit.jupiter") {
         private const val ENGINE_ARTIFACT_ID = "junit-jupiter-engine"
 
         val engine = dependency(ENGINE_ARTIFACT_ID)
