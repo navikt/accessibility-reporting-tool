@@ -135,6 +135,7 @@ class GetReportTest : TestApi() {
         jsonNode["lastChanged"].toLocalDateTime() shouldWithinTheSameMinuteAs this.lastChanged
         jsonNode["lastUpdatedBy"].asText() shouldBe (lastUpdatedBy?.email ?: author.email)
         jsonNode["isPartOfNavNo"].asBoolean() shouldBe true
+        jsonNode["notes"].asText() shouldBe this.notes
     }
 }
 

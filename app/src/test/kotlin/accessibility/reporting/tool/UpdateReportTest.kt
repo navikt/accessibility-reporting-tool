@@ -334,4 +334,24 @@ class UpdateReportTest : TestApi() {
         }
         otherCriteria.isNotEmpty() shouldBe true
     }
+
+    @Test
+    fun `updates notes`() = withTestApi {
+        val newNotes = "Here are some notes that are noted"
+
+        client.get("api/reports/${dummyreport.reportId}").let {
+            testApiObjectmapper.readTree(it.bodyAsText())
+        }["notes"].asText() shouldBe ""
+
+        client.patchWithJwtUser(testUser, "api/reports/${dummyreport.reportId}") {
+            setBody(
+                """{"notes": "$newNotes" }""".trimIndent()
+            )
+            contentType(ContentType.Application.Json)
+        }.status shouldBe HttpStatusCode.OK
+
+        val updatedReport = client.get("api/reports/${dummyreport.reportId}")
+        updatedReport.status shouldBe HttpStatusCode.OK
+        testApiObjectmapper.readTree(updatedReport.bodyAsText())["notes"].asText() shouldBe newNotes
+    }
 }

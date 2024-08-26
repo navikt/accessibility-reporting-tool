@@ -73,6 +73,7 @@ class CreateReportTest: TestApi() {
                 this["author"]["email"].asText() shouldBe testUser.original.email.str()
                 this["hasWriteAccess"].asBoolean() shouldBe true
                 this["isPartOfNavNo"].asBoolean() shouldBe false
+                this["notes"].asText() shouldBe ""
             }
         }
 

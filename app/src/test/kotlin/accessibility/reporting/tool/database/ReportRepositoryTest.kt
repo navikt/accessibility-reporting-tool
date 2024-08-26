@@ -106,7 +106,12 @@ class ReportRepositoryTest {
         reportRepository.upsertReport(aggregatedTestReport)
         reportRepository.upsertReport(dummyAggregatedReportV2(orgUnit = testOrg))
 
-        reportRepository.getReports<Report>(ids = listOf(aggregatedTestReport.reportId, testReport.reportId)).size shouldBe 2
+        reportRepository.getReports<Report>(
+            ids = listOf(
+                aggregatedTestReport.reportId,
+                testReport.reportId
+            )
+        ).size shouldBe 2
         reportRepository.getReports<AggregatedReport>(ids = listOf(aggregatedTestReport.reportId)).size shouldBe 1
     }
 
@@ -158,7 +163,7 @@ class ReportRepositoryTest {
         reportId = id,
         url = url,
         organizationUnit = orgUnit,
-        version = Version.V4,
+        version = Version.V5,
         author = user.toAuthor(),
         successCriteria = Version.V2.criteria,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
@@ -167,6 +172,7 @@ class ReportRepositoryTest {
         descriptiveName = "Dummyname",
         reportType = reportType,
         isPartOfNavNo = false,
+        notes = ""
     )
 
     private fun dummyAggregatedReportV2(

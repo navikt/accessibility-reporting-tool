@@ -31,15 +31,16 @@ fun dummyReportV4(
     reportId = id,
     url = url,
     organizationUnit = orgUnit,
-    version = Version.V4,
+    version = Version.V5,
     author = user.toAuthor(),
-    successCriteria = Version.V4.criteria,
+    successCriteria = Version.V5.criteria,
     lastChanged = LocalDateTimeHelper.nowAtUtc(),
     created = LocalDateTimeHelper.nowAtUtc(),
     lastUpdatedBy = null,
     descriptiveName = descriptiveName,
     reportType = reportType,
-    isPartOfNavNo = true
+    isPartOfNavNo = true,
+    notes = ""
 )
 
 fun dummyReportV4(
@@ -53,15 +54,16 @@ fun dummyReportV4(
     reportId = id,
     url = url,
     organizationUnit = orgUnit,
-    version = Version.V4,
+    version = Version.V5,
     author = user.original.toAuthor(),
-    successCriteria = Version.V4.criteria,
+    successCriteria = Version.V5.criteria,
     lastChanged = LocalDateTimeHelper.nowAtUtc(),
     created = LocalDateTimeHelper.nowAtUtc(),
     lastUpdatedBy = null,
     descriptiveName = descriptiveName,
     reportType = reportType,
-    isPartOfNavNo = true
+    isPartOfNavNo = true,
+    notes = ""
 )
 
 fun dummyAggregatedReportV2(
