@@ -15,7 +15,7 @@ object Kotlin {
     const val VERSION = "1.9.23"
 }
 object Database {
-    object Flyway : Dependency(version = "10.17.1", groupId = "org.flywaydb") {
+    object Flyway : Dependency(version = "10.17.2", groupId = "org.flywaydb") {
 
         val core = dependency("flyway-core")
         val postgres = dependency("flyway-database-postgresql")
@@ -23,7 +23,7 @@ object Database {
 
     const val KOTLIQUERY = "com.github.seratch:kotliquery:1.9.0"
     const val HIKARI = "com.zaxxer:HikariCP:5.1.0"
-    const val POSTGRES = "org.postgresql:postgresql:42.7.3"
+    const val POSTGRES = "org.postgresql:postgresql:42.7.4"
 }
 
 object Jackson : Dependency(version = "2.17.2", groupId = "com.fasterxml.jackson") {
@@ -82,12 +82,3 @@ object Testdependencies {
         val params = dependency("junit-jupiter-params")
     }
 }
-/*
-2024-08-27 06:22:49: 3 outdated dependencies
-org.flywaydb:  10.17.1 -> 10.17.2
-org.flywaydb:  10.17.1 -> 10.17.2
-org.postgresql:  42.7.3 -> 42.7.4
-**Ignored dependencies
-org.jetbrains.kotlin
-org.gradle.kotlin.kotlin-dsl
-io.micrometer
