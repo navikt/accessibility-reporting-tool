@@ -118,14 +118,16 @@ open class Report(
     open fun withUpdatedMetadata(
         title: String? = null,
         pageUrl: String? = null,
-        organizationUnit: OrganizationUnit?,
-        updateBy: User
+        notes: String? = null,
+        organizationUnit: OrganizationUnit? = null,
+        updateBy: User,
     ) = copy(
         url = pageUrl ?: url,
         descriptiveName = title ?: descriptiveName,
         organizationUnit = organizationUnit ?: this.organizationUnit,
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = updateBy.toAuthor(),
+        notes = notes ?: this.notes
     ).apply { if (!isOwner(updateBy)) contributors.add(updateBy.toAuthor()) }
 
     fun isOwner(callUser: User): Boolean =

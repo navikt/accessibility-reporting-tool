@@ -49,6 +49,11 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                 val id = call.reportId
 
                 val result = reportRepository.getReport<Report>(id)
+                    ?.also {
+                        if (it.reportType == ReportType.AGGREGATED) {
+                            throw BadRequestException("Rapport med $id er en samlerapport, tilgjengelig på api/reports/aggregated/$id")
+                        }
+                    }
                     ?.toFullReportWithAccessPolicy(call.userOrNull)
                     ?: throw ResourceNotFoundException("report", id)
 

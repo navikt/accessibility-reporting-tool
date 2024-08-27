@@ -87,18 +87,6 @@ suspend fun HttpClient.postWithJwtUser(user: TestUser, urlString: String, block:
         header("Origin","https://fuck.this.shitt")
     }
 
-suspend fun HttpClient.putWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
-    put(urlString) {
-        block()
-        header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
-    }
-
-suspend fun HttpClient.putWithJwtUser(user: TestUser, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
-    put(urlString) {
-        block()
-        header("Authorization", "Bearer ${JwtConfig.generateToken(user.original)}")
-    }
-
 suspend fun HttpClient.deleteWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     delete(urlString) {
         block()

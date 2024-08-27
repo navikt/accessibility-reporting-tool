@@ -82,14 +82,22 @@ class AggregatedReport : Report {
     override fun withUpdatedCriterion(criterion: SuccessCriterion, updateBy: User): AggregatedReport =
         AggregatedReport(super.withUpdatedCriterion(criterion, updateBy), fromReports, fromOrganizations)
 
+
     override fun withUpdatedMetadata(
         title: String?,
         pageUrl: String?,
+        notes: String?,
         organizationUnit: OrganizationUnit?,
-        updateBy: User
+        updateBy: User,
     ): AggregatedReport =
         AggregatedReport(
-            super.withUpdatedMetadata(title, pageUrl, organizationUnit, updateBy),
+            super.withUpdatedMetadata(
+                title = title,
+                pageUrl = pageUrl,
+                notes = notes,
+                updateBy = updateBy,
+                organizationUnit = organizationUnit
+            ),
             fromReports,
             fromOrganizations
         )
