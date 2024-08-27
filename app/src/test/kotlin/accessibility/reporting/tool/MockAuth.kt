@@ -6,6 +6,7 @@ import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -74,6 +75,7 @@ suspend fun HttpClient.getWithJwtUser(user: TestUser, urlString: String, block: 
 suspend fun HttpClient.postWithJwtUser(user: User, urlString: String, block: HttpRequestBuilder.() -> Unit = {}) =
     post(urlString) {
         block()
+        contentType(ContentType.Application.Json)
         header("Authorization", "Bearer ${JwtConfig.generateToken(user)}")
         header("Origin","https://fuck.this.shitt")
     }

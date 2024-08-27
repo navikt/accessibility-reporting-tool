@@ -3,6 +3,7 @@ package accessibility.reporting.tool.wcag
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.Admins
 import accessibility.reporting.tool.database.LocalDateTimeHelper
+import accessibility.reporting.tool.rest.FullReportWithAccessPolicy
 import accessibility.reporting.tool.rest.NewTeam
 import accessibility.reporting.tool.rest.TeamUpdate
 import com.fasterxml.jackson.databind.JsonNode
@@ -138,6 +139,22 @@ open class Report(
         else -> false
     }
 
+    fun toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy {
+        return FullReportWithAccessPolicy(
+            reportId = this.reportId,
+            descriptiveName = this.descriptiveName,
+            url = this.url,
+            team = this.organizationUnit,
+            author = this.author,
+            successCriteria = this.successCriteria,
+            created = this.created,
+            lastChanged = this.lastChanged,
+            hasWriteAccess = this.writeAccess(user),
+            lastUpdatedBy = lastUpdatedBy?.email ?: author.email,
+            isPartOfNavNo = this.isPartOfNavNo,
+            notes = this.notes
+        )
+    }
 }
 
 data class OrganizationUnit(

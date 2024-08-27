@@ -5,7 +5,8 @@ import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.database.OrganizationRepository
 import accessibility.reporting.tool.database.ReportRepository
 import accessibility.reporting.tool.rest.Admin.isAdmin
-import accessibility.reporting.tool.wcag.ReportType
+import accessibility.reporting.tool.wcag.AggregatedReport
+import accessibility.reporting.tool.wcag.Report
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -16,41 +17,37 @@ import io.ktor.server.routing.*
 fun Route.jsonapiadmin(reportRepository: ReportRepository, organizationRepository: OrganizationRepository) {
     route("admin") {
         install(AdminCheck)
-        route("reports") {
-            get {
-                call.respond(
-                    AdminReportList(
-                        reports = reportRepository.getReports<ReportListItem>(type = ReportType.SINGLE),
-                        aggregatedReports = reportRepository.getReports<ReportListItem>(type = ReportType.AGGREGATED)
-                    )
-                )
-            }
-            route("aggregated") {
-
-                get("new") {
-                    call.respond(HttpStatusCode.OK)
-                }
-                post("new") {
-                    call.respond(HttpStatusCode.Created)
-                }
-                route("{id}") {
-
-                    get {
-                        call.respond(HttpStatusCode.OK)
-                    }
-
-                    patch {
-                        call.respond(HttpStatusCode.OK)
-                    }
-
-                    delete {
-                    }
-                }
-            }
-        }
         delete("teams/{id}") {
             organizationRepository.deleteOrgUnit(call.parameters["id"] ?: throw BadPathParameterException("id"))
             call.respond(HttpStatusCode.OK)
+        }
+        route("reports/aggregated") {
+            route("new") {
+                install(AdminCheck)
+                post {
+                    val newReportRequest = call.receive<NewAggregatedReportRequest>()
+                    val newReport = AggregatedReport(
+                        url=newReportRequest.url,
+                        descriptiveName = newReportRequest.title,
+                        organizationUnit = null,
+                        reports =reportRepository.getReports<Report>(ids = newReportRequest.reports),
+                        user = call.user,
+                        notes = newReportRequest.notes,
+                    ).let {
+                        reportRepository.upsertReportReturning<AggregatedReport>(it)
+                    }
+                    call.respond(HttpStatusCode.Created, """{ "id": "${newReport.reportId}" }""".trimIndent())
+                }
+            }
+            route("{id}") {
+                install(AdminCheck)
+                patch {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+                delete {
+                    call.respond(HttpStatusCode.NotImplemented)
+                }
+            }
         }
     }
 }
@@ -65,7 +62,12 @@ val AdminCheck = createRouteScopedPlugin("adminCheck") {
 
 object Admin {
     private val adminAzureGroup = System.getenv("ADMIN_GROUP")
-    fun isAdmin(user: User) = user.groups.contains(System.getenv("ADMIN_GROUP"))
+    fun isAdmin(user: User) = user.groups.contains(adminAzureGroup)
 }
 
-private class AdminReportList(val reports: List<ReportListItem>, val aggregatedReports: List<ReportListItem>)
+class NewAggregatedReportRequest(
+    val title: String,
+    val url: String,
+    val reports: List<String>,
+    val notes: String
+)

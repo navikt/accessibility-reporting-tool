@@ -23,7 +23,7 @@ class AggregatedReport : Report {
         user: User,
         organizationUnit: OrganizationUnit?,
         reports: List<Report>,
-        isPartOfNavNo: Boolean
+        notes: String,
     ) : super(
         reportId = UUID.randomUUID().toString(),
         url = url,
@@ -46,8 +46,8 @@ class AggregatedReport : Report {
         contributors = reports.map { it.contributors }.flatten().toMutableList(),
         lastUpdatedBy = null,
         reportType = AGGREGATED,
-        isPartOfNavNo = isPartOfNavNo,
-        notes = ""
+        notes = notes,
+        isPartOfNavNo = false
     ) {
         fromReports =
             reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url, it.reportType, it.lastChanged) }

@@ -21,7 +21,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
 
     route("reports") {
         get {
-            call.respond(reportRepository.getReports<ReportListItem>())
+            call.respond(reportRepository.getReports<ReportListItem>(ReportType.SINGLE))
         }
         post("/new") {
             val report = call.receive<NewReport>()
@@ -34,7 +34,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                     url = report.urlTilSiden,
                     user = call.user,
                     descriptiveName = report.name,
-                    isPartOfNavNo = report.isPartOfNavNo ?: true,
+                    isPartOfNavNo = report.isPartOfNavNo ?: true
                 )
             )
             call.respondText(status = HttpStatusCode.OK, provider = {
@@ -46,7 +46,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
         }
         route("{id}") {
             get {
-                val id = call.parameters["id"] ?: throw BadRequestException("Missing id")
+                val id = call.reportId
 
                 val result = reportRepository.getReport<Report>(id)
                     ?.toFullReportWithAccessPolicy(call.userOrNull)
@@ -55,7 +55,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                 call.respond(result)
             }
             patch {
-                val id = call.parameters["id"] ?: throw BadPathParameterException("Missing id")
+                val id = call.reportId
                 val updates = call.receive<ReportUpdate>()
 
                 val existingReport =
@@ -67,7 +67,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                     author = updates.author,
                     lastChanged = LocalDateTimeHelper.nowAtUtc(),
                     lastUpdatedBy = call.user.toAuthor(),
-                    notes = updates.notes,
+                    notes = updates.notes
                 )
 
                 updates.successCriteria?.let { pendingUpdateList ->
@@ -185,6 +185,7 @@ class FullReportWithAccessPolicy(
     val notes: String
 ) : ReportContent
 
+
 data class ReportUpdate(
     val descriptiveName: String? = null,
     val team: OrganizationUnit? = null,
@@ -193,7 +194,7 @@ data class ReportUpdate(
     val lastChanged: String? = null,
     val successCriteria: List<SuccessCriterionUpdate>? = null,
     val isPartOfNavNo: Boolean? = null,
-    val notes: String? = null,
+    val notes: String? = null
 )
 
 data class SuccessCriterionUpdate(
@@ -205,19 +206,5 @@ data class SuccessCriterionUpdate(
     val status: String? = null
 )
 
-fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy {
-    return FullReportWithAccessPolicy(
-        reportId = this.reportId,
-        descriptiveName = this.descriptiveName,
-        url = this.url,
-        team = this.organizationUnit,
-        author = this.author,
-        successCriteria = this.successCriteria,
-        created = this.created,
-        lastChanged = this.lastChanged,
-        hasWriteAccess = this.writeAccess(user),
-        lastUpdatedBy = lastUpdatedBy?.email ?: author.email,
-        isPartOfNavNo = this.isPartOfNavNo,
-        notes = this.notes,
-    )
-}
+private val ApplicationCall.reportId
+    get() = parameters["id"] ?: throw BadPathParameterException("Missing report {id}")
