@@ -31,14 +31,17 @@ open class Report(
     val contributors: MutableList<Author> = mutableListOf(),
     val lastUpdatedBy: Author?,
     val reportType: ReportType,
-    val isPartOfNavNo: Boolean
+    val isPartOfNavNo: Boolean,
+    val notes: String
 ) : ReportContent {
+
+
     companion object {
         private val objectMapper = jacksonObjectMapper().apply {
             registerModule(JavaTimeModule())
             configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
         }
-        val currentVersion = Version.V4
+        val currentVersion = Version.V5
     }
 
     fun copy(
@@ -55,6 +58,7 @@ open class Report(
         lastUpdatedBy: Author? = null,
         reportType: ReportType? = null,
         isPartOfNavNo: Boolean? = null,
+        notes: String? = null
     ) = Report(
         reportId = reportId ?: this.reportId,
         url = url ?: this.url,
@@ -68,7 +72,8 @@ open class Report(
         contributors = contributors ?: this.contributors,
         lastUpdatedBy = lastUpdatedBy ?: this.lastUpdatedBy,
         isPartOfNavNo = isPartOfNavNo ?: this.isPartOfNavNo,
-        reportType = reportType ?: this.reportType
+        reportType = reportType ?: this.reportType,
+        notes = notes ?: this.notes
     )
 
     fun updateCriteria(criteria: List<SuccessCriterion>, updateBy: User): Report = copy(

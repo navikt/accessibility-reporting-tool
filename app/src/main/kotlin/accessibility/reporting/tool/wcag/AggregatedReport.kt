@@ -29,7 +29,7 @@ class AggregatedReport : Report {
         url = url,
         descriptiveName = descriptiveName,
         organizationUnit = organizationUnit,
-        version = Version.V4,
+        version = Version.V5,
         author = user.toAuthor(),
         successCriteria = reports.map { report ->
             report.successCriteria.map { criterion ->
@@ -46,7 +46,8 @@ class AggregatedReport : Report {
         contributors = reports.map { it.contributors }.flatten().toMutableList(),
         lastUpdatedBy = null,
         reportType = AGGREGATED,
-        isPartOfNavNo = isPartOfNavNo
+        isPartOfNavNo = isPartOfNavNo,
+        notes = ""
     ) {
         fromReports =
             reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url, it.reportType, it.lastChanged) }
@@ -71,7 +72,8 @@ class AggregatedReport : Report {
         contributors = report.contributors,
         lastUpdatedBy = report.lastUpdatedBy,
         reportType = AGGREGATED,
-        isPartOfNavNo = report.isPartOfNavNo
+        isPartOfNavNo = report.isPartOfNavNo,
+        notes = report.notes
     ) {
         this.fromReports = fromReports
         this.fromOrganizations = fromOrganizations

@@ -19,7 +19,8 @@ object ReportVersions {
         author = Author.fromJsonOrNull(jsonNode, "user")!!,
         lastChanged = jsonNode.lastChangedOrDefault(),
         created = jsonNode.createdOrDefault(),
-        isPartOfNavNo = true
+        isPartOfNavNo = true,
+        notes = ""
     )
 
     fun migrateFromJsonVersion2(jsonNode: JsonNode): Report = deserialize(
@@ -28,7 +29,8 @@ object ReportVersions {
         descriptiveName = jsonNode.descriptiveNameOrDefault,
         created = jsonNode.createdOrDefault(),
         author = Author.fromJsonOrNull(jsonNode, "author")!!,
-        isPartOfNavNo = true
+        isPartOfNavNo = true,
+        notes = ""
     )
 
     fun fromJsonVersion3(jsonNode: JsonNode) = deserialize(
@@ -37,7 +39,8 @@ object ReportVersions {
         author = Author.fromJson(jsonNode, "author"),
         created = jsonNode["created"].toLocalDateTime(),
         lastChanged = jsonNode.lastChangedOrDefault(),
-        isPartOfNavNo = true
+        isPartOfNavNo = true,
+        notes = ""
     )
 
     fun fromJsonVersion4(jsonNode: JsonNode) = deserialize(
@@ -46,7 +49,17 @@ object ReportVersions {
         author = Author.fromJson(jsonNode, "author"),
         created = jsonNode["created"].toLocalDateTime(),
         lastChanged = jsonNode.lastChangedOrDefault(),
-        isPartOfNavNo = jsonNode["isPartOfNavNo"].asBoolean()
+        isPartOfNavNo = jsonNode["isPartOfNavNo"].asBoolean(),
+        notes = ""
+    )
+    fun fromJsonVersion5(jsonNode: JsonNode) = deserialize(
+        jsonNode = jsonNode,
+        descriptiveName = jsonNode.descriptiveName,
+        author = Author.fromJson(jsonNode, "author"),
+        created = jsonNode["created"].toLocalDateTime(),
+        lastChanged = jsonNode.lastChangedOrDefault(),
+        isPartOfNavNo = jsonNode["isPartOfNavNo"].asBoolean(),
+        notes = jsonNode["notes"].asText()
     )
 
 
@@ -56,7 +69,8 @@ object ReportVersions {
         descriptiveName: String,
         created: LocalDateTime,
         author: Author,
-        isPartOfNavNo: Boolean
+        isPartOfNavNo: Boolean,
+        notes:String
     ) = Report(
         reportId = jsonNode.reportId,
         url = jsonNode.url,
@@ -69,7 +83,8 @@ object ReportVersions {
         created = created,
         lastUpdatedBy = Author.fromJsonOrNull(jsonNode, "lastUpdatedBy"),
         reportType = ReportType.valueFromJson(jsonNode),
-        isPartOfNavNo = isPartOfNavNo
+        isPartOfNavNo = isPartOfNavNo,
+        notes = notes
     )
 
 }
@@ -82,5 +97,6 @@ enum class Version(
     V1(ReportVersions::migrateFromJsonVersion1, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion),
     V2(ReportVersions::migrateFromJsonVersion2, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion),
     V3(ReportVersions::fromJsonVersion3, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion),
-    V4(ReportVersions::fromJsonVersion4, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion);
+    V4(ReportVersions::fromJsonVersion4, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion),
+    V5(ReportVersions::fromJsonVersion5, SucessCriteriaV1.criteriaTemplate, SucessCriteriaV1::updateCriterion);
 }

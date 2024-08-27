@@ -41,20 +41,21 @@ object SucessCriteriaV1 {
         url: String,
         user: User,
         descriptiveName: String,
-        isPartOfNavNo:Boolean
+        isPartOfNavNo: Boolean,
     ) = Report(
         organizationUnit = organizationUnit,
         reportId = reportId,
         successCriteria = criteriaTemplate,
         url = url,
         author = user.toAuthor(),
-        version = Version.V4,
+        version = Version.V5,
         created = LocalDateTimeHelper.nowAtUtc(),
         lastChanged = LocalDateTimeHelper.nowAtUtc(),
         lastUpdatedBy = null,
         descriptiveName = descriptiveName,
         reportType = ReportType.SINGLE,
         isPartOfNavNo = isPartOfNavNo,
+        notes = "",
     )
 
     private object ContentGroups {
@@ -331,7 +332,8 @@ object SucessCriteriaV1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/label-in-name"
         }.levelA(),
         2.operable("2.5.4", "Bevegelsesaktivering") {
-            description = "Funksjonalitet som kan betjenes med å bevege enheten eller ved brukerbevegelse, skal også kunne betjenes med brukergrensesnittkomponenter."
+            description =
+                "Funksjonalitet som kan betjenes med å bevege enheten eller ved brukerbevegelse, skal også kunne betjenes med brukergrensesnittkomponenter."
             guideline = `2-5 Inndatametode`
             tools = "Skjønn"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/motion-actuation"
@@ -423,7 +425,8 @@ object SucessCriteriaV1 {
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/name-role-value"
         }.levelA(),
         4.robust("4.1.3", "Statusbeskjeder") {
-            description = "Brukeren skal få statusbeskjeder om viktige endringer på nettsiden uten at det gir kontekstendring."
+            description =
+                "Brukeren skal få statusbeskjeder om viktige endringer på nettsiden uten at det gir kontekstendring."
             guideline = `4-1 Kompatibel`
             tools = "Skjermleser/$devTools"
             helpUrl = "https://aksel.nav.no/god-praksis/artikler/413-statusbeskjeder#hcdb4fcfaf29c"

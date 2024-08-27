@@ -34,7 +34,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                     url = report.urlTilSiden,
                     user = call.user,
                     descriptiveName = report.name,
-                    isPartOfNavNo = report.isPartOfNavNo ?: true
+                    isPartOfNavNo = report.isPartOfNavNo ?: true,
                 )
             )
             call.respondText(status = HttpStatusCode.OK, provider = {
@@ -66,7 +66,8 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                     organizationUnit = updates.team,
                     author = updates.author,
                     lastChanged = LocalDateTimeHelper.nowAtUtc(),
-                    lastUpdatedBy = call.user.toAuthor()
+                    lastUpdatedBy = call.user.toAuthor(),
+                    notes = updates.notes,
                 )
 
                 updates.successCriteria?.let { pendingUpdateList ->
@@ -181,6 +182,7 @@ class FullReportWithAccessPolicy(
     val hasWriteAccess: Boolean,
     val lastUpdatedBy: String,
     val isPartOfNavNo: Boolean,
+    val notes: String
 ) : ReportContent
 
 data class ReportUpdate(
@@ -190,7 +192,8 @@ data class ReportUpdate(
     val created: String? = null,
     val lastChanged: String? = null,
     val successCriteria: List<SuccessCriterionUpdate>? = null,
-    val isPartOfNavNo: Boolean? = null
+    val isPartOfNavNo: Boolean? = null,
+    val notes: String? = null,
 )
 
 data class SuccessCriterionUpdate(
@@ -215,5 +218,6 @@ fun Report.toFullReportWithAccessPolicy(user: User?): FullReportWithAccessPolicy
         hasWriteAccess = this.writeAccess(user),
         lastUpdatedBy = lastUpdatedBy?.email ?: author.email,
         isPartOfNavNo = this.isPartOfNavNo,
+        notes = this.notes,
     )
 }
