@@ -56,7 +56,7 @@ fun Route.jsonapiadmin(reportRepository: ReportRepository, organizationRepositor
                 install(AdminCheck)
                 patch {
                     val updateReportRequest = call.receive<AggregatedReportUpdateRequest>()
-                    if (updateReportRequest.successCriteria!=null) call.respond(HttpStatusCode.NotImplemented)
+                    if (updateReportRequest.successCriteria != null) call.respond(HttpStatusCode.NotImplemented)
                     val id = call.id
                     val originalReport = reportRepository.getReport<AggregatedReport>(id)
                     val updatedReport = originalReport?.withUpdatedMetadata(
@@ -65,12 +65,7 @@ fun Route.jsonapiadmin(reportRepository: ReportRepository, organizationRepositor
                         notes = updateReportRequest.notes,
                         updateBy = call.user,
                     ) ?: throw ResourceNotFoundException(type = "Aggregated Report", id = id)
-
-                    println(updatedReport)
-                    println(originalReport)
-                    val debug = reportRepository.upsertReportReturning(updatedReport)
-                    println(updateReportRequest)
-                    println(debug)
+                    reportRepository.upsertReportReturning(updatedReport)
                     call.respond(HttpStatusCode.OK)
                 }
                 delete {

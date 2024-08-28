@@ -4,9 +4,162 @@ info:
   description: "accessibility_reporting_tool API"
   version: "1.0.0"
 servers:
-  - url: "https://a11y-statement.ansatt.dev.nav.no/"
-  - url: "https://a11y-statement.ansatt.nav.no/"
+- url: "https://accessibility_reporting_tool"
 paths:
+  /api/admin/reports/aggregated/{id}:
+    delete:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "501":
+          description: "Not Implemented"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    patch:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AggregatedReportUpdateRequest"
+        required: true
+      responses:
+        "501":
+          description: "Not Implemented"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "400":
+          description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+                Example#2:
+                  value: ""
+                Example#3:
+                  value: ""
+                Example#4:
+                  value: ""
+                Example#5:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/admin/reports/aggregated/new:
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewAggregatedReportRequest"
+        required: true
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+                Example#2:
+                  value: ""
+                Example#3:
+                  value: ""
+                Example#4:
+                  value: ""
+                Example#5:
+                  value: ""
+                Example#6:
+                  value: ""
+                Example#7:
+                  value: ""
+                Example#8:
+                  value: ""
+                Example#9:
+                  value: ""
+                Example#10:
+                  value: ""
+                Example#11:
+                  value: ""
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+  /api/admin/teams/{id}:
+    delete:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
   /api/reports:
     get:
       description: ""
@@ -42,11 +195,11 @@ paths:
     get:
       description: ""
       parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       responses:
         "400":
           description: "Bad Request"
@@ -84,11 +237,11 @@ paths:
     patch:
       description: ""
       parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       requestBody:
         content:
           application/json:
@@ -118,8 +271,6 @@ paths:
                 Example#4:
                   value: ""
                 Example#5:
-                  value: ""
-                Example#6:
                   value: ""
         "404":
           description: "Not Found"
@@ -137,11 +288,11 @@ paths:
     patch:
       description: ""
       parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       requestBody:
         content:
           application/json:
@@ -186,6 +337,80 @@ paths:
             '*/*':
               schema:
                 type: "object"
+  /api/reports/aggregated:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ReportListItem"
+        "400":
+          description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+                Example#2:
+                  value: ""
+                Example#3:
+                  value: ""
+  /api/reports/aggregated/{id}:
+    get:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+                Example#2:
+                  value: ""
+                Example#3:
+                  value: ""
+                Example#4:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AggregatedReportWithAccessPolicy"
   /api/reports/list:
     get:
       description: "TODO: remove"
@@ -266,11 +491,11 @@ paths:
     get:
       description: ""
       parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       responses:
         "400":
           description: "Bad Request"
@@ -304,11 +529,11 @@ paths:
     patch:
       description: ""
       parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       requestBody:
         content:
           application/json:
@@ -357,11 +582,11 @@ paths:
     get:
       description: ""
       parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       responses:
         "400":
           description: "Bad Request"
@@ -396,11 +621,11 @@ paths:
     get:
       description: ""
       parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       responses:
         "400":
           description: "Bad Request"
@@ -433,11 +658,11 @@ paths:
     put:
       description: ""
       parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       requestBody:
         content:
           application/json:
@@ -573,9 +798,56 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDetails"
-
 components:
   schemas:
+    SuccessCriterionUpdate:
+      type: "object"
+      properties:
+        number:
+          type: "string"
+        breakingTheLaw:
+          type: "string"
+        lawDoesNotApply:
+          type: "string"
+        tooHardToComply:
+          type: "string"
+        contentGroup:
+          type: "string"
+        status:
+          type: "string"
+      required:
+      - "number"
+    AggregatedReportUpdateRequest:
+      type: "object"
+      properties:
+        descriptiveName:
+          type: "string"
+        url:
+          type: "string"
+        successCriteria:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SuccessCriterionUpdate"
+        notes:
+          type: "string"
+    NewAggregatedReportRequest:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+        url:
+          type: "string"
+        reports:
+          type: "array"
+          items:
+            type: "string"
+        notes:
+          type: "string"
+      required:
+      - "title"
+      - "url"
+      - "reports"
+      - "notes"
     ReportListItem:
       type: "object"
       properties:
@@ -593,25 +865,11 @@ components:
           type: "string"
           format: "date-time"
       required:
-        - "reportId"
-        - "url"
-        - "teamId"
-        - "teamName"
-        - "lastChanged"
-    AdminReportList:
-      type: "object"
-      properties:
-        reports:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/ReportListItem"
-        aggregatedReports:
-          type: "array"
-          items:
-            $ref: "#/components/schemas/ReportListItem"
-      required:
-        - "reports"
-        - "aggregatedReports"
+      - "reportId"
+      - "url"
+      - "teamId"
+      - "teamName"
+      - "lastChanged"
     OrganizationUnit:
       type: "object"
       properties:
@@ -626,10 +884,10 @@ components:
           items:
             type: "string"
       required:
-        - "id"
-        - "name"
-        - "email"
-        - "members"
+      - "id"
+      - "name"
+      - "email"
+      - "members"
     Author:
       type: "object"
       properties:
@@ -638,8 +896,8 @@ components:
         oid:
           type: "string"
       required:
-        - "email"
-        - "oid"
+      - "email"
+      - "oid"
     SuccessCriterion:
       type: "object"
       properties:
@@ -666,10 +924,10 @@ components:
         status:
           type: "string"
           enum:
-            - "COMPLIANT"
-            - "NON_COMPLIANT"
-            - "NOT_APPLICABLE"
-            - "NOT_TESTED"
+          - "COMPLIANT"
+          - "NON_COMPLIANT"
+          - "NOT_APPLICABLE"
+          - "NOT_TESTED"
         wcagUrl:
           type: "string"
         helpUrl:
@@ -679,26 +937,26 @@ components:
         wcagLevel:
           type: "string"
           enum:
-            - "A"
-            - "AA"
-            - "AAA"
-            - "UNKNOWN"
+          - "A"
+          - "AA"
+          - "AAA"
+          - "UNKNOWN"
         successCriterionNumber:
           type: "string"
       required:
-        - "name"
-        - "description"
-        - "principle"
-        - "guideline"
-        - "tools"
-        - "number"
-        - "breakingTheLaw"
-        - "lawDoesNotApply"
-        - "tooHardToComply"
-        - "contentGroup"
-        - "status"
-        - "wcagVersion"
-        - "successCriterionNumber"
+      - "name"
+      - "description"
+      - "principle"
+      - "guideline"
+      - "tools"
+      - "number"
+      - "breakingTheLaw"
+      - "lawDoesNotApply"
+      - "tooHardToComply"
+      - "contentGroup"
+      - "status"
+      - "wcagVersion"
+      - "successCriterionNumber"
     FullReportWithAccessPolicy:
       type: "object"
       properties:
@@ -726,31 +984,17 @@ components:
           type: "boolean"
         lastUpdatedBy:
           type: "string"
-      required:
-        - "reportId"
-        - "url"
-        - "author"
-        - "successCriteria"
-        - "created"
-        - "lastChanged"
-        - "lastUpdatedBy"
-    SuccessCriterionUpdate:
-      type: "object"
-      properties:
-        number:
-          type: "string"
-        breakingTheLaw:
-          type: "string"
-        lawDoesNotApply:
-          type: "string"
-        tooHardToComply:
-          type: "string"
-        contentGroup:
-          type: "string"
-        status:
+        notes:
           type: "string"
       required:
-        - "number"
+      - "reportId"
+      - "url"
+      - "author"
+      - "successCriteria"
+      - "created"
+      - "lastChanged"
+      - "lastUpdatedBy"
+      - "notes"
     ReportUpdate:
       type: "object"
       properties:
@@ -768,6 +1012,92 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/SuccessCriterionUpdate"
+        notes:
+          type: "string"
+    OrganizationUnitShortSummary:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        name:
+          type: "string"
+      required:
+      - "id"
+      - "name"
+    ReportShortSummary:
+      type: "object"
+      properties:
+        reportId:
+          type: "string"
+        descriptiveName:
+          type: "string"
+        url:
+          type: "string"
+        reportType:
+          type: "string"
+          enum:
+          - "AGGREGATED"
+          - "SINGLE"
+        lastChanged:
+          type: "string"
+          format: "date-time"
+        title:
+          type: "string"
+      required:
+      - "reportId"
+      - "url"
+      - "reportType"
+      - "lastChanged"
+      - "title"
+    AggregatedReportWithAccessPolicy:
+      type: "object"
+      properties:
+        reportId:
+          type: "string"
+        descriptiveName:
+          type: "string"
+        url:
+          type: "string"
+        team:
+          $ref: "#/components/schemas/OrganizationUnit"
+        author:
+          $ref: "#/components/schemas/Author"
+        successCriteria:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/SuccessCriterion"
+        created:
+          type: "string"
+          format: "date-time"
+        lastChanged:
+          type: "string"
+          format: "date-time"
+        hasWriteAccess:
+          type: "boolean"
+        lastUpdatedBy:
+          type: "string"
+        notes:
+          type: "string"
+        fromTeams:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrganizationUnitShortSummary"
+        fromReports:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/ReportShortSummary"
+      required:
+      - "reportId"
+      - "descriptiveName"
+      - "url"
+      - "author"
+      - "successCriteria"
+      - "created"
+      - "lastChanged"
+      - "lastUpdatedBy"
+      - "notes"
+      - "fromTeams"
+      - "fromReports"
     NewReport:
       type: "object"
       properties:
@@ -778,9 +1108,9 @@ components:
         teamId:
           type: "string"
       required:
-        - "name"
-        - "urlTilSiden"
-        - "teamId"
+      - "name"
+      - "urlTilSiden"
+      - "teamId"
     TeamSummary:
       type: "object"
       properties:
@@ -791,9 +1121,9 @@ components:
         email:
           type: "string"
       required:
-        - "id"
-        - "name"
-        - "email"
+      - "id"
+      - "name"
+      - "email"
     TeamUpdate:
       type: "object"
       properties:
@@ -808,7 +1138,7 @@ components:
           items:
             type: "string"
       required:
-        - "id"
+      - "id"
     Unit:
       type: "object"
       properties: {}
@@ -824,9 +1154,9 @@ components:
           items:
             type: "string"
       required:
-        - "name"
-        - "email"
-        - "members"
+      - "name"
+      - "email"
+      - "members"
     UserDetails:
       type: "object"
       properties:
@@ -843,6 +1173,6 @@ components:
         email:
           type: "string"
       required:
-        - "reports"
-        - "teams"
-        - "email"
+      - "reports"
+      - "teams"
+      - "email"
