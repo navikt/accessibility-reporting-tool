@@ -3,11 +3,9 @@ package accessibility.reporting.tool.rest
 import accessibility.reporting.tool.*
 import accessibility.reporting.tool.wcag.OrganizationUnit
 import accessibility.reporting.tool.wcag.ReportContent
-import accessibility.reporting.tool.wcag.SuccessCriterionInfo.Companion.perceivable
-import accessibility.reporting.tool.wcag.SucessCriteriaV1.Guidelines.`1-3 Mulig å tilpasse`
-import accessibility.reporting.tool.wcag.SucessCriteriaV1.Tools.devTools
-import accessibility.reporting.tool.wcag.levelA
+import accessibility.reporting.tool.wcag.Status
 import assert
+import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
@@ -19,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 class AdminAggregatedReportTest : TestApi() {
     private val adminRoute = "api/admin"
@@ -211,78 +211,13 @@ class AdminAggregatedReportTest : TestApi() {
 
         @Test
         fun `updates forbidden for non-admin users`() = withTestApi {
-            client.patchWithJwtUser(testUser, "$adminRoute/reports/aggregated/${testAggregatedReports.first().reportId}") {
+            client.patchWithJwtUser(
+                testUser,
+                "$adminRoute/reports/aggregated/${testAggregatedReports.first().reportId}"
+            ) {
                 setBodyWithJsonFields("descriptiveName" to "newName")
                 contentType(ContentType.Application.Json)
             }.status shouldBe HttpStatusCode.Forbidden
-        }
-
-        @Disabled
-        @Test
-        fun `partial updates singleCriterion`() = withTestApi {
-            val dummyreport = testAggregatedReports.first()
-
-            val originalCriteria = 1.perceivable("1.3.1", "Informasjon og relasjoner") {
-                description = "Ting skal være kodet som det ser ut som."
-                guideline = `1-3 Mulig å tilpasse`
-                tools = "$devTools/headingsMap"
-                wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships"
-            }.levelA()
-
-            val singleCriterionUpdate = """
-        {
-            "reportId": "${dummyreport.reportId}",
-            
-            "successCriteria": [{
-                "name": "single updated criterion",
-                "description": "single updated description",
-                "principle": "single updated principle",
-                "guideline": "single updated guideline",
-                "tools": "single updated tools",
-                "number": "1.3.1",
-                "breakingTheLaw": "nei",
-                "lawDoesNotApply": "nei",
-                "tooHardToComply": "nei",
-                "contentGroup": "Group 1",
-                "status": "COMPLIANT",
-                "wcagLevel": "A"
-            }]
-        }
-    """.trimIndent()
-
-            val singleCriterionUpdateRequest =
-                client.patchWithJwtUser(testUser, "$adminRoute/reports/aggregated/${dummyreport.reportId}") {
-                    setBody(singleCriterionUpdate)
-                    contentType(ContentType.Application.Json)
-                }
-            singleCriterionUpdateRequest.status shouldBe HttpStatusCode.OK
-
-            val singleCriterionGetRequest = client.get("$adminRoute/reports/aggregated/${dummyreport.reportId}")
-            singleCriterionGetRequest.status shouldBe HttpStatusCode.OK
-            val singleCriterionUpdateJsonResponse = testApiObjectmapper.readTree(singleCriterionGetRequest.bodyAsText())
-
-
-            val criteriaList = singleCriterionUpdateJsonResponse["successCriteria"].toList()
-            criteriaList.size shouldBe 49
-
-            val specificCriterion = criteriaList.find { it["number"].asText() == "1.3.1" }
-            specificCriterion?.let {
-                it["name"].asText() shouldBe originalCriteria.name
-                it["description"].asText() shouldBe originalCriteria.description
-                it["principle"].asText() shouldBe originalCriteria.principle
-                it["guideline"].asText() shouldBe originalCriteria.guideline
-                it["tools"].asText() shouldBe originalCriteria.tools
-                it["number"].asText() shouldBe originalCriteria.number
-                it["breakingTheLaw"].asText() shouldBe "nei"
-                it["lawDoesNotApply"].asText() shouldBe "nei"
-                it["tooHardToComply"].asText() shouldBe "nei"
-                it["contentGroup"].asText() shouldBe "Group 1"
-                it["status"].asText() shouldBe "COMPLIANT"
-                it["wcagLevel"].asText() shouldBe originalCriteria.wcagLevel.name
-            } ?: throw ResourceNotFoundException("Criterion", "1.3.1")
-
-            val otherCriteria = criteriaList.filter { it["number"].asText() != "1.3.1" }
-            otherCriteria.isNotEmpty() shouldBe true
         }
 
         @Test
@@ -298,17 +233,54 @@ class AdminAggregatedReportTest : TestApi() {
                 contentType(ContentType.Application.Json)
             }.status shouldBe HttpStatusCode.OK
 
-            val updatedReportRequest = client.getWithJwtUser(adminUser,"api/reports/aggregated/${dummyreport.reportId}")
+            val updatedReportRequest =
+                client.getWithJwtUser(adminUser, "api/reports/aggregated/${dummyreport.reportId}")
             updatedReportRequest.status shouldBe HttpStatusCode.OK
             val updatedReport =
                 testApiObjectmapper.readTree(updatedReportRequest.bodyAsText())
             updatedReport["notes"].asText() shouldBe newNotes
         }
 
-        @Disabled("todo")
-        @Test
-        fun `updates a single successcriterion in an aggregated report`() = withTestApi {
-            // assertPatchWithAdminIsOk("reports/${testReport.reportId}")
+        @ParameterizedTest
+        @ValueSource(strings = ["COMPLIANT", "NON_COMPLIANT", "NOT_APPLICABLE", "NOT_TESTED"])
+        fun `updates a single success criterion in an aggregated report`(expectedStatusStr: String) = withTestApi {
+            val expectedStatus = Status.valueOf(expectedStatusStr)
+            val testReport = testAggregatedReports.last()
+            val updateCriteriaBody = """
+                {
+                   "successCriteria": [
+                    ${
+                updatedCriterionJsonBody(
+                    number = "1.3.1",
+                    status = expectedStatus
+                )
+            }
+                   ]
+                }
+            """.trimIndent()
+
+            client.patchWithJwtUser(adminUser, "$adminRoute/reports/aggregated/${testReport.reportId}") {
+                setBody(updateCriteriaBody)
+                contentType(ContentType.Application.Json)
+            }.status shouldBe HttpStatusCode.OK
+
+            client.getWithJwtUser(adminUser, "api/reports/aggregated/${testReport.reportId}").assert {
+                status shouldBe HttpStatusCode.OK
+                json()["successCriteria"].toList().assert {
+                    size shouldBe testReport.successCriteria.size
+                    assertCriterion(
+                        criterionNode = find { it["number"].asText() == "1.3.1" },
+                        expectedStatus = expectedStatus
+                    )
+                    filterNot { it["number"].asText() == "1.3.1" }.forEach {
+                        assertCriterion(
+                            criterionNode = it,
+                            expectedStatus = Status.NOT_TESTED
+                        )
+                    }
+                }
+            }
+
         }
 
     }
@@ -398,3 +370,38 @@ private fun List<Pair<String, String>>.toJsonObject() = joinToString(
 
 private fun List<ReportContent>.jsonList() =
     joinToString(prefix = "[", postfix = "]", separator = ",") { "\"${it.reportId}\"" }
+
+private fun updatedCriterionJsonBody(
+    number: String,
+    status: Status,
+    breakingTheLaw: String? = "",
+    lawDoesNotApply: String? = "",
+    tooHardToComply: String? = "",
+) =
+    """ 
+    {
+       "number": "$number",
+       "breakingTheLaw": "$breakingTheLaw",
+       "lawDoesNotApply": "$lawDoesNotApply",
+       "tooHardToComply": "$tooHardToComply",
+       "status": "${status.name}"
+    
+    }
+    """.trimIndent()
+
+
+private fun assertCriterion(
+    criterionNode: JsonNode?,
+    expectedStatus: Status,
+    expectedBreakingTheLaw: String? = "",
+    expectedLawDoesNotApply: String? = "",
+    expectedTooHardToComply: String? = "",
+) {
+    require(criterionNode != null) { "Criterionnode is null" }
+    criterionNode["status"].asNonEmptyText().trimIndent() shouldBe expectedStatus.name
+    criterionNode["breakingTheLaw"].asNonEmptyText() shouldBe expectedBreakingTheLaw
+    criterionNode["lawDoesNotApply"].asNonEmptyText() shouldBe expectedLawDoesNotApply
+    criterionNode["tooHardToComply"].asNonEmptyText() shouldBe expectedTooHardToComply
+}
+
+private fun JsonNode.asNonEmptyText() = asText().replace("\n", "").trimIndent()
