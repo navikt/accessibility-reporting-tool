@@ -60,6 +60,8 @@ paths:
                   value: ""
                 Example#5:
                   value: ""
+                Example#6:
+                  value: ""
         "404":
           description: "Not Found"
           content:
@@ -407,7 +409,7 @@ paths:
                 $ref: "#/components/schemas/AggregatedReportWithAccessPolicy"
   /api/reports/list:
     get:
-      description: ""
+      description: "TODO: remove"
       responses:
         "200":
           description: "OK"
@@ -827,7 +829,7 @@ components:
     NewAggregatedReportRequest:
       type: "object"
       properties:
-        title:
+        descriptiveName:
           type: "string"
         url:
           type: "string"
@@ -838,7 +840,7 @@ components:
         notes:
           type: "string"
       required:
-      - "title"
+      - "descriptiveName"
       - "url"
       - "reports"
       - "notes"
