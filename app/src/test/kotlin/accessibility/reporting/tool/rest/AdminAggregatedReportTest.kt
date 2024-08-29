@@ -91,7 +91,7 @@ class AdminAggregatedReportTest : TestApi() {
                 setBody(
                     """
                 {
-                   "title": "Some title",
+                   "descriptiveName": "Some title",
                    "url":"Some url", 
                    "notes": "Here is a noooote",
                    "reports": ${testReports.jsonList()}
@@ -124,7 +124,7 @@ class AdminAggregatedReportTest : TestApi() {
                 setBody(
                     """
                 {
-                   "title": "Some title",
+                   "descriptiveName": "Some title",
                    "url":"Some url", 
                    "notes": "Here is a noooote",
                    "reports": ${(testReports + testAggregatedReports.first()).jsonList()}
@@ -140,7 +140,7 @@ class AdminAggregatedReportTest : TestApi() {
                 setBody(
                     """
                 {
-                   "title": "Some title",
+                   "descriptiveName": "Some title",
                    "url":"Some url", 
                    "notes": "Here is a noooote",
                    "reports": ${(testReports + dummyReportV4()).jsonList()}
@@ -153,7 +153,7 @@ class AdminAggregatedReportTest : TestApi() {
                 setBody(
                     """
                 {
-                   "title": "Some title",
+                   "descriptiveName": "Some title",
                    "url":"Some url", 
                    "notes": "Here is a noooote",
                    "reports": ${listOf(dummyReportV4(), dummyReportV4(), dummyReportV4()).jsonList()}

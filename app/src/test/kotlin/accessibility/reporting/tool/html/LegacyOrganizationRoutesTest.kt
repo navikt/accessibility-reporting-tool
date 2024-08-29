@@ -2,6 +2,7 @@ package accessibility.reporting.tool.html
 
 import LocalPostgresDatabase
 import accessibility.reporting.tool.TestUser
+import accessibility.reporting.tool.assertErrorOnSubmit
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.deleteWithJwtUser
 import accessibility.reporting.tool.getWithJwtUser

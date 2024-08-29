@@ -33,7 +33,7 @@ fun Route.aggregatedAdminRoutes(reportRepository: ReportRepository) {
 
                 val newReport = AggregatedReport(
                     url = newReportRequest.url,
-                    descriptiveName = newReportRequest.title,
+                    descriptiveName = newReportRequest.descriptiveName,
                     organizationUnit = null,
                     reports = reportRepository.getReports<Report>(ids = newReportRequest.reports),
                     user = call.user,

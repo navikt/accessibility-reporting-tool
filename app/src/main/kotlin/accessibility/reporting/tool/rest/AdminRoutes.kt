@@ -39,7 +39,7 @@ object Admin {
 }
 
 class NewAggregatedReportRequest(
-    val title: String,
+    val descriptiveName: String,
     val url: String,
     val reports: List<String>,
     val notes: String

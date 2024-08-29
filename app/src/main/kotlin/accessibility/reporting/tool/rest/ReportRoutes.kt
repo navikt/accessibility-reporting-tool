@@ -1,6 +1,5 @@
 package accessibility.reporting.tool.rest
 
-import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.authenitcation.user
 import accessibility.reporting.tool.authenitcation.userOrNull
 import accessibility.reporting.tool.database.LocalDateTimeHelper
