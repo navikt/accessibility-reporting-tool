@@ -17,7 +17,6 @@ fun Route.aggregatedAdminRoutes(reportRepository: ReportRepository) {
         install(AdminCheck)
         route("new") {
             post {
-
                 val newReportRequest = call.receive<NewAggregatedReportRequest>()
                 val sourceReports = reportRepository.getReports<Report>(ids = newReportRequest.reports)
                 when {
@@ -60,7 +59,8 @@ fun Route.aggregatedAdminRoutes(reportRepository: ReportRepository) {
                 call.respond(HttpStatusCode.OK)
             }
             delete {
-                call.respond(HttpStatusCode.NotImplemented)
+                reportRepository.deleteReport(call.id)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

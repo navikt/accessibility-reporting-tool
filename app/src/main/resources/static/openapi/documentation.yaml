@@ -16,8 +16,8 @@ paths:
         schema:
           type: "string"
       responses:
-        "501":
-          description: "Not Implemented"
+        "200":
+          description: "OK"
           content:
             '*/*':
               schema:
@@ -37,12 +37,6 @@ paths:
               $ref: "#/components/schemas/AggregatedReportUpdateRequest"
         required: true
       responses:
-        "501":
-          description: "Not Implemented"
-          content:
-            '*/*':
-              schema:
-                type: "object"
         "400":
           description: "Bad Request"
           content:
@@ -413,7 +407,7 @@ paths:
                 $ref: "#/components/schemas/AggregatedReportWithAccessPolicy"
   /api/reports/list:
     get:
-      description: "TODO: remove"
+      description: ""
       responses:
         "200":
           description: "OK"

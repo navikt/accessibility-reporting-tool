@@ -8,10 +8,13 @@ import assert
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.http.HttpStatusCode.Companion.NotFound
+import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.server.testing.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -45,8 +48,7 @@ class AdminAggregatedReportTest : TestApi() {
             dummyReportV4(orgUnit = testOrg, user = testUser, descriptiveName = "dummyReport1"),
             dummyReportV4(orgUnit = testOrg, descriptiveName = "dummyRepoort2"),
             dummyReportV4(orgUnit = testOrg2, descriptiveName = "dummyreport3"),
-
-            )
+        )
 
 
     @BeforeEach()
@@ -101,7 +103,7 @@ class AdminAggregatedReportTest : TestApi() {
             }
             val id = response.json()["id"].asText()
             client.getWithJwtUser(testUser, "api/reports/aggregated/$id").assert {
-                status shouldBe HttpStatusCode.OK
+                status shouldBe OK
                 val body = json()
                 body["fromTeams"].toList().assert {
                     size shouldBe 2
@@ -177,10 +179,10 @@ class AdminAggregatedReportTest : TestApi() {
             client.patchWithJwtUser(adminUser, "$adminRoute/reports/aggregated/${originalReport.reportId}") {
                 setBodyWithJsonFields("descriptiveName" to newDescriptiveName)
                 contentType(ContentType.Application.Json)
-            }.status shouldBe HttpStatusCode.OK
+            }.status shouldBe OK
 
             client.getWithJwtUser(adminUser, "api/reports/aggregated/${originalReport.reportId}").assert {
-                status shouldBe HttpStatusCode.OK
+                status shouldBe OK
                 val descriptiveNameUpdate = testApiObjectmapper.readTree(bodyAsText())
                 descriptiveNameUpdate["descriptiveName"].asText() shouldBe "Updated Report Title"
                 descriptiveNameUpdate["successCriteria"].toList().size shouldBe originalReport.successCriteria.size
@@ -196,10 +198,10 @@ class AdminAggregatedReportTest : TestApi() {
                     "descriptiveName" to descriptiveNameSecondUpdate
                 )
                 contentType(ContentType.Application.Json)
-            }.status shouldBe HttpStatusCode.OK
+            }.status shouldBe OK
 
             client.getWithJwtUser(adminUser, "api/reports/aggregated/${originalReport.reportId}").assert {
-                status shouldBe HttpStatusCode.OK
+                status shouldBe OK
                 val urlAndTitleUpdate = testApiObjectmapper.readTree(bodyAsText())
                 urlAndTitleUpdate["author"]["email"].asText() shouldBe originalReport.author.email
                 urlAndTitleUpdate["descriptiveName"].asText() shouldBe descriptiveNameSecondUpdate
@@ -231,11 +233,11 @@ class AdminAggregatedReportTest : TestApi() {
                     "notes" to newNotes,
                 )
                 contentType(ContentType.Application.Json)
-            }.status shouldBe HttpStatusCode.OK
+            }.status shouldBe OK
 
             val updatedReportRequest =
                 client.getWithJwtUser(adminUser, "api/reports/aggregated/${dummyreport.reportId}")
-            updatedReportRequest.status shouldBe HttpStatusCode.OK
+            updatedReportRequest.status shouldBe OK
             val updatedReport =
                 testApiObjectmapper.readTree(updatedReportRequest.bodyAsText())
             updatedReport["notes"].asText() shouldBe newNotes
@@ -243,29 +245,22 @@ class AdminAggregatedReportTest : TestApi() {
 
         @ParameterizedTest
         @ValueSource(strings = ["COMPLIANT", "NON_COMPLIANT", "NOT_APPLICABLE", "NOT_TESTED"])
-        fun `updates a single success criterion in an aggregated report`(expectedStatusStr: String) = withTestApi {
+        fun `updates status on a success criterion in an aggregated report`(expectedStatusStr: String) = withTestApi {
             val expectedStatus = Status.valueOf(expectedStatusStr)
             val testReport = testAggregatedReports.last()
-            val updateCriteriaBody = """
-                {
-                   "successCriteria": [
-                    ${
-                updatedCriterionJsonBody(
-                    number = "1.3.1",
-                    status = expectedStatus
-                )
-            }
-                   ]
-                }
-            """.trimIndent()
+            val updateCriteriaBody = UpdateCriterionValues(
+                number = "1.3.1",
+                status = expectedStatus
+            ).let { updateCriteriaBody(it) }
+
 
             client.patchWithJwtUser(adminUser, "$adminRoute/reports/aggregated/${testReport.reportId}") {
                 setBody(updateCriteriaBody)
                 contentType(ContentType.Application.Json)
-            }.status shouldBe HttpStatusCode.OK
+            }.status shouldBe OK
 
             client.getWithJwtUser(adminUser, "api/reports/aggregated/${testReport.reportId}").assert {
-                status shouldBe HttpStatusCode.OK
+                status shouldBe OK
                 json()["successCriteria"].toList().assert {
                     size shouldBe testReport.successCriteria.size
                     assertCriterion(
@@ -283,19 +278,112 @@ class AdminAggregatedReportTest : TestApi() {
 
         }
 
+        @Test
+        fun `updates texts on a success criterion in an aggregated report`() = withTestApi {
+
+            val testReport = testAggregatedReports.last()
+            val updateBreakingTheLaw =
+                UpdateCriterionValues(
+                    number = "1.3.1",
+                    status = Status.NON_COMPLIANT,
+                    breakingTheLaw = "Something bahahad"
+                )
+
+
+            client.patchWithJwtUser(adminUser, "$adminRoute/reports/aggregated/${testReport.reportId}") {
+                setBody(updateCriteriaBody(updateBreakingTheLaw))
+                contentType(ContentType.Application.Json)
+            }.status shouldBe OK
+
+            client.getWithJwtUser(adminUser, "api/reports/aggregated/${testReport.reportId}").assert {
+                status shouldBe OK
+                json()["successCriteria"].toList().assert {
+                    size shouldBe testReport.successCriteria.size
+                    assertCriterion(
+                        criterionNode = find { it["number"].asText() == "1.3.1" },
+                        expectedStatus = Status.NON_COMPLIANT,
+                        expectedBreakingTheLaw = updateBreakingTheLaw.breakingTheLaw
+                    )
+                    filterNot { it["number"].asText() == "1.3.1" }.forEach {
+                        assertCriterion(
+                            criterionNode = it,
+                            expectedStatus = Status.NOT_TESTED
+                        )
+                    }
+                }
+            }
+
+            val updateTooHardToComply =
+                UpdateCriterionValues(number = "4.1.2", tooHardToComply = "It's just sooooo hard")
+            client.patchWithJwtUser(adminUser, "$adminRoute/reports/aggregated/${testReport.reportId}") {
+                setBody(updateCriteriaBody(updateTooHardToComply))
+                contentType(ContentType.Application.Json)
+            }.status shouldBe OK
+
+            client.getWithJwtUser(adminUser, "api/reports/aggregated/${testReport.reportId}").assert {
+                status shouldBe OK
+                json()["successCriteria"].toList().assert {
+                    size shouldBe testReport.successCriteria.size
+                    assertCriterion(
+                        criterionNode = find { it["number"].asText() == "4.1.2" },
+                        expectedStatus = Status.NON_COMPLIANT,
+                        expectedTooHardToComply = updateTooHardToComply.tooHardToComply
+                    )
+                    val notTestedCriteria =
+                        filter { it["status"].asText() == "NOT_TESTED" }.map { it["number"].asText() }
+                    notTestedCriteria shouldNotContain "1.3.1"
+                    notTestedCriteria shouldNotContain "4.1.2"
+                }
+            }
+
+            val updateLawDoesNotApply =
+                UpdateCriterionValues(number = "2.4.6", lawDoesNotApply = "It should, but it does not")
+            client.patchWithJwtUser(adminUser, "$adminRoute/reports/aggregated/${testReport.reportId}") {
+                setBody(updateCriteriaBody(updateLawDoesNotApply))
+                contentType(ContentType.Application.Json)
+            }.status shouldBe OK
+
+            client.getWithJwtUser(adminUser, "api/reports/aggregated/${testReport.reportId}").assert {
+                status shouldBe OK
+                json()["successCriteria"].toList().assert {
+                    size shouldBe testReport.successCriteria.size
+                    assertCriterion(
+                        criterionNode = find { it["number"].asText() == "2.4.6" },
+                        expectedStatus = Status.NON_COMPLIANT,
+                        expectedLawDoesNotApply = updateLawDoesNotApply.lawDoesNotApply
+                    )
+
+                    val notTestedCriteria =
+                        filter { it["status"].asText() == "NOT_TESTED" }.map { it["number"].asText() }
+                    notTestedCriteria shouldNotContain "1.3.1"
+                    notTestedCriteria shouldNotContain "4.1.2"
+                    notTestedCriteria shouldNotContain "2.4.6"
+                }
+            }
+
+
+        }
+
     }
 
-    @Disabled("todo")
     @Test
     fun `deletes an aggregated report`() = withTestApi {
-        //  assertDeleteWithAdminIsOk("$adminRoute/reports/aggregated/${testAggregatedReport.reportId}")
+        val aggregatedReport1 = testAggregatedReports.first()
+        val aggregatedReport2 = testAggregatedReports[1]
+        assertDeleteWithAdminIsOk("$adminRoute/reports/aggregated/${aggregatedReport1.reportId}").status shouldBe OK
+        client.getWithJwtUser(adminUser, "api/reports/aggregated/${aggregatedReport1.reportId}").status shouldBe NotFound
 
+        assertDeleteWithAdminIsOk("$adminRoute/reports/aggregated/${aggregatedReport2.reportId}").status shouldBe OK
+        client.getWithJwtUser(adminUser, "api/reports/aggregated/${aggregatedReport2.reportId}").status shouldBe NotFound
+        client.getWithJwtUser(adminUser, "api/reports/aggregated").assert {
+            json().toList().size shouldBe 0
+        }
     }
 
 
-    private suspend fun ApplicationTestBuilder.getWithAdminAccessChek(
+    private suspend fun ApplicationTestBuilder.getWithAdminAccessCheck(
         url: String,
-        expectedAdminStatusCode: HttpStatusCode = HttpStatusCode.OK
+        expectedAdminStatusCode: HttpStatusCode = OK
     ): HttpResponse {
         client.getWithJwtUser(testUser, url).status shouldBe HttpStatusCode.Forbidden
         client.get(url).status shouldBe HttpStatusCode.Unauthorized
@@ -306,7 +394,7 @@ class AdminAggregatedReportTest : TestApi() {
 
     private suspend fun ApplicationTestBuilder.assertPatchWithAdminIsOk(
         url: String,
-        expectedAdminStatusCode: HttpStatusCode = HttpStatusCode.OK
+        expectedAdminStatusCode: HttpStatusCode = OK
     ): HttpResponse {
         client.patchWithJwtUser(testUser, url).assert {
             withClue("user without admin check fails for $url") { status shouldBe HttpStatusCode.Forbidden }
@@ -321,7 +409,7 @@ class AdminAggregatedReportTest : TestApi() {
 
     private suspend fun ApplicationTestBuilder.postWithAdminAssertion(
         url: String,
-        expectedAdminStatusCode: HttpStatusCode = HttpStatusCode.OK,
+        expectedAdminStatusCode: HttpStatusCode = OK,
         block: HttpRequestBuilder.() -> Unit = {}
     ): HttpResponse {
         client.postWithJwtUser(testUser, url, block).assert {
@@ -337,7 +425,7 @@ class AdminAggregatedReportTest : TestApi() {
 
     private suspend fun ApplicationTestBuilder.assertDeleteWithAdminIsOk(
         url: String,
-        expectedAdminStatusCode: HttpStatusCode = HttpStatusCode.OK
+        expectedAdminStatusCode: HttpStatusCode = OK
     ): HttpResponse {
         client.deleteWithJwtUser(testUser, url).assert {
             withClue("user without admin check fails for $url") { status shouldBe HttpStatusCode.Forbidden }
@@ -371,24 +459,6 @@ private fun List<Pair<String, String>>.toJsonObject() = joinToString(
 private fun List<ReportContent>.jsonList() =
     joinToString(prefix = "[", postfix = "]", separator = ",") { "\"${it.reportId}\"" }
 
-private fun updatedCriterionJsonBody(
-    number: String,
-    status: Status,
-    breakingTheLaw: String? = "",
-    lawDoesNotApply: String? = "",
-    tooHardToComply: String? = "",
-) =
-    """ 
-    {
-       "number": "$number",
-       "breakingTheLaw": "$breakingTheLaw",
-       "lawDoesNotApply": "$lawDoesNotApply",
-       "tooHardToComply": "$tooHardToComply",
-       "status": "${status.name}"
-    
-    }
-    """.trimIndent()
-
 
 private fun assertCriterion(
     criterionNode: JsonNode?,
@@ -405,3 +475,28 @@ private fun assertCriterion(
 }
 
 private fun JsonNode.asNonEmptyText() = asText().replace("\n", "").trimIndent()
+
+private fun updateCriteriaBody(vararg updates: UpdateCriterionValues) = """
+                {
+                   "successCriteria": [${updates.joinToString { it.jsonBody }}]
+                }
+            """.trimIndent()
+
+private data class UpdateCriterionValues(
+    val number: String,
+    val status: Status = Status.NON_COMPLIANT,
+    val breakingTheLaw: String? = "",
+    val lawDoesNotApply: String? = "",
+    val tooHardToComply: String? = "",
+) {
+    val jsonBody = """ 
+    {
+       "number": "$number",
+       "breakingTheLaw": "$breakingTheLaw",
+       "lawDoesNotApply": "$lawDoesNotApply",
+       "tooHardToComply": "$tooHardToComply",
+       "status": "${status.name}"
+    
+    }
+    """.trimIndent()
+}
