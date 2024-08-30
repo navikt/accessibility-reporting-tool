@@ -1,8 +1,8 @@
 package accessibility.reporting.tool.html
 
 import LocalPostgresDatabase
+import accessibility.reporting.tool.HttpAsserter.Companion.shouldReturnErrorOnSubmit
 import accessibility.reporting.tool.TestUser
-import accessibility.reporting.tool.assertErrorOnSubmit
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.deleteWithJwtUser
 import accessibility.reporting.tool.getWithJwtUser
@@ -48,18 +48,18 @@ class LegacyOrganizationRoutesTest {
         }
         client.adminAndNonAdminsShouldBeOK(testUser, testAdminUser, orgSubRoute(expectedTestUnitId))
 
-        client.assertErrorOnSubmit(orgSubRoute("new")) {
-            assertBadRequest {
+        client.shouldReturnErrorOnSubmit(orgSubRoute("new")) {
+            badRequest {
                 user = testUser
                 parametersBuilder = null
             }
-            assertBadRequest {
+            badRequest {
                 user = testUser
                 parametersBuilder = {
                     append("unit-email", testUser.original.email.str())
                 }
             }
-            assertBadRequest {
+            badRequest {
                 user = testUser
                 parametersBuilder = {
                     append("unit-name", testUser.original.email.str())
@@ -94,11 +94,11 @@ class LegacyOrganizationRoutesTest {
             append("orgunit-email", "another@test.nav")
         }.status shouldBe HttpStatusCode.OK
 
-        client.assertErrorOnSubmit(ownerUpdateRoute) {
-            assertBadRequest {
+        client.shouldReturnErrorOnSubmit(ownerUpdateRoute) {
+            badRequest {
                 user = testAdminUser
             }
-            assertBadRequest {
+            badRequest {
                 user = testAdminUser
                 parametersBuilder = {
                     append("organic-email", "newowner@test.nav")
@@ -148,20 +148,20 @@ class LegacyOrganizationRoutesTest {
             append("orgunit", testorgId)
         }.status shouldBe HttpStatusCode.OK
 
-        client.assertErrorOnSubmit(memberRoute) {
-            assertBadRequest {
+        client.shouldReturnErrorOnSubmit(memberRoute) {
+            badRequest {
                 user = testAdminUser
                 parametersBuilder = {
                     append("member", otherMemberEmail)
                 }
             }
-            assertBadRequest {
+            badRequest {
                 user = testAdminUser
                 parametersBuilder = {
                     append("org-unit", "no-exists")
                 }
             }
-            assertBadRequest {
+            badRequest {
                 user = testAdminUser
                 parametersBuilder = {
                     append("org-unit", testorgId)

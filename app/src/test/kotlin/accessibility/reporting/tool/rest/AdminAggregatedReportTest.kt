@@ -17,7 +17,6 @@ import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.server.testing.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -290,7 +289,7 @@ class AdminAggregatedReportTest : TestApi() {
                 )
 
 
-            client.patchWithJwtUser(adminUser, "$adminRoute/reports/aggregated/${testReport.reportId}") {
+            assertPatchWithAdminIsOk("$adminRoute/reports/aggregated/${testReport.reportId}") {
                 setBody(updateCriteriaBody(updateBreakingTheLaw))
                 contentType(ContentType.Application.Json)
             }.status shouldBe OK
@@ -360,8 +359,10 @@ class AdminAggregatedReportTest : TestApi() {
                     notTestedCriteria shouldNotContain "2.4.6"
                 }
             }
+        }
 
-
+        @Test
+        fun `Bad request if criterion data has errors`() = withTestApi {
         }
 
     }
@@ -370,39 +371,34 @@ class AdminAggregatedReportTest : TestApi() {
     fun `deletes an aggregated report`() = withTestApi {
         val aggregatedReport1 = testAggregatedReports.first()
         val aggregatedReport2 = testAggregatedReports[1]
-        assertDeleteWithAdminIsOk("$adminRoute/reports/aggregated/${aggregatedReport1.reportId}").status shouldBe OK
-        client.getWithJwtUser(adminUser, "api/reports/aggregated/${aggregatedReport1.reportId}").status shouldBe NotFound
+        deleteWithAdminAssertion("$adminRoute/reports/aggregated/${aggregatedReport1.reportId}").status shouldBe OK
+        client.getWithJwtUser(
+            adminUser,
+            "api/reports/aggregated/${aggregatedReport1.reportId}"
+        ).status shouldBe NotFound
 
-        assertDeleteWithAdminIsOk("$adminRoute/reports/aggregated/${aggregatedReport2.reportId}").status shouldBe OK
-        client.getWithJwtUser(adminUser, "api/reports/aggregated/${aggregatedReport2.reportId}").status shouldBe NotFound
+        deleteWithAdminAssertion("$adminRoute/reports/aggregated/${aggregatedReport2.reportId}").status shouldBe OK
+        client.getWithJwtUser(
+            adminUser,
+            "api/reports/aggregated/${aggregatedReport2.reportId}"
+        ).status shouldBe NotFound
         client.getWithJwtUser(adminUser, "api/reports/aggregated").assert {
             json().toList().size shouldBe 0
         }
     }
 
-
-    private suspend fun ApplicationTestBuilder.getWithAdminAccessCheck(
-        url: String,
-        expectedAdminStatusCode: HttpStatusCode = OK
-    ): HttpResponse {
-        client.getWithJwtUser(testUser, url).status shouldBe HttpStatusCode.Forbidden
-        client.get(url).status shouldBe HttpStatusCode.Unauthorized
-        val adminResponse = client.getWithJwtUser(adminUser, url)
-        adminResponse.status shouldBe expectedAdminStatusCode
-        return adminResponse
-    }
-
     private suspend fun ApplicationTestBuilder.assertPatchWithAdminIsOk(
         url: String,
-        expectedAdminStatusCode: HttpStatusCode = OK
+        expectedAdminStatusCode: HttpStatusCode = OK,
+        block: HttpRequestBuilder.() -> Unit = {}
     ): HttpResponse {
-        client.patchWithJwtUser(testUser, url).assert {
+        client.patchWithJwtUser(testUser, url) { block() }.assert {
             withClue("user without admin check fails for $url") { status shouldBe HttpStatusCode.Forbidden }
         }
-        client.patch(url).assert {
+        client.patch(url) { block() }.assert {
             withClue("unauthenicated user check fails for $url") { status shouldBe HttpStatusCode.Unauthorized }
         }
-        val adminResponse = client.patchWithJwtUser(adminUser, url)
+        val adminResponse = client.patchWithJwtUser(adminUser, url) { block() }
         withClue("admin user check fails for $url") { adminResponse.status shouldBe expectedAdminStatusCode }
         return adminResponse
     }
@@ -423,7 +419,7 @@ class AdminAggregatedReportTest : TestApi() {
         return adminResponse
     }
 
-    private suspend fun ApplicationTestBuilder.assertDeleteWithAdminIsOk(
+    private suspend fun ApplicationTestBuilder.deleteWithAdminAssertion(
         url: String,
         expectedAdminStatusCode: HttpStatusCode = OK
     ): HttpResponse {
@@ -448,12 +444,6 @@ private fun HttpRequestBuilder.setBodyWithJsonFields(vararg fields: Pair<String,
             separator = ","
         ) { """ "${it.first}" : "${it.second}" """.trimIndent() })
 }
-
-private fun List<Pair<String, String>>.toJsonObject() = joinToString(
-    prefix = "{",
-    postfix = "}",
-    separator = ","
-) { """ "${it.first}" : "${it.second}" """.trimIndent() }
 
 
 private fun List<ReportContent>.jsonList() =
