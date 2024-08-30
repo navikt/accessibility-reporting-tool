@@ -120,7 +120,10 @@ class ReportTest {
         testReport.writeAccess(memberUser) shouldBe false
 
         testOrg.addMember(memberUser.email)
-        val updatedReport = testReport.withUpdatedMetadata(organizationUnit = testOrg, updateBy = memberUser)
+        val updatedReport = testReport.withUpdatedMetadata(
+            organizationUnit = testOrg,
+            updateBy = memberUser,
+        )
         updatedReport.writeAccess(memberUser) shouldBe true
 
         updatedReport.writeAccess(

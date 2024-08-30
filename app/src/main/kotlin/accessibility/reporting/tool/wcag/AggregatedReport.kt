@@ -3,6 +3,7 @@ package accessibility.reporting.tool.wcag
 import accessibility.reporting.tool.authenitcation.User
 import accessibility.reporting.tool.database.LocalDateTimeHelper
 import accessibility.reporting.tool.database.LocalDateTimeHelper.toLocalDateTimeOrNull
+import accessibility.reporting.tool.rest.SuccessCriterionUpdate
 import accessibility.reporting.tool.wcag.ReportType.AGGREGATED
 import accessibility.reporting.tool.wcag.SuccessCriterion.Companion.aggregate
 import com.fasterxml.jackson.databind.JsonNode
@@ -23,7 +24,7 @@ class AggregatedReport : Report {
         user: User,
         organizationUnit: OrganizationUnit?,
         reports: List<Report>,
-        isPartOfNavNo: Boolean
+        notes: String,
     ) : super(
         reportId = UUID.randomUUID().toString(),
         url = url,
@@ -46,8 +47,8 @@ class AggregatedReport : Report {
         contributors = reports.map { it.contributors }.flatten().toMutableList(),
         lastUpdatedBy = null,
         reportType = AGGREGATED,
-        isPartOfNavNo = isPartOfNavNo,
-        notes = ""
+        notes = notes,
+        isPartOfNavNo = false
     ) {
         fromReports =
             reports.map { ReportShortSummary(it.reportId, it.descriptiveName, it.url, it.reportType, it.lastChanged) }
@@ -82,17 +83,75 @@ class AggregatedReport : Report {
     override fun withUpdatedCriterion(criterion: SuccessCriterion, updateBy: User): AggregatedReport =
         AggregatedReport(super.withUpdatedCriterion(criterion, updateBy), fromReports, fromOrganizations)
 
+
     override fun withUpdatedMetadata(
         title: String?,
         pageUrl: String?,
+        notes: String?,
         organizationUnit: OrganizationUnit?,
-        updateBy: User
+        updateBy: User,
     ): AggregatedReport =
         AggregatedReport(
-            super.withUpdatedMetadata(title, pageUrl, organizationUnit, updateBy),
+            super.withUpdatedMetadata(
+                title = title,
+                pageUrl = pageUrl,
+                notes = notes,
+                updateBy = updateBy,
+                organizationUnit = organizationUnit
+            ),
             fromReports,
             fromOrganizations
         )
+
+    fun updatedWith(
+        title: String?,
+        pageUrl: String?,
+        notes: String?,
+        updateBy: User,
+        changedCriteria: List<SuccessCriterionUpdate>?
+    ): AggregatedReport =
+        AggregatedReport(
+            Report(
+                reportId = this.reportId,
+                url = pageUrl ?: this.url,
+                descriptiveName = title ?: this.descriptiveName,
+                organizationUnit = this.organizationUnit,
+                version = version,
+                author = author,
+                successCriteria = changedCriteria?.let { copyCriteriaList(changedCriteria) } ?: this.successCriteria,
+                created = created,
+                lastChanged = LocalDateTimeHelper.nowAtUtc(),
+                contributors = contributors,
+                lastUpdatedBy = updateBy.toAuthor(),
+                isPartOfNavNo = false,
+                reportType = AGGREGATED,
+                notes = notes ?: this.notes
+            ),
+            fromReports,
+            fromOrganizations
+        )
+
+    private fun copyCriteriaList(updatedValues: List<SuccessCriterionUpdate>): List<SuccessCriterion> {
+        val newList = this.successCriteria.toMutableList()
+        updatedValues.forEach { updatedCriterion ->
+            val index = newList.indexOfFirst { it.number == updatedCriterion.number }
+            if (index == -1) {
+                throw IllegalArgumentException(
+                    """Update criterion error: could not find criterion ${updatedCriterion.number}: 
+                           in ${newList.joinToString(",") { it.number }}""".trimIndent()
+                )
+            } else {
+                val currentCriterion = this.successCriteria[index]
+                newList[index] = currentCriterion.copy(
+                    status = updatedCriterion.status?.let { Status.valueOf(it) }?:currentCriterion.status,
+                    breakingTheLaw = updatedCriterion.breakingTheLaw?:currentCriterion.breakingTheLaw,
+                    lawDoesNotApply = updatedCriterion.lawDoesNotApply?:currentCriterion.lawDoesNotApply,
+                    tooHardToComply = updatedCriterion.tooHardToComply?:currentCriterion.tooHardToComply
+                ).apply { this.wcagLevel = currentCriterion.wcagLevel }
+            }
+        }
+        return newList
+    }
 
     fun updateWithDataFromSource(srcReport: Report?): AggregatedReport {
         if (srcReport == null) throw IllegalArgumentException("Kilderapport finnes ikke")

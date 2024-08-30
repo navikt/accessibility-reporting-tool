@@ -95,7 +95,8 @@ class OrganizationRepository(database: Database) : BaseRepository(database) {
                             name = organizationUnit.name,
                             oid = User.Oid("organizationUnit"),
                             groups = emptyList()
-                        )
+                        ),
+                        notes = report.notes
                     )
                 )
         }

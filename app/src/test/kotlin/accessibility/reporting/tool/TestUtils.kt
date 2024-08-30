@@ -9,6 +9,7 @@ import accessibility.reporting.tool.wcag.*
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.assertions.withClue
+import io.ktor.client.statement.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -80,7 +81,7 @@ fun dummyAggregatedReportV2(
             dummyReportV4(),
             dummyReportV4(orgUnit = OrganizationUnit("something", "something", "something"))
         ),
-        isPartOfNavNo = false
+        notes = ""
     )
 
 
@@ -105,7 +106,8 @@ class TestUser(email: String? = null, val name: String, groups: List<String> = l
     val capitalized = original.copy(email = User.Email(emailStr.replaceFirstChar(Char::titlecase)))
 
     companion object {
-        fun createAdminUser(email: String? = null, name: String="Admin adminson") = TestUser(email, name, listOf("test_admin"))
+        fun createAdminUser(email: String? = null, name: String = "Admin adminson") =
+            TestUser(email, name, listOf("test_admin"))
     }
 }
 
@@ -146,6 +148,8 @@ open class TestApi {
             }
             block()
         }
+
+    protected suspend fun HttpResponse.json() = testApiObjectmapper.readTree(bodyAsText())
 
     companion object {
         val testApiObjectmapper = jacksonObjectMapper().apply {

@@ -64,9 +64,11 @@ fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository
         get("{id}") {
             val reportId = call.parameters["id"] ?: throw IllegalArgumentException()
             val report =
-                reportRepository.getReport<AggregatedReport>(reportId) ?: throw IllegalArgumentException("Ukjent rapport")
-            val srcReports = reportRepository.getReports<ReportShortSummary>(null, report.fromReports.map { it.reportId })
-                .sortedBy { it.title.lowercase() }
+                reportRepository.getReport<AggregatedReport>(reportId)
+                    ?: throw IllegalArgumentException("Ukjent rapport")
+            val srcReports =
+                reportRepository.getReports<ReportShortSummary>(null, report.fromReports.map { it.reportId })
+                    .sortedBy { it.title.lowercase() }
             val organizations = organizationRepository.getAllOrganizationUnits()
 
             call.respondHtmlContent("Tilgjengelighetserklæring", NavBarItem.NONE) {
@@ -211,7 +213,7 @@ fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository
 
             post {
                 val formParameters = call.receiveParameters()
-                //TODO
+                //TODO: lag egen legacy constructor
                 AggregatedReport(
                     url = formParameters["page-url"].toString(),
                     descriptiveName = formParameters["descriptive-name"].toString(),
@@ -221,7 +223,7 @@ fun Route.adminRoutes(reportRepository: ReportRepository, organizationRepository
                     user = call.adminUser,
                     reports = reportRepository.getReports<Report>(ids = formParameters.getAll("report"))
                         .sortedBy { it.descriptiveName },
-                    isPartOfNavNo = true
+                    notes = ""
                 ).let {
                     reportRepository.upsertReportReturning<AggregatedReport>(it)
                 }.apply {

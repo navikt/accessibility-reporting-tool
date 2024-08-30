@@ -187,7 +187,7 @@ class ReportRepositoryTest {
                 dummyReportV2(),
                 dummyReportV2(orgUnit = OrganizationUnit("something", "something", "something"))
             ),
-            isPartOfNavNo = false,
+            notes = ""
         )
 
 }

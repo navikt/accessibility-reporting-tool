@@ -16,5 +16,7 @@ class MissingPrincipalException(route: String, expectedPrincipal: String) :
         "Error in request to $route: Principal does not contain $expectedPrincipal"
     )
 
+class BadAggregatedReportRequestException(message: String) : RequestException(HttpStatusCode.BadRequest, message)
+
 class NotAdminUserException(route: String, userName: String) :
     RequestException(HttpStatusCode.Forbidden, "Error in request to $route: '$userName' is not admin")

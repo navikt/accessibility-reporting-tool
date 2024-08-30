@@ -68,7 +68,7 @@ fun Route.updateMetdataRoute(
                 organizationUnit = formParameters["org-selector"]?.let { orgId ->
                     organizations.first { it.id == orgId }
                 },
-                updateBy = call.user
+                updateBy = call.user,
             )
             ?.let { reportRepository.upsertReportFunction(it) }
 

@@ -350,8 +350,10 @@ class UpdateReportTest : TestApi() {
             contentType(ContentType.Application.Json)
         }.status shouldBe HttpStatusCode.OK
 
-        val updatedReport = client.get("api/reports/${dummyreport.reportId}")
-        updatedReport.status shouldBe HttpStatusCode.OK
-        testApiObjectmapper.readTree(updatedReport.bodyAsText())["notes"].asText() shouldBe newNotes
+        val updatedReportRequest = client.get("api/reports/${dummyreport.reportId}")
+        updatedReportRequest.status shouldBe HttpStatusCode.OK
+        val updatedReport =
+            testApiObjectmapper.readTree(updatedReportRequest.bodyAsText())
+        updatedReport["notes"].asText() shouldBe newNotes
     }
 }
