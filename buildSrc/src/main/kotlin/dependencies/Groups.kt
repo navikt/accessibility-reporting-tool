@@ -82,3 +82,11 @@ object Testdependencies {
         val params = dependency("junit-jupiter-params")
     }
 }
+/*
+2024-09-04 10:04:12: 2 outdated dependencies
+org.flywaydb:  10.17.2 -> 10.17.3
+org.flywaydb:  10.17.2 -> 10.17.3
+**Ignored dependencies
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
+io.micrometer
