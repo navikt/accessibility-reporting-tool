@@ -110,7 +110,7 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                 call.respond(HttpStatusCode.OK)
             }
             delete {
-                id = call.reportId
+                val id = call.reportId
                 val report = reportRepository.getReport<Report>(id) ?: throw ResourceNotFoundException("report", id)
                 val reportWithAccessPolicy = report.toFullReportWithAccessPolicy(call.userOrNull)
 
