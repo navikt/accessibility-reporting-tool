@@ -1,0 +1,9 @@
+2024-09-18 10:03:50: 4 outdated dependencies found
+ch.qos.logback:  1.5.7 -> 1.5.8
+ch.qos.logback:  1.5.7 -> 1.5.8
+org.flywaydb:  10.17.2 -> 10.18.0
+org.flywaydb:  10.17.2 -> 10.18.0
+**Ignored dependencies
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
+io.micrometer
