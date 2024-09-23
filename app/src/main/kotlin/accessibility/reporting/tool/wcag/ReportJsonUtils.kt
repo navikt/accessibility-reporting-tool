@@ -23,7 +23,7 @@ val JsonNode.descriptiveName: String //Skal brukes i V3
     get() = this["descriptiveName"].asText()
 
 val JsonNode.isPartOfNavNo: Boolean
-    get() = this["isPartOfNavNo"].asBoolean()
+    get() = this["isPartOfNavNo"]?.asBoolean() ?: false
 
 fun JsonNode.organizationUnit() = this["organizationUnit"].takeIf { !it.isEmpty }
     ?.let { organizationJson ->
