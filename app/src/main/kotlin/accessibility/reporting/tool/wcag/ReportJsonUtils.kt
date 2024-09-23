@@ -22,6 +22,9 @@ val JsonNode.descriptiveNameOrDefault: String
 val JsonNode.descriptiveName: String //Skal brukes i V3
     get() = this["descriptiveName"].asText()
 
+val JsonNode.isPartOfNavNo: Boolean
+    get() = this["isPartOfNavNo"]?.asBoolean() ?: false
+
 fun JsonNode.organizationUnit() = this["organizationUnit"].takeIf { !it.isEmpty }
     ?.let { organizationJson ->
         OrganizationUnit.fromJson(organizationJson)
@@ -42,4 +45,5 @@ fun String.datestr(date: LocalDateTime) = let {
     val formatter = DateTimeFormatter.ofPattern(this)
     date.format(formatter)
 }
+
 
