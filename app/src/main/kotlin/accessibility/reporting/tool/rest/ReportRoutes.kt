@@ -71,8 +71,8 @@ fun Route.jsonApiReports(reportRepository: ReportRepository, organizationReposit
                     author = updates.author,
                     lastChanged = LocalDateTimeHelper.nowAtUtc(),
                     lastUpdatedBy = call.user.toAuthor(),
-                    notes = updates.notes
-                    isPartOfNavNo = updates.isPartOfNavNo ?: existingReport.isPartOfNavNo
+                    notes = updates.notes,
+                    isPartOfNavNo = updates.isPartOfNavNo
                 )
 
                 updates.successCriteria?.let { pendingUpdateList ->
