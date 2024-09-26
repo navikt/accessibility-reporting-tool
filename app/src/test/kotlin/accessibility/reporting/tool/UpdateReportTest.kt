@@ -85,7 +85,7 @@ class UpdateReportTest : TestApi() {
                 "name": "${newTeamName}",
                 "email": "${newTeamEmail}"
             },
-            "isPartOfNavNo":"false"
+            "isPartOfNavNo":"true"
         }
     """.trimIndent()
 
