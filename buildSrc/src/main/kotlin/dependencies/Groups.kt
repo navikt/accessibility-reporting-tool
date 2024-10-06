@@ -82,3 +82,22 @@ object Testdependencies {
         val params = dependency("junit-jupiter-params")
     }
 }
+/*
+2024-10-06 10:03:41: 13 outdated dependencies
+ch.qos.logback:  1.5.7 -> 1.5.8
+ch.qos.logback:  1.5.7 -> 1.5.8
+com.fasterxml.jackson.core:  2.17.2 -> 2.18.0
+com.fasterxml.jackson.datatype:  2.17.2 -> 2.18.0
+com.fasterxml.jackson.module:  2.17.2 -> 2.18.0
+com.zaxxer:  5.1.0 -> 6.0.0
+org.flywaydb:  10.17.2 -> 10.19.0
+org.flywaydb:  10.17.2 -> 10.19.0
+org.junit.jupiter:  5.11.0 -> 5.11.2
+org.junit.jupiter:  5.11.0 -> 5.11.2
+org.testcontainers:  1.20.1 -> 1.20.2
+org.testcontainers:  1.20.1 -> 1.20.2
+org.testcontainers:  1.20.1 -> 1.20.2
+**Ignored dependencies
+org.jetbrains.kotlin
+org.gradle.kotlin.kotlin-dsl
+io.micrometer
