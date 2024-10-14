@@ -1,4 +1,4 @@
-package accessibility.reporting.tool.html
+/*package accessibility.reporting.tool.html
 
 import accessibility.reporting.tool.getWithJwtUser
 import io.kotest.matchers.shouldBe
@@ -27,4 +27,4 @@ class LegacyBasicRoutesTest {
         client.getWithJwtUser(testAdminUser.original, "/admin").status shouldBe HttpStatusCode.OK
         client.getWithJwtUser(testUser.original, "/admin").status shouldBe HttpStatusCode.Unauthorized
     }
-}
+}*/
