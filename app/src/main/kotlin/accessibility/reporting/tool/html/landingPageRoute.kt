@@ -14,7 +14,7 @@ import kotlinx.html.*
 fun Route.landingPage(repository: ReportRepository) {
     get {
         val reports = repository.getReports<ReportShortSummary>().sortedBy { it.title.lowercase() }
-        call.response.headers.append("HX-Redirect", NewPage.url)
+        call.respondRedirect(NewPage.url)
         call.respondHtmlContent("a11y rapportering", NavBarItem.FORSIDE) {
             img {
                 id = "uu-katt"
