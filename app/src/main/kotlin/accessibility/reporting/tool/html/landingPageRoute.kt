@@ -8,12 +8,13 @@ import accessibility.reporting.tool.wcag.ReportShortSummary
 import accessibility.reporting.tool.wcag.ReportType
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import io.ktor.server.response.respondRedirect
 import kotlinx.css.*
 import kotlinx.html.*
 
 fun Route.landingPage(repository: ReportRepository) {
     get {
-        val reports = repository.getReports<ReportShortSummary>().sortedBy { it.title.lowercase() }
+        /*val reports = repository.getReports<ReportShortSummary>().sortedBy { it.title.lowercase() }*/
         call.respondRedirect(NewPage.url)
         /*call.respondHtmlContent("a11y rapportering", NavBarItem.FORSIDE) {
             img {
