@@ -15,7 +15,7 @@ fun Route.landingPage(repository: ReportRepository) {
     get {
         val reports = repository.getReports<ReportShortSummary>().sortedBy { it.title.lowercase() }
         call.respondRedirect(NewPage.url)
-        call.respondHtmlContent("a11y rapportering", NavBarItem.FORSIDE) {
+        /*call.respondHtmlContent("a11y rapportering", NavBarItem.FORSIDE) {
             img {
                 id = "uu-katt"
                 src = "/static/UU-katt.svg"
@@ -46,7 +46,7 @@ fun Route.landingPage(repository: ReportRepository) {
                 ul {
                     reports.filter { it.reportType == ReportType.AGGREGATED }.forEach { report -> reportListItem(report) }
                 }
-        }
+        }*/
     }
 }
 
