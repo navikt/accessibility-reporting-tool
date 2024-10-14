@@ -8,13 +8,14 @@ import accessibility.reporting.tool.wcag.ReportShortSummary
 import accessibility.reporting.tool.wcag.ReportType
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import kotlinx.css.*
 import kotlinx.html.*
 
 fun Route.landingPage(repository: ReportRepository) {
     get {
         val reports = repository.getReports<ReportShortSummary>().sortedBy { it.title.lowercase() }
         call.response.headers.append("HX-Redirect", NewPage.url)
-        call.respondHtmlContent("a11y rapportering", NavBarItem.FORSIDE) {
+        /*call.respondHtmlContent("a11y rapportering", NavBarItem.FORSIDE) {
             img {
                 id = "uu-katt"
                 src = "/static/UU-katt.svg"
@@ -45,7 +46,7 @@ fun Route.landingPage(repository: ReportRepository) {
                 ul {
                     reports.filter { it.reportType == ReportType.AGGREGATED }.forEach { report -> reportListItem(report) }
                 }
-        }
+        }*/
     }
 }
 
