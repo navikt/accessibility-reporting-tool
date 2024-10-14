@@ -14,6 +14,7 @@ fun Route.landingPage(repository: ReportRepository) {
     get {
         val reports = repository.getReports<ReportShortSummary>().sortedBy { it.title.lowercase() }
         call.respondHtmlContent("a11y rapportering", NavBarItem.FORSIDE) {
+            HX-Redirect: NewPage.url
             img {
                 id = "uu-katt"
                 src = "/static/UU-katt.svg"
