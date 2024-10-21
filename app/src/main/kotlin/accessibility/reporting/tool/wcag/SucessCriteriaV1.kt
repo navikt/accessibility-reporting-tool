@@ -103,6 +103,7 @@ object SucessCriteriaV1 {
             guideline = `1-2 Tidsbaserte medier`
             contentGroup = lydVideoAnimasjoner
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/121-bare-lyd-og-bare-video-forhandsinnspilt"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/audio-only-and-video-only-prerecorded.html"
         }.levelA(),
         1.perceivable("1.2.2", "Teksting (forhåndsinnspilt)") {
@@ -110,6 +111,7 @@ object SucessCriteriaV1 {
             guideline = `1-2 Tidsbaserte medier`
             contentGroup = lydVideoAnimasjoner
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/122-teksting-forhandsinnspilt"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded"
         }.levelA(),
         1.perceivable("1.2.3", "Synstolking eller mediealternativ (forhåndsinnspilt)") {
@@ -118,6 +120,7 @@ object SucessCriteriaV1 {
             guideline = `1-2 Tidsbaserte medier`
             contentGroup = lydVideoAnimasjoner
             tools = "Skjønn"
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/123-synstolking-eller-mediealternativ-forhandsinnspilt"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/audio-description-or-media-alternative-prerecorded"
         }.levelA(),
         1.perceivable("1.2.5", "Synstolking (forhåndsinnspilt)") {
@@ -125,6 +128,7 @@ object SucessCriteriaV1 {
             guideline = `1-2 Tidsbaserte medier`
             contentGroup = lydVideoAnimasjoner
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/125-synstolking-forhandsinnspilt"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/audio-description-prerecorded"
         }.levelAA(),
         //1.3 Adaptable
@@ -206,6 +210,7 @@ object SucessCriteriaV1 {
                 "Ikke-tekstlig innhold skal ha et kontrastforhold på minst 3:1 mot farge(r) som ligger ved siden av."
             guideline = `1-4 Mulig å skille fra hverandre`
             tools = cca
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/1411-kontrast-for-ikke-tekstlig-innhold"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html"
         }.levelAA(),
         1.perceivable("1.4.12", "Tekstavstand") {
@@ -272,6 +277,7 @@ object SucessCriteriaV1 {
             description = "Gi brukeren mulighet til å hoppe direkte til hovedinnholdet."
             guideline = `2-4 Navigerbar`
             tools = tastatur
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/241-hoppe-over-blokker"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/bypass-blocks"
         }.levelA(),
         2.operable("2.4.2", "Sidetitler") {
@@ -302,12 +308,14 @@ object SucessCriteriaV1 {
             description = "Sørg for at ledetekster og overskrifter er beskrivende."
             guideline = `2-4 Navigerbar`
             tools = "Skjønn/headingsMap"
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/246-overskrifter-og-ledetekster"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/headings-and-labels"
         }.levelAA(),
         2.operable("2.4.7", " Synlig fokus") {
             description = "Sørg for at alt innhold får synlig fokus når du navigerer med tastatur."
             guideline = `2-4 Navigerbar`
             tools = tastatur
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/247-synlig-fokus"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/focus-visible"
         }.levelAA(),
         //2.5 Input Modalities
@@ -343,6 +351,7 @@ object SucessCriteriaV1 {
             description = "Sørg for at språket til innholdet på alle nettsider er angitt i koden."
             guideline = `3-1 Leselig`
             tools = devTools
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/311-sprak-pa-siden"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/language-of-page"
         }.levelA(),
         3.understandable("3.1.2", "Språk på deler av innhold") {
@@ -416,6 +425,7 @@ object SucessCriteriaV1 {
             description = "Alle sider skal være uten store kodefeil."
             guideline = `4-1 Kompatibel`
             tools = arcToolkit
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/411-parsing"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/parsing"
         }.levelA(),
         4.robust("4.1.2", "Navn, rolle, verdi") {
@@ -429,7 +439,7 @@ object SucessCriteriaV1 {
                 "Brukeren skal få statusbeskjeder om viktige endringer på nettsiden uten at det gir kontekstendring."
             guideline = `4-1 Kompatibel`
             tools = "Skjermleser/$devTools"
-            helpUrl = "https://aksel.nav.no/god-praksis/artikler/413-statusbeskjeder#hcdb4fcfaf29c"
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/413-statusbeskjeder"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/status-messages.html"
         }.levelA()
     )
