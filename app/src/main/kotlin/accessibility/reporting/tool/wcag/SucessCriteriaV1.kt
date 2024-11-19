@@ -149,6 +149,7 @@ object SucessCriteriaV1 {
                 "Instruksjoner må ikke utelukkende være avhengige av form, størrelse, visuell plassering, orientering, eller lyd for å kunne bli forstått."
             guideline = `1-3 Mulig å tilpasse`
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/133-sensoriske-egenskaper"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/sensory-characteristics"
         }.levelA(),
         1.perceivable("1.3.4", "Visningsretning") {
@@ -169,6 +170,7 @@ object SucessCriteriaV1 {
             description = "Ikke bruk presentasjon som bygger utelukkende på farge."
             guideline = `1-4 Mulig å skille fra hverandre`
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/141-bruk-av-farge"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/distinguishable"
         }.levelA(),
         1.perceivable("1.4.2", "Styring av lyd") {
@@ -196,6 +198,7 @@ object SucessCriteriaV1 {
             guideline = `1-4 Mulig å skille fra hverandre`
             contentGroup = ikonerBilderGrafer
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/145-bilder-av-tekst"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/images-of-text"
         }.levelAA(),
         1.perceivable("1.4.10", "Dynamisk tilpasning (Reflow)") {
@@ -284,6 +287,7 @@ object SucessCriteriaV1 {
             description = "Bruk nyttige og tydelige sidetitler."
             guideline = `2-4 Navigerbar`
             tools = "Skjønn"
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/242-sidetitler"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/page-titled"
         }.levelA(),
         2.operable("2.4.3", "Fokusrekkefølge") {
@@ -296,12 +300,14 @@ object SucessCriteriaV1 {
             description = "Alle lenkers mål og funksjon fremgår tydelig av lenketeksten."
             guideline = `2-4 Navigerbar`
             tools = devTools
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/244-formal-med-lenke-i-kontekst"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/link-purpose-in-context"
         }.levelA(),
         2.operable("2.4.5", "Flere måter") {
             description = "Tilby brukeren flere måter å navigere på."
             guideline = `2-4 Navigerbar`
             tools = "Skjønn"
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/245-flere-mater"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/multiple-ways"
         }.levelAA(),
         2.operable("2.4.6", "Overskrifter og ledetekster") {
@@ -380,6 +386,7 @@ object SucessCriteriaV1 {
             description = "Navigasjonslinker som gjentas på flere sider skal ha en konsekvent rekkefølge."
             guideline = `3-2 Forutsigbar`
             tools = "Skjønn"
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/323-konsekvent-navigering"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/consistent-navigation"
         }.levelAA(),
         3.understandable("3.2.4", "Konsekvent identifikasjon") {
@@ -395,6 +402,7 @@ object SucessCriteriaV1 {
             guideline = `3-3 Inndatahjelp`
             contentGroup = skjema
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/331-identifikasjon-av-feil"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/error-identification"
         }.levelA(),
         3.understandable("3.3.2", " Ledetekster eller instruksjoner") {
@@ -410,6 +418,7 @@ object SucessCriteriaV1 {
             guideline = `3-3 Inndatahjelp`
             contentGroup = skjema
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/333-forslag-ved-feil"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/error-suggestion"
         }.levelAA(),
         3.understandable("3.3.4", " Forhindring av feil (juridiske feil, økonomiske feil, datafeil)") {
