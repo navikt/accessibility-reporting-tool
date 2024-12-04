@@ -142,6 +142,7 @@ object SucessCriteriaV1 {
             description = "Presenter innhold i en meningsfull rekkefølge."
             guideline = `1-3 Mulig å tilpasse`
             tools = "disableHTML"
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/132-meningsbaerende-rekkefolge"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/meaningful-sequence"
         }.levelA(),
         1.perceivable("1.3.3", "Sensoriske egenskaper") {
@@ -237,6 +238,7 @@ object SucessCriteriaV1 {
             description = "All funksjonalitet skal kunne brukes kun ved hjelp av tastatur."
             guideline = `2-1 Tilgjengelig med tastatur`
             tools = tastatur
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/211-tastatur"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/keyboard"
         }.levelA(),
         2.operable("2.1.2", "Ingen tastaturfelle") {
@@ -411,6 +413,7 @@ object SucessCriteriaV1 {
             guideline = `3-3 Inndatahjelp`
             contentGroup = skjema
             tools = skjønn
+            helpUrl = "https://aksel.nav.no/god-praksis/artikler/332-ledetekster-eller-instruksjoner"
             wcagUrl = "https://www.w3.org/WAI/WCAG21/Understanding/labels-or-instructions"
         }.levelA(),
         3.understandable("3.3.3", "Forslag ved feil") {
