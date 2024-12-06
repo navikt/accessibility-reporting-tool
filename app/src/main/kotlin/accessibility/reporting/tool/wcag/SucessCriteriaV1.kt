@@ -33,7 +33,7 @@ import java.time.LocalDateTime
 val log = KotlinLogging.logger { }
 
 object SucessCriteriaV1 {
-    val lastTextUpdate: LocalDateTime = LocalDateTime.parse("2023-09-06T14:00:00.00")
+    val lastTextUpdate: LocalDateTime = LocalDateTime.parse("2024-12-05T14:00:00.00")
 
     fun newReport(
         organizationUnit: OrganizationUnit?,
